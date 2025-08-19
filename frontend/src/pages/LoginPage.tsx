@@ -401,7 +401,7 @@ const ProfessionalLoginPage: React.FC = () => {
         const data = await res.json();
         console.log(JSON.stringify(data))
 
-        if(data.err){
+        if(data.status === "error"){
           setErrors({ general: data.err });
         }
         else{
