@@ -1,0 +1,14 @@
+SELECT 
+    t.id,
+    t.name,
+    t.description,
+    CASE 
+        WHEN a.tool_id IS NOT NULL OR sa.tool_id IS NOT NULL THEN 'Available'
+        ELSE 'Unavailable'
+    END AS access_status
+FROM tools t
+LEFT JOIN auth u ON u.uname = 'TeTeacher2'
+LEFT JOIN access a 
+    ON a.tool_id = t.id AND a.user_type = u.role
+LEFT JOIN specialaccess sa 
+    ON sa.tool_id = t.id AND sa.uname = u.uname;

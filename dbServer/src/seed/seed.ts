@@ -11,6 +11,7 @@ async function seedDB() {
   await connection.query(`DROP TABLE IF EXISTS auth`);
   await connection.query(`DROP TABLE IF EXISTS chathistory`);
   await connection.query(`DROP TABLE IF EXISTS chat`);
+  await connection.query(`DROP TABLE IF EXISTS specialaccess`);
 
 
   await connection.query(`
@@ -80,6 +81,16 @@ await connection.query(`
     FOREIGN KEY (chatid) REFERENCES chathistory(chatid) ON DELETE CASCADE
   )
 `);
+
+  await connection.query(`
+    CREATE TABLE specialaccess (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      tool_id INT,
+      uname VARCHAR(100) NOT NULL,
+      FOREIGN KEY (tool_id) REFERENCES tools(id) ON DELETE CASCADE,
+      FOREIGN KEY (uname) REFERENCES auth(uname) ON DELETE CASCADE
+    )
+  `);
 
 
   await connection.query(`
