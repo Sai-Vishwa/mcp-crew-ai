@@ -107,7 +107,7 @@ const TypewriterText: React.FC<{ text: string; delay?: number; className?: strin
         setDisplayText(prev => prev + text[currentIndex]);
         setCurrentIndex(prev => prev + 1);
       }
-    }, delay+100);
+    }, delay+50);
 
     return () => clearTimeout(timer);
   }, [currentIndex, text, delay]);
@@ -406,7 +406,7 @@ const ProfessionalLoginPage: React.FC = () => {
         }
         else{
           Cookies.set("session", data.session, { expires: 7 });
-          nav("/bot-page");
+          nav("/chat-page");
         }
     } catch (error) {
       setErrors({ general: 'Connection error. Please try again.' });
@@ -466,7 +466,7 @@ const ProfessionalLoginPage: React.FC = () => {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: showWelcome ? 2 : 0.2, duration: 0.6 }}
+                transition={{ delay: 0.2, duration: 0.6 }}
               >
                 <CardDescription className={`${theme.textSecondary}`}>
                   Enter your credentials to continue

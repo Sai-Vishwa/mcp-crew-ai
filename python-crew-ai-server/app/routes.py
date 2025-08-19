@@ -17,7 +17,7 @@ async def login():
     data = request.get_json()
     return await login_controller(data)
 
-@main.route("/bot-page", methods=["POST"])
+@main.route("/chat-page", methods=["POST"])
 async def botPage():
     data = request.get_json()
     return await botpage_controller(data)
