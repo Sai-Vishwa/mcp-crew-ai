@@ -25,10 +25,10 @@ async function connectSlave() {
       port: 3308,
     });
 
-    console.log('✅ Connected to MySQL master with thread ID:', connectionMaster.threadId);
+    // console.log('✅ Connected to MySQL master with thread ID:', connectionMaster.threadId);
 
-    const [rows] = await connectionMaster.query('SELECT NOW()');
-    console.log('🕒 Current time:', rows);
+    // const [rows] = await connectionMaster.query('SELECT NOW()');
+    // console.log('🕒 Current time:', rows);
 
     return connectionMaster;
 

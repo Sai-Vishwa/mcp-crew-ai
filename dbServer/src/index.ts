@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { Request, Response } from "express";
-import router from "./router/router";
+import router from "./router/router.js";
 
 
 const app = express();
@@ -23,5 +23,5 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.listen(4007, () => {
-  console.log("DB Server is running on http://localhost:4006/mcp");
+  console.log("DB Server is running on http://localhost:4006");
 });

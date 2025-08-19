@@ -396,17 +396,17 @@ const ProfessionalLoginPage: React.FC = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({uname: credentials.username, password: credentials.password}),    
+          body: JSON.stringify({username: credentials.username, password: credentials.password}),    
         });
         const data = await res.json();
         console.log(JSON.stringify(data))
 
         if(data.status === "error"){
-          setErrors({ general: data.err });
+          setErrors({ general: data.message });
         }
         else{
           Cookies.set("session", data.session, { expires: 7 });
-          nav("/view-tools");
+          nav("/bot-page");
         }
     } catch (error) {
       setErrors({ general: 'Connection error. Please try again.' });

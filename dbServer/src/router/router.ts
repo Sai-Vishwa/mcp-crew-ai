@@ -4,7 +4,7 @@ import {Request} from 'express';
 import {Response} from 'express';
 import { NextFunction } from 'express';
 import { RequestHandler } from 'express';
-import login from '../controllers/login/login';
+import login from '../controllers/login/login.js';
 
 const router = Router();
 

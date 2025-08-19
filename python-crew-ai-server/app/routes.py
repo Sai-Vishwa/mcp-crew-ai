@@ -1,5 +1,9 @@
 from flask import Blueprint, request, jsonify
+from .controllers.login.login import login_controller
+from .controllers.bot_page.bot_page import botpage_controller
+from .controllers.bot_page.sub_controllers.load_chat_history import load_chat_history_controller
 
+import asyncio
 main = Blueprint("main", __name__)
 
 # GET route
@@ -9,13 +13,16 @@ def hello():
 
 # POST route
 @main.route("/login", methods=["POST"])
-def login():
-    data = request.get_json()  # parse JSON body
-    username = data.get("username")
-    password = data.get("password")
+async def login():
+    data = request.get_json()
+    return await login_controller(data)
 
-    # fake auth check
-    if username == "admin" and password == "123":
-        return jsonify({"status": "success", "user": username})
-    else:
-        return jsonify({"status": "error", "message": "Invalid credentials"}), 401
+@main.route("/bot-page", methods=["POST"])
+async def botPage():
+    data = request.get_json()
+    return await botpage_controller(data)
+
+@main.route("/load-chats", methods=["POST"])
+async def loadChats():
+    data = request.get_json()
+    return await load_chat_history_controller(data)

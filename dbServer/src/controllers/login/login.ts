@@ -6,7 +6,7 @@ import { stat } from "fs";
 import generateSession from "../../helpers/sessionGenerator.js";
 
 interface requestType {
-    uname : string;
+    username : string;
     password : string;
 }
 
@@ -16,12 +16,13 @@ interface passwordType {
 
 async function login(req : Request & {body : requestType}, res: Response) {
     try{
-            const  uname = req.body.uname;
+            const  uname = req.body.username;
             const password = req.body.password;
             const connectionSlave = await connectSlave();
             const connectionMaster = await connectMaster();
             const [sysPassword] = await connectionSlave.query(`SELECT password FROM auth WHERE uname = ?`, [uname]);
             const sysPwd : passwordType[] = sysPassword as passwordType[];
+            console.log("System password fetched: ", sysPwd);
             if(sysPwd.length === 0){
                 res.status(200).json({
                     status: "error",
