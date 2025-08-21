@@ -2,9 +2,13 @@ from flask import Blueprint, request, jsonify
 from .controllers.login.login import login_controller
 from .controllers.bot_page.chat_page import chatpage_controller
 from .controllers.bot_page.sub_controllers.load_chat_history import load_chat_history_controller
-
+import time
+from flask import Response, stream_with_context
 import asyncio
+import json
+
 main = Blueprint("main", __name__)
+
 
 # GET route
 @main.route("/hello", methods=["GET"])
@@ -26,3 +30,11 @@ async def botPage():
 async def loadChats():
     data = request.get_json()
     return await load_chat_history_controller(data)
+
+@main.route("/user-input", methods=["POST"])
+def giveResponse():
+    def event_stream():
+        for i in range(10):
+            yield f"data: Message {i}\n\n"
+            time.sleep(1)  # wait 1 second before sending next
+    return Response(event_stream(), mimetype="text/event-stream")

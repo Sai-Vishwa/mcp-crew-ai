@@ -86,6 +86,7 @@ type AppAction =
   | { type: 'REMOVE_TOOL_FROM_CONTEXT'; payload: number }
   | { type: 'REQUEST_TOOL_ACCESS'; payload: number }
   | { type: 'ADD_MESSAGE'; payload: Message }
+  | { type: 'CONTINUE_MESSAGE'; payload: Message }
   | { type: 'SET_TYPING'; payload: boolean }
   | { type: 'SET_TOOL_FILTER'; payload: ToolFilter }
   | { type: 'SET_TOOL_SEARCH'; payload: string }
@@ -187,6 +188,20 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         messages: [...state.messages, action.payload]
       };
 
+    case 'CONTINUE_MESSAGE':
+        const messageToContinue = state.messages.find(m => m.id === action.payload.id);
+        if(messageToContinue) {
+            messageToContinue.content += `\n${action.payload.content}`;
+            return {
+                ...state,
+                messages: [...state.messages.filter(m => m.id !== action.payload.id), messageToContinue]
+            }
+        }
+        return {
+        ...state,
+        messages: [...state.messages, action.payload]
+        }
+    
     case 'SET_TYPING':
       return {
         ...state,
@@ -258,7 +273,12 @@ const useAppContext = () => {
 const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, createInitialState());
 
-      const nav = useNavigate();
+  const nav = useNavigate();
+  const session = Cookies.get('session');
+
+
+  const controller = new AbortController();
+  const signal = controller.signal;
 
 
   // Initialize theme
@@ -286,6 +306,74 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     }, []),
 
     sendMessage: useCallback(async (content: string) => {
+        const userMessage: Message = {
+            id: Date.now().toString(),
+            content,
+            sender: 'user',
+            timestamp: new Date()
+        };
+
+        dispatch({ type: 'ADD_MESSAGE', payload: userMessage });
+        dispatch({ type: 'SET_TYPING', payload: true });
+
+        const id = (Date.now() + 1).toString()
+
+        const assistantMessage2: Message = {
+            id: id,
+            content: "",
+            sender: 'assistant',
+            timestamp: new Date()
+        }
+        dispatch({ type: 'ADD_MESSAGE', payload: assistantMessage2 });
+
+
+        try {
+            const res = await fetch(`http://localhost:4006/user-input`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            signal,
+            body: JSON.stringify({ session: session, userMessage: content }),
+            });
+
+            if (!res.body) throw new Error("No response body");
+
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder("utf-8");
+            let Content = "";
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                Content = decoder.decode(value, { stream: true });
+
+                const assistantMessage: Message = {
+                    id: id,
+                    content: Content,
+                    sender: 'assistant',
+                    timestamp: new Date()
+                };
+
+      // Instead of appending new message each chunk, replace the last assistant one
+      dispatch({ type: 'CONTINUE_MESSAGE', payload: assistantMessage });
+    }
+
+    dispatch({ type: 'SET_TYPING', payload: false });
+  } catch (error) {
+    console.log("Error fetching tools:", error);
+    const assistantMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      content: 'Hey vro... I know u r trying ur best , but long way to go vro ',
+      sender: 'assistant',
+      timestamp: new Date()
+    };
+    dispatch({ type: 'ADD_MESSAGE', payload: assistantMessage });
+    dispatch({ type: 'SET_TYPING', payload: false });
+  }
+}, []),
+
+
+    sendMessage2: useCallback(async (content: string) => {
       const userMessage: Message = {
         id: Date.now().toString(),
         content,
@@ -296,17 +384,46 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       dispatch({ type: 'ADD_MESSAGE', payload: userMessage });
       dispatch({ type: 'SET_TYPING', payload: true });
 
-      // Simulate assistant response
-      setTimeout(() => {
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          content: 'I understand your request. Let me help you with that. This is a simulated response to demonstrate the chat interface functionality.',
-          sender: 'assistant',
-          timestamp: new Date()
-        };
-        dispatch({ type: 'ADD_MESSAGE', payload: assistantMessage });
-        dispatch({ type: 'SET_TYPING', payload: false });
-      }, 2000);
+
+
+    try {
+            const res = await fetch(`http://localhost:4006/user-input`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ session: session , userMessage: content }),
+            });
+            const data = await res.json();
+            let Content = "";
+
+            if (data.status === "error") {
+                console.log(JSON.stringify(data));
+                Content = 'Hey vro... I know u r trying ur best , but long way to go vro ';
+                
+            }
+            else {
+                Content = data.response;
+            }
+            const assistantMessage: Message = {
+                    id: (Date.now() + 1).toString(),
+                    content: Content,
+                    sender: 'assistant',
+                    timestamp: new Date()
+                };
+            dispatch({ type: 'ADD_MESSAGE', payload: assistantMessage });
+            dispatch({ type: 'SET_TYPING', payload: false });
+        } 
+        catch (error) {
+            console.log("Error fetching tools:", error);
+            const assistantMessage: Message = {
+                id: (Date.now() + 1).toString(),
+                content: 'Hey vro... I know u r trying ur best , but long way to go vro ',
+                sender: 'assistant',
+                timestamp: new Date()
+            };
+            dispatch({ type: 'ADD_MESSAGE', payload: assistantMessage });
+            dispatch({ type: 'SET_TYPING', payload: false });
+        }
+   
     }, []),
 
     setToolFilter: useCallback((filter: ToolFilter) => {
@@ -325,7 +442,6 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   
   // Load initial data
   useEffect(() => {
-    const session = Cookies.get('session');
     const loadData = async () => {
         try {
             const res = await fetch(`http://localhost:4006/chat-page`, {
