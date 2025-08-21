@@ -33,11 +33,20 @@ async def loadChats():
     return await load_chat_history_controller(data)
 
 @main.route("/user-input", methods=["POST"])
-async def giveResponse():
+def giveResponse():
     data = request.get_json()
-    result = process_message_with_crew(data)
-
-    def event_stream():
-        for i in range(len(result)):
-            yield f"{result[i]}\n\n"
-    return Response(event_stream(), mimetype="text/event-stream")
+    
+    def generate():
+        for chunk in process_message_with_crew(data):
+            print("sending a chunk ")
+            yield f"data: {chunk}\n\n"
+    
+    return Response(
+        stream_with_context(generate()),
+        mimetype='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no'  # Important for streaming
+        }
+    )

@@ -346,6 +346,7 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 if (done) break;
 
                 Content = decoder.decode(value, { stream: true });
+                console.log("Received chunk:", Content);
 
                 const assistantMessage: Message = {
                     id: id,
