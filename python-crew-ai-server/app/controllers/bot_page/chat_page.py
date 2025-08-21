@@ -2,13 +2,13 @@ from flask import jsonify
 import httpx
 import asyncio
 
-async def botpage_controller(data):
+async def chatpage_controller(data):
     session = data.get("session")
     if not session:
         return jsonify({"status": "error", "message": "Session is required"})
     
     async with httpx.AsyncClient() as client:
-        response = await client.post("http://localhost:4007/bot-page-details", json={"session": session})
+        response = await client.post("http://localhost:4007/chat-page", json={"session": session})
         resp = response.json()
         print("hey this is the resp i got --- ")
         print(resp)

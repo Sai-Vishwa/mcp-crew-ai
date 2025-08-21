@@ -3,8 +3,8 @@ SELECT
     t.name,
     t.description,
     CASE 
-        WHEN a.tool_id IS NOT NULL OR sa.tool_id IS NOT NULL THEN 'Available'
-        ELSE 'Unavailable'
+        WHEN a.tool_id IS NOT NULL OR sa.tool_id IS NOT NULL THEN TRUE
+        ELSE FALSE
     END AS access_status
 FROM tools t
 LEFT JOIN auth u ON u.uname = 'TeTeacher2'

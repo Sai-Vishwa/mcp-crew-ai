@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from .controllers.login.login import login_controller
-from .controllers.bot_page.bot_page import botpage_controller
+from .controllers.bot_page.chat_page import chatpage_controller
 from .controllers.bot_page.sub_controllers.load_chat_history import load_chat_history_controller
 
 import asyncio
@@ -20,7 +20,7 @@ async def login():
 @main.route("/chat-page", methods=["POST"])
 async def botPage():
     data = request.get_json()
-    return await botpage_controller(data)
+    return await chatpage_controller(data)
 
 @main.route("/load-chats", methods=["POST"])
 async def loadChats():

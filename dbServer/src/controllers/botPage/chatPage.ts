@@ -19,10 +19,10 @@ interface toolType {
     id: number;
     name: string;
     description: string;
-    access_status: string;
+    available: number;
 }
 
-async function botPage(req : Request & {body : requestType}, res: Response) {
+async function chatPage(req : Request & {body : requestType}, res: Response) {
     try{
             const  session = req.body.session;
 
@@ -38,21 +38,21 @@ async function botPage(req : Request & {body : requestType}, res: Response) {
                 return;
             }
 
-            const [toolsAvailable] = await connectionSlave.query(`
-                        SELECT 
-                            t.id,
-                            t.name,
-                            t.description,
-                            CASE 
-                                WHEN a.tool_id IS NOT NULL OR sa.tool_id IS NOT NULL THEN 'Available'
-                                ELSE 'Unavailable'
-                            END AS access_status
-                        FROM tools t
-                        LEFT JOIN auth u ON u.uname = ?
-                        LEFT JOIN access a 
-                            ON a.tool_id = t.id AND a.user_type = u.role
-                        LEFT JOIN specialaccess sa 
-                            ON sa.tool_id = t.id AND sa.uname = u.uname;
+                const [toolsAvailable] = await connectionSlave.query(`
+                            SELECT 
+                                t.id,
+                                t.name,
+                                t.description,
+                                CASE 
+                                    WHEN a.tool_id IS NOT NULL OR sa.tool_id IS NOT NULL THEN TRUE
+                                    ELSE FALSE
+                                END AS available
+                            FROM tools t
+                            LEFT JOIN auth u ON u.uname = ?
+                            LEFT JOIN access a 
+                                ON a.tool_id = t.id AND a.user_type = u.role
+                            LEFT JOIN specialaccess sa 
+                                ON sa.tool_id = t.id AND sa.uname = u.uname;
             `,[isValidSession?.uname]);
 
             const tools: toolType[] = toolsAvailable as toolType[];
@@ -87,4 +87,4 @@ async function botPage(req : Request & {body : requestType}, res: Response) {
     
 }
 
-export default botPage;
+export default chatPage;
