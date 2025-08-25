@@ -9,13 +9,19 @@ dotenv.config();
 let connectionMaster;
 async function connectMaster() {
     try {
-        connectionMaster = await mysql.createConnection({
+        if (connectionMaster) {
+            return connectionMaster;
+        }
+        connectionMaster = await mysql.createPool({
             host: 'localhost',
             user: 'root',
             password: process.env.PASSWORD,
             database: process.env.DATABASE,
             socketPath: process.env.SOCKETPATH_MASTER,
             port: 3307,
+            waitForConnections: true,
+            connectionLimit: 10,
+            queueLimit: 0,
         });
         // console.log('✅ Connected to MySQL master with thread ID:', connectionMaster.threadId);
         // const [rows] = await connectionMaster.query('SELECT NOW()');

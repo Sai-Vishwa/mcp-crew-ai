@@ -6,6 +6,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
     origin: [
+        "http://localhost:4005", // langgraphh server
         "http://localhost:4006", // python crew - ai server
         "http://localhost:4007", // mcp server 1
         "http://localhost:4008" // mcp server 2

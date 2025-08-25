@@ -6,21 +6,27 @@ import { dirname, resolve } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 dotenv.config({ path: resolve(__dirname, '.env') });
-let connectionMaster;
+let connectionSlave;
 async function connectSlave() {
     try {
-        connectionMaster = await mysql.createConnection({
+        if (connectionSlave) {
+            return connectionSlave;
+        }
+        connectionSlave = await mysql.createPool({
             host: 'localhost',
             user: 'root',
             password: process.env.PASSWORD,
             database: process.env.DATABASE,
             socketPath: process.env.SOCKETPATH_SLAVE,
             port: 3308,
+            waitForConnections: true,
+            connectionLimit: 10,
+            queueLimit: 0,
         });
         // console.log('✅ Connected to MySQL master with thread ID:', connectionMaster.threadId);
         // const [rows] = await connectionMaster.query('SELECT NOW()');
         // console.log('🕒 Current time:', rows);
-        return connectionMaster;
+        return connectionSlave;
     }
     catch (err) {
         console.error('❌ Error connecting to MySQL:', err);
