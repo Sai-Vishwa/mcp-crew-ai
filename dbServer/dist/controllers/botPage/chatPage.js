@@ -43,10 +43,15 @@ async function chatPage(req, res) {
         return;
     }
     catch (err) {
+        let message = "An error occurred while fetching chat page data";
+        if (err instanceof Error) {
+            message = err.message;
+            console.error("Error in chatPage function: ", message);
+        }
         console.error("Error in login function: ", err);
         res.status(200).json({
             status: "error",
-            message: "An error occurred during login",
+            message: message,
             data: {
                 tools: [],
                 chatHistory: []

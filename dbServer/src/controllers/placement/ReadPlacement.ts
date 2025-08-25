@@ -18,7 +18,7 @@ interface placementType {
 }
 
 
-async function createPlacement(req : Request & {body : requestType}, res: Response) {
+async function readPlacement(req : Request & {body : requestType}, res: Response) {
     try{
             const  session = req.body.session;
 
@@ -63,15 +63,19 @@ async function createPlacement(req : Request & {body : requestType}, res: Respon
             });
             return;
     }
-    catch(err: any){
-        console.error("Error in login function: ", err);
+    catch(err: unknown){
+        let message = "An error occurred during reading placement data";
+        if (err instanceof Error) {
+            message = err.message;
+            console.error("Error in createPlacement function: ", message);
+        }
         res.status(200).json({
             status: "error",
-            message: "An error occurred during login"
+            message: message
         });
         return;
     }
     
 }
 
-export default createPlacement;
+export default readPlacement;

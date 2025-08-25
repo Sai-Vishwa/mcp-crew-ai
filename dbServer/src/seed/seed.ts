@@ -60,7 +60,7 @@ await connection.query(`
     await connection.query(`
     CREATE TABLE placement (
       id INT AUTO_INCREMENT PRIMARY KEY,
-      company_name VARCHAR(100) NOT NULL,
+      company_name VARCHAR(100) UNIQUE NOT NULL,
       visiting_date DATE NOT NULL,
       interview_start TIME NOT NULL,
       interview_end TIME NOT NULL
@@ -70,6 +70,7 @@ await connection.query(`
     await connection.query(`
     CREATE TABLE examcell (
       id INT AUTO_INCREMENT PRIMARY KEY,
+      exam_name VARCHAR(100) UNIQUE NOT NULL,
       exam_date DATE NOT NULL,
       exam_start TIME NOT NULL,
       exam_end TIME NOT NULL
@@ -159,9 +160,9 @@ await connection.query(`
     ('DEF', '2025-09-02', '10:00:00', '14:00:00')
   `);
     await connection.query(`
-    INSERT INTO examcell (exam_date, exam_start, exam_end) VALUES
-    ('2025-09-03', '09:00:00', '12:00:00'),
-    ('2025-09-04', '13:00:00', '16:00:00')
+    INSERT INTO examcell (exam_name, exam_date, exam_start, exam_end) VALUES
+    ('CAT-1', '2025-09-03', '09:00:00', '12:00:00'),
+    ('CAT-2', '2025-09-04', '13:00:00', '16:00:00')
   `);
     await connection.query(`
     INSERT INTO transport (bus_date, start_time, leave_time) VALUES

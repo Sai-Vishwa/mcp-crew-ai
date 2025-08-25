@@ -34,10 +34,13 @@ async function login(req, res) {
         return;
     }
     catch (err) {
-        console.error("Error in login function: ", err);
+        let message = "An error occurred during login";
+        if (err instanceof Error) {
+            message = err.message;
+        }
         res.status(200).json({
             status: "error",
-            message: "An error occurred during login"
+            message: message
         });
         return;
     }

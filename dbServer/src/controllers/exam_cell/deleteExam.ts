@@ -1,20 +1,19 @@
 
 import { Request , Response } from "express";
 import { connectMaster } from "../../connector/connectMaster.js";
-import generateSession from "../../helpers/sessionGenerator.js";
 import sessionChecker from "../../helpers/sessionChecker.js";
 import toolAccessChecker from "../../helpers/toolAccessChecker.js";
 
 interface requestType {
     session : string;
-    company_name : string;
+    exam_name : string;
 }
 
 
-async function deletePlacement(req : Request & {body : requestType}, res: Response) {
+async function deleteExam(req : Request & {body : requestType}, res: Response) {
     try{
             const  session = req.body.session;
-            const company_name = req.body.company_name;
+            const exam_name = req.body.exam_name;
 
             const validSessions = await sessionChecker(session);
 
@@ -29,12 +28,11 @@ async function deletePlacement(req : Request & {body : requestType}, res: Respon
                 return;
             }
 
-            const validAccess = await toolAccessChecker({session: session, toolName: "Delete_Placement"});
+            const validAccess = await toolAccessChecker({session: session, toolName: "Delete_ExamCell"});
 
             console.log("Access check result for create placement: ", validAccess);
 
             if(validAccess?.status === "error" || validAccess?.isAccessible === "NO"){
-                console.log("Access denied for create placement");
                 res.status(200).json({
                     status: "error",
                     message: "Access denied"
@@ -44,14 +42,14 @@ async function deletePlacement(req : Request & {body : requestType}, res: Respon
 
             const connectionMaster = await connectMaster();
 
-            await connectionMaster.query( `DELETE FROM placement where company_name = ?`,[company_name]);
+            await connectionMaster.query( `DELETE FROM examcell where exam_name = ?`,[exam_name]);
 
             
 
             console.log("Placement entry created successfully");
             res.status(200).json({
                 status: "success",
-                message :"Placement entry deleted successfully"
+                message :"exam entry deleted successfully"
             });
             return;
     }
@@ -71,4 +69,4 @@ async function deletePlacement(req : Request & {body : requestType}, res: Respon
     
 }
 
-export default deletePlacement;
+export default deleteExam;

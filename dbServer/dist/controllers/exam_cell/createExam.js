@@ -1,13 +1,13 @@
 import { connectMaster } from "../../connector/connectMaster.js";
 import sessionChecker from "../../helpers/sessionChecker.js";
 import toolAccessChecker from "../../helpers/toolAccessChecker.js";
-async function createPlacement(req, res) {
+async function createExam(req, res) {
     try {
         const session = req.body.session;
-        const company_name = req.body.company_name;
-        const visiting_date = req.body.visiting_date;
-        const interview_start = req.body.interview_start;
-        const interview_end = req.body.interview_end;
+        const exam_date = req.body.exam_date;
+        const exam_start = req.body.exam_start;
+        const exam_end = req.body.exam_end;
+        const exam_name = req.body.exam_name;
         const validSessions = await sessionChecker(session);
         if (validSessions?.status === "error") {
             console.log("Invalid session detected in create placement");
@@ -17,7 +17,7 @@ async function createPlacement(req, res) {
             });
             return;
         }
-        const validAccess = await toolAccessChecker({ session: session, toolName: "Create_Placement" });
+        const validAccess = await toolAccessChecker({ session: session, toolName: "Create_ExamCell" });
         console.log("Access check result for create placement: ", validAccess);
         if (validAccess?.status === "error" || validAccess?.isAccessible === "NO") {
             console.log("Access denied for create placement");
@@ -28,12 +28,12 @@ async function createPlacement(req, res) {
             return;
         }
         const connectionMaster = await connectMaster();
-        await connectionMaster.query(`INSERT INTO placement (company_name, visiting_date, interview_start, interview_end)
-   VALUES (?, ?, ?, ?)
+        await connectionMaster.query(`INSERT INTO examcell (exam_name, exam_date, exam_start, exam_end)
+   VALUES (?, ?, ? , ?)
    ON DUPLICATE KEY UPDATE 
-      visiting_date = VALUES(visiting_date),
-      interview_start = VALUES(interview_start),
-      interview_end = VALUES(interview_end)`, [company_name, visiting_date, interview_start, interview_end]);
+      exam_date = VALUES(exam_date),
+      exam_start = VALUES(exam_start),
+      exam_end = VALUES(exam_end)`, [exam_name, exam_date, exam_start, exam_end]);
         console.log("Placement entry created successfully");
         res.status(200).json({
             status: "success",
@@ -45,8 +45,9 @@ async function createPlacement(req, res) {
         let message = "An error occurred during placement creation";
         if (err instanceof Error) {
             message = err.message;
-            console.error("Error in createPlacement function: ", message);
+            console.error("Error in createExam function: ", message);
         }
+        console.error("Error in login function: ", err);
         res.status(200).json({
             status: "error",
             message: message
@@ -54,4 +55,4 @@ async function createPlacement(req, res) {
         return;
     }
 }
-export default createPlacement;
+export default createExam;

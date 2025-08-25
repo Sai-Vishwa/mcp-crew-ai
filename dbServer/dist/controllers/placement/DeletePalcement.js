@@ -1,13 +1,10 @@
 import { connectMaster } from "../../connector/connectMaster.js";
 import sessionChecker from "../../helpers/sessionChecker.js";
 import toolAccessChecker from "../../helpers/toolAccessChecker.js";
-async function createPlacement(req, res) {
+async function deletePlacement(req, res) {
     try {
         const session = req.body.session;
         const company_name = req.body.company_name;
-        const visiting_date = req.body.visiting_date;
-        const interview_start = req.body.interview_start;
-        const interview_end = req.body.interview_end;
         const validSessions = await sessionChecker(session);
         if (validSessions?.status === "error") {
             console.log("Invalid session detected in create placement");
@@ -17,7 +14,7 @@ async function createPlacement(req, res) {
             });
             return;
         }
-        const validAccess = await toolAccessChecker({ session: session, toolName: "Create_Placement" });
+        const validAccess = await toolAccessChecker({ session: session, toolName: "Delete_Placement" });
         console.log("Access check result for create placement: ", validAccess);
         if (validAccess?.status === "error" || validAccess?.isAccessible === "NO") {
             console.log("Access denied for create placement");
@@ -28,24 +25,19 @@ async function createPlacement(req, res) {
             return;
         }
         const connectionMaster = await connectMaster();
-        await connectionMaster.query(`INSERT INTO placement (company_name, visiting_date, interview_start, interview_end)
-   VALUES (?, ?, ?, ?)
-   ON DUPLICATE KEY UPDATE 
-      visiting_date = VALUES(visiting_date),
-      interview_start = VALUES(interview_start),
-      interview_end = VALUES(interview_end)`, [company_name, visiting_date, interview_start, interview_end]);
+        await connectionMaster.query(`DELETE FROM placement where company_name = ?`, [company_name]);
         console.log("Placement entry created successfully");
         res.status(200).json({
             status: "success",
-            message: "Placement entry created successfully"
+            message: "Placement entry deleted successfully"
         });
         return;
     }
     catch (err) {
-        let message = "An error occurred during placement creation";
+        let message = "An error occurred during entry deletion";
         if (err instanceof Error) {
             message = err.message;
-            console.error("Error in createPlacement function: ", message);
+            console.error("Error in deletePlacement function: ", message);
         }
         res.status(200).json({
             status: "error",
@@ -54,4 +46,4 @@ async function createPlacement(req, res) {
         return;
     }
 }
-export default createPlacement;
+export default deletePlacement;

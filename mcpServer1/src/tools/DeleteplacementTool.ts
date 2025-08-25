@@ -41,7 +41,7 @@ class DeleteplacementTool extends MCPTool<DeleteplacementInput> {
         console.log(data);
         return data
     } catch (error) {
-        return { status: "error", message: "Failed to fetch placement entries" };
+        return { status: "error", message: "Failed to delete placement entry" };
     } 
   }
 }
