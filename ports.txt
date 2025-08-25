@@ -1,0 +1,7 @@
+5173 = frontend 
+4004 = db server
+4005 = langgraph python 
+4006 = crew ai server ( not needed )
+4007 = mcp server 1 - placement
+4008 = mcp server 2 - exam cell
+4009 = mcp server 3 - transport

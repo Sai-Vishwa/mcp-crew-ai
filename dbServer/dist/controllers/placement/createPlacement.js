@@ -13,7 +13,7 @@ async function createPlacement(req, res) {
             console.log("Invalid session detected in create placement");
             res.status(200).json({
                 status: "error",
-                error: "Invalid session"
+                message: "Invalid session"
             });
             return;
         }
@@ -23,7 +23,7 @@ async function createPlacement(req, res) {
             console.log("Access denied for create placement");
             res.status(200).json({
                 status: "error",
-                error: "Access denied"
+                message: "Access denied"
             });
             return;
         }

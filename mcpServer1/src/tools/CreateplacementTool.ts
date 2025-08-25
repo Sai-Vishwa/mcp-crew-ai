@@ -11,29 +11,29 @@ interface CreateplacementInput {
 
 class CreateplacementTool extends MCPTool<CreateplacementInput> {
   name = "CreatePlacement";
-  description = "Createplacement tool description";
+  description = "This tool is used to create a new placement entry or update an existing one in the database";
 
   schema = {
-    session: {
-      type: z.string(),
-      description: "Session identifier",
-    },
-    company_name: {
-      type: z.string(),
-      description: "Name of the company",
-    },
-    visiting_date: {
-      type: z.string(),
-      description: "Date of the company visit",
-    },
-    interview_start: {
-      type: z.string(),
-      description: "Interview start time (HH:MM:SS)",
-    },
-    interview_end: {
-      type: z.string(),
-      description: "Interview end time (HH:MM:SS)",
-    },
+        session: {
+          type: z.string(),
+          description: "Session identifier",
+        },
+        company_name: {
+          type: z.string(),
+          description: "Name of the company",
+        },
+        visiting_date: {
+          type: z.string(),
+          description: "Date of the company visit",
+        },
+        interview_start: {
+          type: z.string(),
+          description: "Interview start time (HH:MM:SS)",
+        },
+        interview_end: {
+          type: z.string(),
+          description: "Interview end time (HH:MM:SS)",
+        },
   };
 
   async execute(input: CreateplacementInput) {
@@ -55,7 +55,7 @@ class CreateplacementTool extends MCPTool<CreateplacementInput> {
         console.log(data);
         return data
     } catch (error) {
-        return { status: "error", error: "Failed to create placement entry" };
+        return { status: "error", message: "Failed to create placement entry" };
     } 
   }
 }

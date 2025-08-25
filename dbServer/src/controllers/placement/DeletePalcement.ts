@@ -8,19 +8,13 @@ import toolAccessChecker from "../../helpers/toolAccessChecker.js";
 interface requestType {
     session : string;
     company_name : string;
-    visiting_date : Date;
-    interview_start : string;
-    interview_end : string;
 }
 
 
-async function createPlacement(req : Request & {body : requestType}, res: Response) {
+async function deletePlacement(req : Request & {body : requestType}, res: Response) {
     try{
             const  session = req.body.session;
             const company_name = req.body.company_name;
-            const visiting_date = req.body.visiting_date;
-            const interview_start = req.body.interview_start;
-            const interview_end = req.body.interview_end;
 
             const validSessions = await sessionChecker(session);
 
@@ -35,7 +29,7 @@ async function createPlacement(req : Request & {body : requestType}, res: Respon
                 return;
             }
 
-            const validAccess = await toolAccessChecker({session: session, toolName: "Create_Placement"});
+            const validAccess = await toolAccessChecker({session: session, toolName: "Delete_Placement"});
 
             console.log("Access check result for create placement: ", validAccess);
 
@@ -50,22 +44,14 @@ async function createPlacement(req : Request & {body : requestType}, res: Respon
 
             const connectionMaster = await connectMaster();
 
-            await connectionMaster.query(
-  `INSERT INTO placement (company_name, visiting_date, interview_start, interview_end)
-   VALUES (?, ?, ?, ?)
-   ON DUPLICATE KEY UPDATE 
-      visiting_date = VALUES(visiting_date),
-      interview_start = VALUES(interview_start),
-      interview_end = VALUES(interview_end)`,
-  [company_name, visiting_date, interview_start, interview_end]
-);
+            await connectionMaster.query( `DELETE FROM placement where company_name = ?`,[company_name]);
 
             
 
             console.log("Placement entry created successfully");
             res.status(200).json({
                 status: "success",
-                message :"Placement entry created successfully"
+                message :"Placement entry deleted successfully"
             });
             return;
     }
@@ -73,11 +59,11 @@ async function createPlacement(req : Request & {body : requestType}, res: Respon
         console.error("Error in login function: ", err);
         res.status(200).json({
             status: "error",
-            message: "An error occurred during placement creation"
+            message: "An error occurred during entry deletion"
         });
         return;
     }
     
 }
 
-export default createPlacement;
+export default deletePlacement;
