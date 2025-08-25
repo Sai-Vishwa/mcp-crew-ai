@@ -7,7 +7,7 @@ async def login_controller(data):
     pwd = data.get("password")
     
     async with httpx.AsyncClient() as client:
-        response = await client.post("http://localhost:4007/login", json={"username": uname, "password": pwd})
+        response = await client.post("http://localhost:4004/login", json={"username": uname, "password": pwd})
         resp = response.json()
         print("hey this is the resp i got --- ")
         print(resp)

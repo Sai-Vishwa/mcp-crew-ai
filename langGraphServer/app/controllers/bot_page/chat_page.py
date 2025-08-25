@@ -8,7 +8,7 @@ async def chatpage_controller(data):
         return jsonify({"status": "error", "message": "Session is required"})
     
     async with httpx.AsyncClient() as client:
-        response = await client.post("http://localhost:4007/chat-page", json={"session": session})
+        response = await client.post("http://localhost:4004/chat-page", json={"session": session})
         resp = response.json()
         print("hey this is the resp i got --- ")
         print(resp)

@@ -328,7 +328,7 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 
         try {
-            const res = await fetch(`http://localhost:4006/user-input`, {
+            const res = await fetch(`http://localhost:4005/user-input`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             signal,
@@ -388,7 +388,7 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 
     try {
-            const res = await fetch(`http://localhost:4006/user-input`, {
+            const res = await fetch(`http://localhost:4005/user-input`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ session: session , userMessage: content }),
@@ -445,7 +445,7 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   useEffect(() => {
     const loadData = async () => {
         try {
-            const res = await fetch(`http://localhost:4006/chat-page`, {
+            const res = await fetch(`http://localhost:4005/chat-page`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ session: session }),

@@ -47,7 +47,7 @@ placment_llm = ChatXAI(
     xai_api_key=os.getenv("GROK_API"),
     base_url="https://api.groq.com/openai/v1",
     temperature=0.7,
-    max_tokens=1000
+    max_tokens=1000,
 )
 
 exam_cell_llm = ChatXAI(
