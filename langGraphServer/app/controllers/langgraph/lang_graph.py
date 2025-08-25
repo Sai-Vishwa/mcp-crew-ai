@@ -5,15 +5,66 @@ from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 
-import os
+from langchain_mcp_adapters.client import MultiServerMCPClient
+
+client = MultiServerMCPClient(
+    {
+        "transport": {
+            "url": "http://localhost:4001/mcp",
+            "transport": "streamable_http",
+        },
+        "exam_cell": {
+            "url": "http://localhost:4002/mcp",
+            "transport": "streamable_http",
+        },
+        "placment": {
+            "url": "http://localhost:4003/mcp", 
+            "transport": "streamable_http",
+        }
+    }
+)
+
+
+
+
+from langchain_xai import ChatXAI
+
+from langchain_core.messages import HumanMessage, AIMessage
+
 from langchain.chat_models import init_chat_model
 
 from IPython.display import Image, display
 
+import os
+from dotenv import load_dotenv
 
-os.environ["OPENAI_API_KEY"] = "sk-..."
+# Load variables from .env into environment
+load_dotenv()
 
-# llm = init_chat_model("openai:gpt-4.1")
+# Initialize Grok chat model
+placment_llm = ChatXAI(
+    model="llama3-8b-8192",
+    xai_api_key=os.getenv("GROK_API"),
+    base_url="https://api.groq.com/openai/v1",
+    temperature=0.7,
+    max_tokens=1000
+)
+
+exam_cell_llm = ChatXAI(
+    model="llama3-8b-8192",
+    xai_api_key=os.getenv("GROK_API"),
+    base_url="https://api.groq.com/openai/v1",
+    temperature=0.7,
+    max_tokens=1000
+)
+
+transport_llm = ChatXAI(
+    model="llama3-8b-8192",
+    xai_api_key=os.getenv("GROK_API"),
+    base_url="https://api.groq.com/openai/v1",
+    temperature=0.7,
+    max_tokens=1000
+)
 
 
 class State(TypedDict):
@@ -30,16 +81,58 @@ def chatbot(state: State) -> State :
         return state
 
 
-# The first argument is the unique node name
-# The second argument is the function or object that will be called whenever
-# the node is used.
+def router(state: State) -> str :
+    str = ""
+    if "exam" in state["userRequest"].lower():
+        str = "exam_cell"
+    elif "place" in state["userRequest"].lower():
+        str = "placment"
+    elif "transport" in state["userRequest"].lower():
+        str = "transport"
+    else:
+        str = "chatbot"
+    return str
+
+
+def exam_cell(state: State) -> State :
+    prompt = state["userRequest"] + state["intermediateResponse"] + " based on the previous messages " + str(state["previousMessages"])
+    response = exam_cell_llm.invoke([prompt])
+    state["intermediateResponse"] += response.content
+    return state
+
+
+def placement(state: State) -> State :
+    prompt = state["userRequest"] + state["intermediateResponse"] + " based on the previous messages " + str(state["previousMessages"])
+    response = exam_cell_llm.invoke([prompt])
+    state["intermediateResponse"] += response.content
+    return state
+
+
+def transport(state: State) -> State :
+    prompt = state["userRequest"] + state["intermediateResponse"] + " based on the previous messages " + str(state["previousMessages"])
+    response = exam_cell_llm.invoke([prompt])
+    state["intermediateResponse"] += response.content
+    state["finalResponse"] = response.content
+    return state
+
+
 
 graph_builder = StateGraph(State)
 
 graph_builder.add_node("chatbot", chatbot)
+graph_builder.add_node("router", router)
 
 
-graph_builder.add_edge(START, "chatbot")
+
+graph_builder.add_edge(START, router)
+
+graph_builder.add_conditional_edges(
+    router,
+    {"exam_cell": "exam_cell",
+     "placment": "placment",
+     "transport": "transport",
+     "chatbot": "chatbot"}
+)
 
 graph_builder.add_edge("chatbot", END)
 
