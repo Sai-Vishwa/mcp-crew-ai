@@ -1,7 +1,7 @@
 import { connectSlave } from "../connector/connectSlave.js";
 
 interface respType {
-    resp: string;
+    access_result: string;
 }
 
 interface inputType {
@@ -39,7 +39,7 @@ async function toolAccessChecker(input : inputType) : Promise<responseType | und
     
     return {
         status: "success",
-        isAccessible: response[0].resp
+        isAccessible: response[0].access_result
     }
 }
     catch(err: any){

@@ -1,23 +1,17 @@
 import { MCPTool } from "mcp-framework";
 import { z } from "zod";
 
-interface CreatePlacementInput {
+interface CreateplacementInput {
   session: string;
   company_name: string;
-  visiting_date: Date;
+  visiting_date: string;
   interview_start: string; 
-  interview_end: string;   
+  interview_end: string; 
 }
 
-interface CreatePlacementOutput {
-  status: string;
-  message?: string;
-  error?: string;
-}
-
-class CreatePlacementTool extends MCPTool<CreatePlacementInput>{
-  name = "create_placement";
-  description = "This tool creates a new placement entry in the database";
+class CreateplacementTool extends MCPTool<CreateplacementInput> {
+  name = "CreatePlacement";
+  description = "Createplacement tool description";
 
   schema = {
     session: {
@@ -29,7 +23,7 @@ class CreatePlacementTool extends MCPTool<CreatePlacementInput>{
       description: "Name of the company",
     },
     visiting_date: {
-      type: z.date(),
+      type: z.string(),
       description: "Date of the company visit",
     },
     interview_start: {
@@ -42,10 +36,11 @@ class CreatePlacementTool extends MCPTool<CreatePlacementInput>{
     },
   };
 
-  async execute(input: CreatePlacementInput) : Promise<CreatePlacementOutput>{
+  async execute(input: CreateplacementInput) {
     try {
-
-      const res = await fetch(`http://localhost:4006/create-placement`, {
+      console.log("Hey i am getting called");
+      console.log(input);
+      const res = await fetch(`http://localhost:4004/create-placement`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -53,8 +48,11 @@ class CreatePlacementTool extends MCPTool<CreatePlacementInput>{
           body: JSON.stringify({session : input.session, company_name: input.company_name, visiting_date: input.visiting_date, interview_start: input.interview_start, interview_end: input.interview_end}),    
         });
         const data = await res.json() ;
-        console.log(JSON.stringify(data))
 
+
+        console.log(JSON.stringify(data))
+        console.log("Hey i am returning data");
+        console.log(data);
         return data
     } catch (error) {
         return { status: "error", error: "Failed to create placement entry" };
@@ -62,4 +60,4 @@ class CreatePlacementTool extends MCPTool<CreatePlacementInput>{
   }
 }
 
-export default CreatePlacementTool;
+export default CreateplacementTool;

@@ -2,7 +2,6 @@ from flask import Blueprint, request, jsonify
 from .controllers.login.login import login_controller
 from .controllers.bot_page.chat_page import chatpage_controller
 from .controllers.bot_page.sub_controllers.load_chat_history import load_chat_history_controller
-from .controllers.crew.crew import process_message_with_crew
 import time
 from flask import Response, stream_with_context
 import asyncio

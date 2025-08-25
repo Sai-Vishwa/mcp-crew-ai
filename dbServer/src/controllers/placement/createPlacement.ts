@@ -3,6 +3,7 @@ import { Request , Response } from "express";
 import { connectMaster } from "../../connector/connectMaster.js";
 import generateSession from "../../helpers/sessionGenerator.js";
 import sessionChecker from "../../helpers/sessionChecker.js";
+import toolAccessChecker from "../../helpers/toolAccessChecker.js";
 
 interface requestType {
     session : string;
@@ -12,11 +13,6 @@ interface requestType {
     interview_end : string;
 }
 
-interface responseType {
-    status : string;
-    message ?: string;
-    error ?: string;
-}
 
 async function createPlacement(req : Request & {body : requestType}, res: Response) {
     try{
@@ -28,7 +24,10 @@ async function createPlacement(req : Request & {body : requestType}, res: Respon
 
             const validSessions = await sessionChecker(session);
 
+
             if (validSessions?.status === "error"){
+
+                console.log("Invalid session detected in create placement");
                 res.status(200).json({
                     status: "error",
                     error: "Invalid session"
@@ -36,12 +35,24 @@ async function createPlacement(req : Request & {body : requestType}, res: Respon
                 return;
             }
 
+            const validAccess = await toolAccessChecker({session: session, toolName: "Create_Placement"});
+
+            console.log("Access check result for create placement: ", validAccess);
+
+            if(validAccess?.status === "error" || validAccess?.isAccessible === "NO"){
+                console.log("Access denied for create placement");
+                res.status(200).json({
+                    status: "error",
+                    error: "Access denied"
+                });
+                return;
+            }
 
             const connectionMaster = await connectMaster();
-
-
             
             await connectionMaster.query(`INSERT INTO placement (company_name , visiting_date , interview_start , interview_end ) values (? , ? , ? , ? )`, [company_name , visiting_date , interview_start , interview_end ]);
+
+            console.log("Placement entry created successfully");
             res.status(200).json({
                 status: "success",
                 message :"Placement entry created successfully"

@@ -22,7 +22,7 @@ SELECT
             SELECT 1
             FROM session s
             JOIN auth a ON s.uname = a.uname
-            JOIN tools t ON t.name = 'Read_Placement'
+            JOIN tools t ON t.name = 'Create_Placement'
             LEFT JOIN access ra ON ra.user_type = a.role AND ra.tool_id = t.id
             LEFT JOIN specialaccess sa ON sa.uname = a.uname AND sa.tool_id = t.id
             WHERE s.session = 'abcd'

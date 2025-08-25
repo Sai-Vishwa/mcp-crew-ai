@@ -6,7 +6,7 @@ const server = new MCPServer({
     options: {
       port: 4007,
       cors: {
-        allowOrigin: "http://localhost:4005",
+        allowOrigin: "*",
       }
     }
   }});
