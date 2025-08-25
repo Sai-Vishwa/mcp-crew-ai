@@ -283,7 +283,7 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   // Initialize theme
   useEffect(() => {
-    const theme = useTheme(false); // Start with light theme
+    useTheme(false); // Start with light theme
     dispatch({ type: 'TOGGLE_THEME' }); // This will set initial theme
   }, []);
 

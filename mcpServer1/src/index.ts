@@ -4,11 +4,13 @@ const server = new MCPServer({
   transport: {
     type: "http-stream",
     options: {
-      port: 5000,
+      port: 4007,
       cors: {
-        allowOrigin: "*"
+        allowOrigin: "http://localhost:4005",
       }
     }
   }});
 
 server.start();
+
+// this is mcp server 1 - placement
