@@ -4,7 +4,7 @@ const server = new MCPServer({
   transport: {
     type: "http-stream",
     options: {
-      port: 5000,
+      port: 4008,
       cors: {
         allowOrigin: "*"
       }
@@ -12,3 +12,5 @@ const server = new MCPServer({
   }});
 
 server.start();
+
+// this is mcp server 2 - exam cell
