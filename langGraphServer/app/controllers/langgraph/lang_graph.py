@@ -15,6 +15,10 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.chat_models import init_chat_model
 import json
 from langchain.tools import StructuredTool
+from langchain_core.messages import HumanMessage, SystemMessage
+from langchain.memory import ConversationSummaryBufferMemory
+from langchain.agents import AgentExecutor 
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 
 load_dotenv()
@@ -38,16 +42,8 @@ client = MultiServerMCPClient(
 
 async def get_mcp_tools():
     tools = await client.get_tools()
-    # print(type(tools))
-    # print(tools)
     return tools
 
-# llm = ChatXAI(
-#     model="llama3-8b-8192",
-#     xai_api_key=os.getenv("GROK_API"),
-#     temperature=0.7,
-#     max_tokens=1000,
-# )
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 
@@ -61,104 +57,38 @@ llm = ChatGoogleGenerativeAI(
 
 async def set_up_agents():
     tools = await get_mcp_tools()
-    # with open("reasoning_agent_developer_prompt.txt", "r") as f:
-    #     developer_prompt = f.read()
-    final_prompt = ChatPromptTemplate.from_messages([
-    ("system", """
-You are a reasoning agent that outputs ONLY valid JSON workflows. 
+ 
 
-STRICT RULES (must always be followed):
-1. Your output MUST be valid JSON — nothing else.
-2. JSON must strictly match this schema:
-
-{
-  "workflow": [
-    {
-      "step": <integer starting from 1>,
-      "tool": "<tool_name>",
-      "args": { <key-value pairs of arguments for the tool> }
-    }
-  ]
-}
-
-3. If no valid workflow is possible, return exactly:
-{
-  "workflow": []
-}
-
-4. DO NOT include explanations, natural language, comments, markdown, or extra keys. 
-   Output JSON ONLY.
-
-5. Tool usage rules:
-   - Use ONLY the tools provided in the list below.
-   - Use tool names EXACTLY as provided.
-   - Do NOT invent tools.
-   - If arguments are missing, still output a workflow but leave missing args as empty strings.
-
-6. Steps must always be ordered starting from 1, incremented by 1.
-
-"""),
-    ("system", "Available tools:\n{tool_descriptions}"),
-    ("system", "Previous workflow (may be empty):\n{previous_workflow}"),
-    ("human", "{input}")
-])
+    memory = ConversationSummaryBufferMemory(
+        llm=llm,
+        max_token_limit=300,
+        return_messages=True,
+        memory_key="chat_history"
+    )
 
     reasoning_agent = initialize_agent(
-        tools= tools,
         llm= llm,
         agent= AgentType.OPENAI_MULTI_FUNCTIONS,
-        verbose= True
+        verbose= True,
+        memory = memory,
+        tools=[],
+        agent_kwargs={
+            "extra_prompt_messages" : [MessagesPlaceholder(variable_name="chat_history")]
+        }
     )
-    tools_json = []
-    for t in tools:
-        tools_json.append({
-            "name": t.name,
-            "description": t.description,
-            "args_schema": (
-                t.args_schema.schema()
-                if hasattr(t.args_schema, "schema")
-                else t.args_schema  # sometimes already dict
-            )
-        })
-
-    ans = await reasoning_agent.ainvoke({
-        "input" :"""
-You are a reasoning agent that outputs ONLY valid JSON workflows. 
-
-STRICT RULES (must always be followed):
-1. Your output MUST be valid JSON — nothing else.
-2. JSON must strictly match this schema:
-
-{
-  "workflow": [
-    {
-      "step": <integer starting from 1>,
-      "tool": "<tool_name>",
-      "args": { <key-value pairs of arguments for the tool> }
-    }
-  ]
-}
-
-3. If no valid workflow is possible, return exactly:
-{
-  "workflow": []
-}
-
-4. DO NOT include explanations, natural language, comments, markdown, or extra keys. 
-   Output JSON ONLY.
-
-5. Tool usage rules:
-   - Use ONLY the tools provided in the list below.
-   - Use tool names EXACTLY as provided.
-   - Do NOT invent tools.
-   - If arguments are missing, still output a workflow but leave missing args as empty strings.
-
-6. Steps must always be ordered starting from 1, incremented by 1.
-
-""" + "\n\nSchedule interview on 28th for Zoho"
+   
+    ans = reasoning_agent.invoke({
+        "input" :"Hi my name is Leo Dass"
     })
     
-    print(ans["output"])
+    ans2 = reasoning_agent.invoke({
+        "input" : "What is my name"
+    })
+    
+    val = reasoning_agent.memory.copy()
+    print("val")
+    print(val)    
+    print(memory.buffer)
 
 
 
