@@ -16,9 +16,15 @@ from langchain.chat_models import init_chat_model
 import json
 from langchain.tools import StructuredTool
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain.memory import ConversationSummaryBufferMemory
+from langchain.memory import ConversationSummaryBufferMemory 
 from langchain.agents import AgentExecutor 
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain_core.chat_history import BaseChatMessageHistory
+from pydantic import BaseModel, Field
+from langchain_core.messages import BaseMessage, AIMessage
+
+
 
 
 load_dotenv()
@@ -48,48 +54,83 @@ async def get_mcp_tools():
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash",   # or "gemini-1.5-flash" (cheaper & faster)
+    model="gemini-1.5-flash",  
     google_api_key=os.getenv("GEMINI_API"),
     temperature=0.7,
     max_output_tokens=1000,
 )
 
 
+store = {}
+
+prompt = ChatPromptTemplate.from_messages([
+    MessagesPlaceholder(variable_name="history"),  # memory slot
+    ("human", "{input}")  # user input
+])
+
+
+class MemoryClass (BaseChatMessageHistory , BaseModel):
+    
+    messages: list[BaseMessage] = Field(default_factory=list)
+    
+    def add_messages(self, messages: list[BaseMessage]) -> None:
+        self.messages.extend(messages)
+
+    def clear(self) -> None:
+        self.messages = []
+    
+
+def get_by_session_id(session_id: str) -> BaseChatMessageHistory:
+    if session_id not in store:
+        store[session_id] = MemoryClass()
+    return store[session_id]
+
 async def set_up_agents():
-    tools = await get_mcp_tools()
+    # tools = await get_mcp_tools()
  
 
-    memory = ConversationSummaryBufferMemory(
-        llm=llm,
-        max_token_limit=300,
-        return_messages=True,
-        memory_key="chat_history"
-    )
+    
 
     reasoning_agent = initialize_agent(
         llm= llm,
         agent= AgentType.OPENAI_MULTI_FUNCTIONS,
         verbose= True,
-        memory = memory,
         tools=[],
         agent_kwargs={
-            "extra_prompt_messages" : [MessagesPlaceholder(variable_name="chat_history")]
-        }
+        "extra_prompt_messages": [MessagesPlaceholder(variable_name="chat_history")]
+        },
     )
    
-    ans = reasoning_agent.invoke({
-        "input" :"Hi my name is Leo Dass"
-    })
+   
+    reasoning_agent_with_memory = RunnableWithMessageHistory(
+        reasoning_agent , 
+        get_by_session_id , 
+        input_messages_key= "input",
+        history_messages_key= "chat_history",
+        output_messages_key= "output"
+    )
     
-    ans2 = reasoning_agent.invoke({
-        "input" : "What is my name"
-    })
+    ans = reasoning_agent_with_memory.invoke(
+        {"input" :"Hi my name is Leo Dass"},
+        config= {"configurable" : {"session_id": "Leo"}}    
+    )
     
-    val = reasoning_agent.memory.copy()
-    print("val")
-    print(val)    
-    print(memory.buffer)
-
+    ans2 = reasoning_agent_with_memory.invoke(
+        {"input" :"Hi my name is Kanguva"},
+        config= {"configurable" : {"session_id": "Kanguva"}}    
+    )
+    
+    ans3 = reasoning_agent_with_memory.invoke(
+        {"input" :"What is my name ??????"},
+        config= {"configurable" : {"session_id": "Kanguva"}}    
+    )
+    
+    ans4 = reasoning_agent_with_memory.invoke(
+        {"input" :"What is my name vro "},
+        config= {"configurable" : {"session_id": "Leo"}}    
+    )
+    
+    print(store)
 
 
 async def main():
