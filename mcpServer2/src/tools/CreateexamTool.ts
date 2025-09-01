@@ -3,6 +3,7 @@ import { z } from "zod";
 
 interface CreateexamInput {
   session: string;
+  exam_name: string;
   exam_date: string;
   exam_start: string; 
   exam_end: string;
@@ -10,12 +11,16 @@ interface CreateexamInput {
 
 class CreateexamTool extends MCPTool<CreateexamInput> {
   name = "CreateExam";
-  description = "This tool is used to create a new exam entry or update an existing one in the database";
+  description = "This tool is used to create a new exam entry on the database";
 
   schema = {
         session: {
           type: z.string(),
           description: "Session identifier",
+        },
+        exam_name: {
+          type: z.string(),
+          description: "Name of the Exam"
         },
         exam_date: {
           type: z.string(),
@@ -40,7 +45,7 @@ class CreateexamTool extends MCPTool<CreateexamInput> {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({session : input.session, exam_date: input.exam_date, exam_start: input.exam_start, exam_end: input.exam_end}),    
+          body: JSON.stringify({session : input.session, exam_name : input.exam_name , exam_date: input.exam_date, exam_start: input.exam_start, exam_end: input.exam_end}),    
         });
         const data = await res.json() ;
 

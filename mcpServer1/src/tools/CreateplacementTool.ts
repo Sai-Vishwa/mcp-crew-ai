@@ -11,7 +11,7 @@ interface CreateplacementInput {
 
 class CreateplacementTool extends MCPTool<CreateplacementInput> {
   name = "CreatePlacement";
-  description = "This tool is used to create a new placement entry or update an existing one in the database";
+  description = "This tool is used to create a new placement entry in the database";
 
   schema = {
         session: {

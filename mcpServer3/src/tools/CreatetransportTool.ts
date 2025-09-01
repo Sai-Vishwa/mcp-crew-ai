@@ -10,7 +10,7 @@ interface CreatetransportInput {
 
 class CreatetransportTool extends MCPTool<CreatetransportInput> {
   name = "CreateTransport";
-  description = "This tool is used to create a new transport entry or update an existing one in the database";
+  description = "This tool is used to create a new transport entry in the database";
 
   schema = {
         session: {
