@@ -23,7 +23,7 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.chat_history import BaseChatMessageHistory
 from pydantic import BaseModel, Field
 from langchain_core.messages import BaseMessage, AIMessage
-
+from langchain.prompts import SystemMessagePromptTemplate
 
 
 
@@ -86,18 +86,29 @@ def get_by_session_id(session_id: str) -> BaseChatMessageHistory:
     return store[session_id]
 
 async def set_up_agents():
-    # tools = await get_mcp_tools()
+    tools = await get_mcp_tools()
+    
+    dev_prompt = ""
  
-
+    with open("reasoning_agent_developer_prompt.txt" , "r" , encoding="utf-8") as file :
+        dev_prompt = file.read()
     
 
+    dev_prompt = SystemMessagePromptTemplate.from_template(
+        template=dev_prompt , 
+        partial_variables={} , 
+    )
+    print(dev_prompt)
     reasoning_agent = initialize_agent(
         llm= llm,
         agent= AgentType.OPENAI_MULTI_FUNCTIONS,
         verbose= True,
-        tools=[],
+        tools=tools,
         agent_kwargs={
-        "extra_prompt_messages": [MessagesPlaceholder(variable_name="chat_history")]
+        "extra_prompt_messages": [
+                dev_prompt ,
+                MessagesPlaceholder(variable_name="chat_history")
+            ]
         },
     )
    
@@ -111,26 +122,26 @@ async def set_up_agents():
     )
     
     ans = reasoning_agent_with_memory.invoke(
-        {"input" :"Hi my name is Leo Dass"},
+        {"input" :"Change exam date from 4th sept to 5th sept"},
         config= {"configurable" : {"session_id": "Leo"}}    
     )
     
-    ans2 = reasoning_agent_with_memory.invoke(
-        {"input" :"Hi my name is Kanguva"},
-        config= {"configurable" : {"session_id": "Kanguva"}}    
-    )
+    # ans2 = reasoning_agent_with_memory.invoke(
+    #     {"input" :"Hi my name is Kanguva"},
+    #     config= {"configurable" : {"session_id": "Kanguva"}}    
+    # )
     
-    ans3 = reasoning_agent_with_memory.invoke(
-        {"input" :"What is my name ??????"},
-        config= {"configurable" : {"session_id": "Kanguva"}}    
-    )
+    # ans3 = reasoning_agent_with_memory.invoke(
+    #     {"input" :"What is my name ??????"},
+    #     config= {"configurable" : {"session_id": "Kanguva"}}    
+    # )
     
-    ans4 = reasoning_agent_with_memory.invoke(
-        {"input" :"What is my name vro "},
-        config= {"configurable" : {"session_id": "Leo"}}    
-    )
+    # ans4 = reasoning_agent_with_memory.invoke(
+    #     {"input" :"What is my name vro "},
+    #     config= {"configurable" : {"session_id": "Leo"}}    
+    # )
     
-    print(store)
+    # print(store)
 
 
 async def main():
