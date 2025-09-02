@@ -13,7 +13,7 @@ interface UpdateplacementInput {
 }
 
 class UpdateplacementTool extends MCPTool<UpdateplacementInput> {
-  name = "updatePlacement";
+  name = "UpdatePlacement";
   description = "This tool is used to update a placement entry on the databse by changing the visiting date , start time and end time for the provided company";
 
   schema = {

@@ -13,7 +13,7 @@ interface UpdateexamInput {
 }
 
 class UpdateexamTool extends MCPTool<UpdateexamInput> {
-  name = "updateExam";
+  name = "UpdateExam";
   description = "This tool is used to update a exam entry on the database by the changing the exam date , start time and end time of the provided exam name";
 
   schema = {

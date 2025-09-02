@@ -11,7 +11,7 @@ interface UpdatetransportInput {
 }
 
 class UpdatetransportTool extends MCPTool<UpdatetransportInput> {
-  name = "updateTransport";
+  name = "UpdateTransport";
   description = "This tool is used to update a transport entry in the database by changing the start and leave time for the provided bus date";
 
   schema = {

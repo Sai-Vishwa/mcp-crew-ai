@@ -24,8 +24,7 @@ from langchain_core.chat_history import BaseChatMessageHistory
 from pydantic import BaseModel, Field
 from langchain_core.messages import BaseMessage, AIMessage
 from langchain.prompts import SystemMessagePromptTemplate
-
-
+from typing import List
 
 load_dotenv()
 
@@ -48,6 +47,7 @@ client = MultiServerMCPClient(
 
 async def get_mcp_tools():
     tools = await client.get_tools()
+    # print(tools)
     return tools
 
 
@@ -68,6 +68,25 @@ prompt = ChatPromptTemplate.from_messages([
     ("human", "{input}")  # user input
 ])
 
+from langchain.tools import StructuredTool
+from pydantic import BaseModel
+
+class ExamInput(BaseModel):
+    placements : List[str]
+    exams : List[str]
+    date : str
+
+def date_clash_checker(placements : list , exams : list , date : str) -> str:
+    return f"Clash um ila oru mannum ila"
+
+date_clash_checker_tool = StructuredTool.from_function(
+    func=date_clash_checker,
+    name="DateClashChecker",
+    description="With a lsit of all placement entries or with a list of all exam entries provided the tool checks for clash in a specific date",
+    args_schema=ExamInput
+)
+
+
 
 class MemoryClass (BaseChatMessageHistory , BaseModel):
     
@@ -87,23 +106,25 @@ def get_by_session_id(session_id: str) -> BaseChatMessageHistory:
 
 async def set_up_agents():
     tools = await get_mcp_tools()
+    tools.append(date_clash_checker_tool)
     
     dev_prompt = ""
  
     with open("reasoning_agent_developer_prompt.txt" , "r" , encoding="utf-8") as file :
         dev_prompt = file.read()
     
-
+    toolsStr = "\n".join([f"{tool.name}: {tool.description}" for tool in tools])
+    print(toolsStr)
     dev_prompt = SystemMessagePromptTemplate.from_template(
         template=dev_prompt , 
         partial_variables={} , 
     )
-    print(dev_prompt)
+    # print(dev_prompt)
     reasoning_agent = initialize_agent(
         llm= llm,
         agent= AgentType.OPENAI_MULTI_FUNCTIONS,
         verbose= True,
-        tools=tools,
+        tools=[],
         agent_kwargs={
         "extra_prompt_messages": [
                 dev_prompt ,
@@ -122,7 +143,7 @@ async def set_up_agents():
     )
     
     ans = reasoning_agent_with_memory.invoke(
-        {"input" :"Change exam date from 4th sept to 5th sept"},
+        {"input" :"update practical exam from 4th sept to 8th sept"+toolsStr},
         config= {"configurable" : {"session_id": "Leo"}}    
     )
     

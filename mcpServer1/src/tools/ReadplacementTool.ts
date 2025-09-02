@@ -7,7 +7,7 @@ interface ReadplacementInput {
 
 class ReadplacementTool extends MCPTool<ReadplacementInput> {
   name = "ReadPlacement";
-  description = "This tool is used to read placement entries";
+  description = "This tool is used to read all placement entries";
 
   schema = {
     session: {
