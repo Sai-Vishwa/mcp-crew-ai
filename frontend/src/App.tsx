@@ -2,6 +2,7 @@ import './App.css'
 import { BrowserRouter , Routes , Route } from 'react-router-dom'
 import LoginPage from './pages/LoginPage'
 import ChatPage from './pages/ChatPage'
+import AdminPage from './pages/AdminPage'
 
 
 
@@ -12,6 +13,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LoginPage />}/>
         <Route path="/chat-page" element={<ChatPage />}/>
+        <Route path='/admin' element={<AdminPage/>} />
       </Routes>
    </BrowserRouter>
   )

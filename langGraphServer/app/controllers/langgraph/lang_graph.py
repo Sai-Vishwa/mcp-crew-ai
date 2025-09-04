@@ -25,25 +25,10 @@ from pydantic import BaseModel, Field
 from langchain_core.messages import BaseMessage, AIMessage
 from langchain.prompts import SystemMessagePromptTemplate
 from typing import List
+import httpx
+from flask import jsonify
 
 load_dotenv()
-
-client = MultiServerMCPClient(
-    {
-        "transport": {
-            "url": "http://localhost:4007/mcp",
-            "transport": "streamable_http",
-        },
-        "exam_cell": {
-            "url": "http://localhost:4008/mcp",
-            "transport": "streamable_http",
-        },
-        "placment": {
-            "url": "http://localhost:4009/mcp", 
-            "transport": "streamable_http",
-        }
-    }
-)
 
 async def get_mcp_tools():
     tools = await client.get_tools()
@@ -53,15 +38,6 @@ async def get_mcp_tools():
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash",  
-    google_api_key=os.getenv("GEMINI_API"),
-    temperature=0.7,
-    max_output_tokens=1000,
-)
-
-
-store = {}
 
 prompt = ChatPromptTemplate.from_messages([
     MessagesPlaceholder(variable_name="history"),  # memory slot
@@ -120,18 +96,7 @@ async def set_up_agents():
         partial_variables={} , 
     )
     # print(dev_prompt)
-    reasoning_agent = initialize_agent(
-        llm= llm,
-        agent= AgentType.OPENAI_MULTI_FUNCTIONS,
-        verbose= True,
-        tools=[],
-        agent_kwargs={
-        "extra_prompt_messages": [
-                dev_prompt ,
-                MessagesPlaceholder(variable_name="chat_history")
-            ]
-        },
-    )
+    
    
    
     reasoning_agent_with_memory = RunnableWithMessageHistory(
@@ -146,26 +111,177 @@ async def set_up_agents():
         {"input" :"update practical exam from 4th sept to 8th sept"+toolsStr},
         config= {"configurable" : {"session_id": "Leo"}}    
     )
-    
-    # ans2 = reasoning_agent_with_memory.invoke(
-    #     {"input" :"Hi my name is Kanguva"},
-    #     config= {"configurable" : {"session_id": "Kanguva"}}    
-    # )
-    
-    # ans3 = reasoning_agent_with_memory.invoke(
-    #     {"input" :"What is my name ??????"},
-    #     config= {"configurable" : {"session_id": "Kanguva"}}    
-    # )
-    
-    # ans4 = reasoning_agent_with_memory.invoke(
-    #     {"input" :"What is my name vro "},
-    #     config= {"configurable" : {"session_id": "Leo"}}    
-    # )
-    
-    # print(store)
 
 
 async def main():
     await set_up_agents()
     
 asyncio.run(main())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Tools = []
+
+client = MultiServerMCPClient(
+    {
+        "transport": {
+            "url": "http://localhost:4007/mcp",
+            "transport": "streamable_http",
+        },
+        "exam_cell": {
+            "url": "http://localhost:4008/mcp",
+            "transport": "streamable_http",
+        },
+        "placment": {
+            "url": "http://localhost:4009/mcp", 
+            "transport": "streamable_http",
+        }
+    }
+)
+
+
+
+dev_prompt_reasoning_agent = ""
+dev_prompt_execution_agent = ""
+ 
+with open("reasoning_agent_developer_prompt.txt" , "r" , encoding="utf-8") as file :
+    dev_prompt_reasoning_agent = file.read()
+
+with open("execution_agent_developer_prompt.txt" , "r" , encoding="utf-8") as file :
+    dev_prompt_execution_agent = file.read()
+
+llm = ChatGoogleGenerativeAI(
+    model="gemini-1.5-flash",  
+    google_api_key=os.getenv("GEMINI_API"),
+    temperature=0.2,
+    max_output_tokens=1000,
+)
+
+
+store = {}
+
+reasoning_agent = initialize_agent(
+    llm= llm,
+    agent= AgentType.OPENAI_MULTI_FUNCTIONS,
+    verbose= True,
+    tools=[],
+    agent_kwargs={
+    "extra_prompt_messages": [
+            dev_prompt_reasoning_agent ,
+            MessagesPlaceholder(variable_name="chat_history")
+        ]
+    },
+)
+
+execution_agent = initialize_agent(
+    llm= llm,
+    agent= AgentType.OPENAI_MULTI_FUNCTIONS,
+    verbose= True,
+    tools=Tools,
+    agent_kwargs={
+    "extra_prompt_messages": [
+            dev_prompt_execution_agent ,
+            MessagesPlaceholder(variable_name="chat_history")
+        ]
+    },
+)
+
+
+
+async def langGraphInvoke(body):
+    try:
+        user_session = body.get("session")
+        chat_session = body.get('chat_session')
+        prompt = body.get("propmt")
+        actual_chat_session = chat_session
+        global Tools
+        global execution_agent
+        global store
+        if not user_session or chat_session or prompt:
+            yield json.dumps({
+                "thinking" : "no",
+                "message" : "wrong request",
+                "isFinalChunk" : "yes"
+            })
+            return
+        
+        if(len(Tools)==0):
+            yield json.dumps({
+                "thinking": "yes",
+                "message": "fetching tools",
+                "isFinalChunk": "no"
+            })
+            
+            TOOLS = await get_mcp_tools()
+            print("im loading tools ra elei")
+            
+            yield json.dumps({
+                "thinking": "yes",
+                "message": "setting agents",
+                "isFinalChunk": "no"
+            })
+            
+            execution_agent = initialize_agent(
+                llm= llm,
+                agent= AgentType.OPENAI_MULTI_FUNCTIONS,
+                verbose= True,
+                tools=Tools,
+                agent_kwargs={
+                "extra_prompt_messages": [
+                        dev_prompt_execution_agent ,
+                        MessagesPlaceholder(variable_name="chat_history")
+                    ]
+                },
+            )
+            
+        if(chat_session == "new"):
+            yield json.dumps({
+                "thinking": "yes",
+                "message": "Setting up a new chat",
+                "isFinalChunk": "no"
+            })
+            async with httpx.AsyncClient() as client:
+                response = await client.post("http://localhost:4004/create-new-chat-session", json={"user_session": user_session })
+                resp = response.json()
+                if resp["status"] == "error":
+                    yield json.dumps({
+                        "thinking": "no",
+                        "message": "Cannot create a new chat to answer your question.. try again",
+                        "isFinalChunk": "yes"
+                    })
+                    return 
+                actual_chat_session = resp["chat_session"]
+                store[actual_chat_session] = [MemoryClass(),user_session,resp["user_id"]]
+                
+              
+        else :
+            chat_in_store = store.get(chat_session)
+            if(chat_in_store is not None):
+                memory_in_store = chat_in_store[0]
+                
+                
+            async with httpx.AsyncClient() as client:
+                response = await client.post("http://localhost:4004/valid-chat-session", json={"user_session": user_session , "chat_session":chat_session})
+                resp = response.json()
+                print("hey this is the resp i got --- ")
+                print(resp)
+                if resp["status"] == "error":
+                    return jsonify({"status": "error", "message": resp["message"]})
+                return jsonify({"status": "success", "message": "Bot page details fetched successfully", "data": resp["data"]})
+                    
+            
+    except Exception as e:
+        yield f"Error : {str(e)}"
+        

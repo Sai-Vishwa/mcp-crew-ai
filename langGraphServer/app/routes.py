@@ -6,6 +6,7 @@ import time
 from flask import Response, stream_with_context
 import asyncio
 import json
+from .controllers.langgraph.lang_graph import langGraphInvoke
 
 main = Blueprint("main", __name__)
 
@@ -31,21 +32,24 @@ async def loadChats():
     data = request.get_json()
     return await load_chat_history_controller(data)
 
-# @main.route("/user-input", methods=["POST"])
-# def giveResponse():
-#     data = request.get_json()
+@main.route("/user-input", methods=["POST"])
+def giveResponse():
+    data = request.get_json()
     
-#     def generate():
-#         for chunk in process_message_with_crew(data):
-#             print("sending a chunk ")
-#             yield f"data: {chunk}\n\n"
-    
-#     return Response(
-#         stream_with_context(generate()),
-#         mimetype='text/event-stream',
-#         headers={
-#             'Cache-Control': 'no-cache',
-#             'Connection': 'keep-alive',
-#             'X-Accel-Buffering': 'no'  # Important for streaming
-#         }
-#     )
+    def generate():
+        async def runner():
+            async for chunk in langGraphInvoke(data):
+                yield f"{chunk}\n"
+
+        for chunk in asyncio.run(runner()):
+            yield chunk
+        
+    return Response(
+        stream_with_context(generate()),
+        mimetype='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no'  # Important for streaming
+        }
+    )
