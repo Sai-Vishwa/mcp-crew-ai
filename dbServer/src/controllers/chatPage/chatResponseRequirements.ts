@@ -17,10 +17,24 @@ async function chatRequirements(req : Request & {body : requestType} , res : Res
     if(isValidSession?.status=="error"){
         res.status(200).json({
             status : "error",
-            message : "invalid session"
+            message : "invalid session",
+            data : ""
         })
+        return
     }
     const isValidChat = await chatChecker(isValidSession?.uname as string , chatSession as string);
+    if(isValidChat.status == "error"){
+        res.status(200).json({
+            status : "error",
+            message : isValidChat.message,
+            data :""
+        })
+        return
+    }
+    // history of the chat 5 q and a 
+    // workflows of them 
+    // relevant priompts + workflows 
+
 }
 
 export default chatRequirements

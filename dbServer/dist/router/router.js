@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import login from '../controllers/login/login.js';
-import chatPage from '../controllers/botPage/chatPage.js';
+import chatPage from '../controllers/chatPage/chatPage.js';
 import createPlacement from '../controllers/placement/createPlacement.js';
 const router = Router();
 const asyncHandler = (fn) => {
