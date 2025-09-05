@@ -5,7 +5,7 @@ import {Response} from 'express';
 import { NextFunction } from 'express';
 import { RequestHandler } from 'express';
 import login from '../controllers/login/login.js';
-import chatPage from '../controllers/botPage/chatPage.js';
+import chatPage from '../controllers/chatPage/chatPage.js';
 import createPlacement from '../controllers/placement/createPlacement.js';
 
 const router = Router();

@@ -33,7 +33,7 @@ async function chatPage(req : Request & {body : requestType}, res: Response) {
             if(isValidSession?.status === "error"){
                 res.status(200).json({
                     status: "error",
-                    message: "Invalid session"
+                    message: "Invalid session"  
                 });
                 return;
             }
