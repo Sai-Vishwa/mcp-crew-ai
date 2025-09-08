@@ -28,6 +28,7 @@ from typing import List
 import httpx
 from flask import jsonify
 from cachetools import TTLCache
+from typing import TypedDict , NotRequired , Any , Optional
 
 load_dotenv()
 
@@ -207,8 +208,39 @@ toolsStr = ""
 
 reference_store = []
 
+class toolCallInfo(TypedDict):
+    tool_name : str
+    input : dict
+    status : str
+    message : Optional[str]
+    data : Optional[Any]
+    
+
+class Workflow(TypedDict):
+    step_number : int
+    tool_name : str
+    tool_description : str
+
+
+
+class State(TypedDict):
+    user_input : str
+    workflow_name : str
+    workflow_description : str
+    steps : List[Workflow]
+    current_step : Workflow
+    completed_tools : List[Workflow]
+    current_tool_call_info : toolCallInfo
+    completed_tool_calls_info : List[toolCallInfo]
+    final_response : str
+    
+    
+
 async def langGraphInvoke(body):
     try:
+        
+        
+        
         user_session = body.get("session")
         chat_session = body.get('chat_session')
         prompt = body.get("propmt")
