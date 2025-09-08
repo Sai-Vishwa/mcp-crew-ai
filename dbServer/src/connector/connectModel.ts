@@ -10,6 +10,8 @@ const __dirname = dirname(__filename);
 
 dotenv.config({ path: resolve(__dirname, '.env') });
 
+console.log("Hey inga paaru ==> " , process.env.GEMINI_API)
+
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API!);
 
 const model = genAI.getGenerativeModel({ model: "models/embedding-001" });
