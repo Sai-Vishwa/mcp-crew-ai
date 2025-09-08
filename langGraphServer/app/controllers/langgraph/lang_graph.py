@@ -67,22 +67,7 @@ date_clash_checker_tool = StructuredTool.from_function(
 
 
 
-class MemoryClass (BaseChatMessageHistory , BaseModel):
-    
-    messages: list[BaseMessage] = Field(default_factory=list)
-    
-    def add_messages(self, messages: list[BaseMessage]) -> None:
-        self.messages.extend(messages)
 
-    def clear(self) -> None:
-        self.messages = []
-    
-
-def get_by_session_id(session_id: str) -> BaseChatMessageHistory:
-    if session_id not in store:
-        print("AABATHU")
-        store[session_id] = [MemoryClass(),"yaara nee","ithu epdi trigger aachu"]
-    return store[session_id[0]]
 
 async def set_up_agents():
     tools = await get_mcp_tools()
@@ -130,80 +115,19 @@ asyncio.run(main())
 
 
 
-Tools = []
-
-client = MultiServerMCPClient(
-    {
-        "transport": {
-            "url": "http://localhost:4007/mcp",
-            "transport": "streamable_http",
-        },
-        "exam_cell": {
-            "url": "http://localhost:4008/mcp",
-            "transport": "streamable_http",
-        },
-        "placment": {
-            "url": "http://localhost:4009/mcp", 
-            "transport": "streamable_http",
-        }
-    }
-)
 
 
 
-dev_prompt_reasoning_agent = ""
-dev_prompt_execution_agent = ""
- 
-with open("reasoning_agent_developer_prompt.txt" , "r" , encoding="utf-8") as file :
-    dev_prompt_reasoning_agent = file.read()
-
-with open("execution_agent_developer_prompt.txt" , "r" , encoding="utf-8") as file :
-    dev_prompt_execution_agent = file.read()
-
-llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash",  
-    google_api_key=os.getenv("GEMINI_API"),
-    temperature=0.2,
-    max_output_tokens=1000,
-)
 
 
-store = {}
-store = TTLCache(maxsize=10000, ttl=600)
 
-reasoning_agent = initialize_agent(
-    llm= llm,
-    agent= AgentType.OPENAI_MULTI_FUNCTIONS,
-    verbose= True,
-    tools=[],
-    agent_kwargs={
-    "extra_prompt_messages": [
-            dev_prompt_reasoning_agent ,
-            MessagesPlaceholder(variable_name="chat_history")
-        ]
-    },
-)
 
-execution_agent = initialize_agent(
-    llm= llm,
-    agent= AgentType.OPENAI_MULTI_FUNCTIONS,
-    verbose= True,
-    tools=Tools,
-    agent_kwargs={
-    "extra_prompt_messages": [
-            dev_prompt_execution_agent ,
-            MessagesPlaceholder(variable_name="chat_history")
-        ]
-    },
-)
 
-reasoning_agent_with_memory = RunnableWithMessageHistory(
-        reasoning_agent , 
-        get_by_session_id , 
-        input_messages_key= "input",
-        history_messages_key= "chat_history",
-        output_messages_key= "output"
-)
+
+
+
+
+
 
 toolsStr = ""
 

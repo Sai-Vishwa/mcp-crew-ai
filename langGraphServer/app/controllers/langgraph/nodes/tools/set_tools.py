@@ -3,27 +3,29 @@ from langchain_mcp_adapters.client import MultiServerMCPClient
 
 Tools = []
 
-client = MultiServerMCPClient(
-    {
-        "transport": {
-            "url": "http://localhost:4007/mcp",
-            "transport": "streamable_http",
-        },
-        "exam_cell": {
-            "url": "http://localhost:4008/mcp",
-            "transport": "streamable_http",
-        },
-        "placment": {
-            "url": "http://localhost:4009/mcp", 
-            "transport": "streamable_http",
-        }
-    }
-)
+client = None
+
 
 async def set_tools():
     try: 
         global client
         global Tools
+        client = MultiServerMCPClient(
+            {
+                "transport": {
+                    "url": "http://localhost:4007/mcp",
+                    "transport": "streamable_http",
+                },
+                "exam_cell": {
+                    "url": "http://localhost:4008/mcp",
+                    "transport": "streamable_http",
+                },
+                "placment": {
+                    "url": "http://localhost:4009/mcp", 
+                    "transport": "streamable_http",
+                }
+            }
+        )
         Tools = await client.get_tools()
         return {
             "status" : "success", 
