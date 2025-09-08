@@ -1,13 +1,11 @@
-
-import { Request , Response } from "express"
-import sessionChecker from "../../helpers/sessionChecker"
-import chatChecker from "../../helpers/chatChecker"
-import { connectSlave } from "../../connector/connectSlave"
+import { Request, Response } from "express";
+import { connectSlave } from "../../connector/connectSlave";
+import sessionChecker from "../../helpers/sessionChecker";
+import chatChecker from "../../helpers/chatChecker";
 
 interface requestType {
     userSession : string
     chatSession : string
-    prompt : string
 }
 
 interface last_5_chats_type {
@@ -16,13 +14,13 @@ interface last_5_chats_type {
     ques : string;
     ans : string;
     q_time : Date;
+    workflow_id : number;
     workflow : string;
 }
 
-async function chatRequirements(req : Request & {body : requestType} , res : Response) {
+async function historyPrompts(req : Request & {body : requestType}, res : Response) {
     const userSession = req.body.userSession
     const chatSession = req.body.chatSession
-    const prompt = req.body.prompt
     const connectionSlave = await connectSlave();
     const isValidSession = await sessionChecker(userSession as string)
     if(isValidSession?.status=="error"){
@@ -48,9 +46,10 @@ async function chatRequirements(req : Request & {body : requestType} , res : Res
             c.ques,
             c.ans,
             c.q_time,
+            w.workflow_id
             w.workflow_text
             FROM chat c
-            JOIN workflow w ON c.workflow_id = w.id
+            JOIN workflow w ON c.workflow_id = w.workflow_id
             WHERE c.chatid = ?
             ORDER BY c.q_time DESC
             LIMIT 5;
@@ -58,16 +57,11 @@ async function chatRequirements(req : Request & {body : requestType} , res : Res
 
     const Last_5_Chats : last_5_chats_type[] = last_5_chats as last_5_chats_type[]
 
-    const relevant_prompts = ""
-
-    
-
-    
-
-    // history of the chat 5 q and a 
-    // workflows of them 
-    // relevant priompts + workflows 
-
+    return {
+        status : "success" , 
+        message : "last 5 chats from history is fetched successfully" , 
+        data : Last_5_Chats
+    }
 }
 
-export default chatRequirements
+export default historyPrompts
