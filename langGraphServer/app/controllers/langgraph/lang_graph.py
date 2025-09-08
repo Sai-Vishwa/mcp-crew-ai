@@ -29,6 +29,7 @@ import httpx
 from flask import jsonify
 from cachetools import TTLCache
 from typing import TypedDict , NotRequired , Any , Optional
+from langgraph.graph import StateGraph , END , START
 
 load_dotenv()
 
@@ -233,6 +234,10 @@ class State(TypedDict):
     current_tool_call_info : toolCallInfo
     completed_tool_calls_info : List[toolCallInfo]
     final_response : str
+    
+    
+graph = StateGraph(State)
+graph.add_node()
     
     
 
