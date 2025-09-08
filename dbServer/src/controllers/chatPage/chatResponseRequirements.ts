@@ -62,6 +62,8 @@ async function chatRequirements(req : Request & {body : requestType} , res : Res
 
     
 
+    
+
     // history of the chat 5 q and a 
     // workflows of them 
     // relevant priompts + workflows 
