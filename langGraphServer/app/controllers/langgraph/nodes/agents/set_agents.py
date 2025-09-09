@@ -27,8 +27,20 @@ class MemoryClass (BaseChatMessageHistory , BaseModel):
     
     messages: list[BaseMessage] = Field(default_factory=list)
     
+    chat_session : str = ""
+    
+    user_session : str = ""
+    
+    user_name : str = ""
+    
+    max_messages : int = 10
+    
     def add_messages(self, messages: list[BaseMessage]) -> None:
+        
         self.messages.extend(messages)
+        
+        if(len(self.messages) > self.max_messages):
+            self.messages = self.messages[-self.max_messages:]
 
     def clear(self) -> None:
         self.messages = []
@@ -42,10 +54,11 @@ def get_by_session_id(session_id: str) -> BaseChatMessageHistory:
     if session_id not in store:
         print("AABATHU")
         print(session_id)
-        store[session_id] = [MemoryClass(),"yaara nee","ithu epdi trigger aachu"]
-    return store[session_id[0]]
-
-
+        mmy = MemoryClass()
+        mmy.chat_session = session_id
+        store[session_id] = mmy
+        
+    return store[session_id]
 
 
 
