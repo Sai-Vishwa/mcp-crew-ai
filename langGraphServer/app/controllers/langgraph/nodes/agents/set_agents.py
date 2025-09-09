@@ -13,11 +13,9 @@ from ..tools.set_tools import Tools
 
 
 
-store = {}
-store = TTLCache(maxsize=10000, ttl=600)
-
-dev_prompt_reasoning_agent = ""
-dev_prompt_execution_agent = ""
+store = None
+dev_prompt_reasoning_agent = None
+dev_prompt_execution_agent = None
 llm = None
 reasoning_agent = None
 reasoning_agent_with_memory = None
@@ -52,20 +50,24 @@ def get_by_session_id(session_id: str) -> BaseChatMessageHistory:
 
 
 
-
-
-
-
 def set_agents():
     
     try:
     
+        global store
         global dev_prompt_execution_agent
         global dev_prompt_reasoning_agent
         global llm
         global reasoning_agent
         global reasoning_agent_with_memory
         global execution_agent
+        
+        
+        store = {}
+        store = TTLCache(maxsize=10000, ttl=600)
+        
+        dev_prompt_reasoning_agent = ""
+        dev_prompt_execution_agent = ""
         
         with open("reasoning_agent_developer_prompt.txt" , "r" , encoding="utf-8") as file :
             dev_prompt_reasoning_agent = file.read()
