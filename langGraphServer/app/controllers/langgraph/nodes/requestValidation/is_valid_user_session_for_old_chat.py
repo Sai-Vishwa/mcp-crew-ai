@@ -5,7 +5,7 @@ from ..agents.set_agents import store , MemoryClass
 from langchain.schema import HumanMessage, AIMessage
 
 
-async def is_valid_user_session(state : State) : 
+async def is_valid_user_session_for_old_chat(state : State) : 
     try :
         
         user_session = state.user_session
