@@ -47,7 +47,7 @@ class MemoryClass (BaseChatMessageHistory , BaseModel):
     
 
 
-def get_by_session_id(session_id: str) -> BaseChatMessageHistory:
+async def get_by_session_id(session_id: str) -> BaseChatMessageHistory:
     
     global store
     
@@ -63,7 +63,7 @@ def get_by_session_id(session_id: str) -> BaseChatMessageHistory:
 
 
 
-def set_agents():
+async def set_agents():
     
     try:
     

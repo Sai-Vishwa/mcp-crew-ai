@@ -270,7 +270,7 @@ async def langGraphInvoke(body):
                     })
                     return 
                 actual_chat_session = resp["chat_session"]
-                store[actual_chat_session] = [MemoryClass(),user_session,resp["user_id"]]
+                store[actual_chat_session] = [  (),user_session,resp["user_id"]]
             yield json.dumps({
                 "thinking": "yes",
                 "message": "Sending your request to the reasoning agent",

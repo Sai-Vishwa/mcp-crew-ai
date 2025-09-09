@@ -1,6 +1,6 @@
 from set_tools import Tools , set_tools
 
-def are_tools_set():
+async def are_tools_set():
     try:
         if(Tools is not None):
             return {
