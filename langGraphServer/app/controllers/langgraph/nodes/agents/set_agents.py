@@ -1,4 +1,6 @@
 
+import json
+from typing import Optional
 from langchain_google_genai import ChatGoogleGenerativeAI
 import os
 from langchain.agents import initialize_agent , AgentType
@@ -9,9 +11,12 @@ from pydantic import BaseModel, Field
 from langchain_core.messages import BaseMessage
 from cachetools import TTLCache
 from ..tools.set_tools import Tools
+from ...lang_graph import Workflow , toolCallInfo , State
+from langchain_community.chat_message_histories import RedisChatMessageHistory
+from langchain_core.messages import BaseMessage, message_to_dict, messages_from_dict
+import logging
 
-
-
+logger = logging.getLogger(__name__)
 
 store = None
 dev_prompt_reasoning_agent = None
@@ -45,11 +50,48 @@ class MemoryClass (BaseChatMessageHistory , BaseModel):
     def clear(self) -> None:
         self.messages = []
     
+    
+    
+class CustomRedisClass(RedisChatMessageHistory) :
+    
+        def __init__(
+        self,
+        user_session: str,
+        chat_session: str,
+        url: str = "redis://localhost:6379/0",
+        key_prefix: str = "message_store:",
+        ttl: Optional[int] = None,
+        max_messages: int = 10,   # 5 Human + 5 AI messages (total 10 entries)
+        ):
+
+            super().__init__(session_id=chat_session, url=url, key_prefix=key_prefix, ttl=ttl)
+            
+            self.user_session = user_session
+            self.chat_session = chat_session
+            self.max_messages = max_messages
+            
+        def add_message(self, message: BaseMessage) -> None:
+            try:
+                self.redis_client.lpush(self.key, json.dumps(message_to_dict(message)))
+
+                self.redis_client.ltrim(self.key, 0, self.max_messages - 1)
+
+                if self.ttl:
+                    self.redis_client.expire(self.key, self.ttl)
+
+            except Exception as e:
+                logger.error(f"Failed to add message to Redis: {e}")
+        
 
 
-async def get_by_session_id(session_id: str) -> BaseChatMessageHistory:
+async def get_by_session_id(session_id: str) -> RedisChatMessageHistory:
     
     global store
+    
+    redis_mmy = RedisChatMessageHistory(
+        session_id=session_id , 
+        url= ""
+    )
     
     if session_id not in store:
         print("AABATHU")
@@ -63,7 +105,7 @@ async def get_by_session_id(session_id: str) -> BaseChatMessageHistory:
 
 
 
-async def set_agents():
+async def set_agents(state : State):
     
     try:
     

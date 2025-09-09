@@ -165,7 +165,8 @@ class State(BaseModel):
     final_response : str
     is_memory_loaded : bool
     is_relevant_inputs_loaded : bool
-    
+    status : str
+    message : str
     
 graph = StateGraph(State)
 graph.add_node()

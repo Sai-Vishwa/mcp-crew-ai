@@ -1,21 +1,11 @@
-from set_tools import Tools , set_tools
+from set_tools import Tools , set_tools , client
+from ...lang_graph import Workflow , toolCallInfo , State
 
-async def are_tools_set():
+async def are_tools_set(state : State) -> str:
     try:
-        if(Tools is not None):
-            return {
-                "status" : "success",
-                "message" : "Tools are set",
-                "response" : "yes"
-            }
-        elif(Tools is None):
-            return {
-                "status" : "success",
-                "message" : "Tools are not set",
-                "response" : "no"
-            }
+        if(Tools is not None and client is not None):
+            return "yes"
+        elif(Tools is None or client is None):
+            return "no"
     except Exception as e:
-        return  {
-            "status" : "error",
-            "message" : "Some internal error in accessing Tools variable"
-        }
+        return  "error"

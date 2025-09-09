@@ -2,7 +2,8 @@ from flask import jsonify
 import httpx
 from ...lang_graph import Workflow , toolCallInfo , State
 from ..agents.set_agents import store , MemoryClass
-from langchain.schema import HumanMessage, AIMessage\
+from langchain.schema import HumanMessage, AIMessage
+from langchain_community.chat_message_histories import RedisChatMessageHistory
 
 
 async def is_valid_user_session_for_new_chat(state : State) :

@@ -1,12 +1,13 @@
 
 from langchain_mcp_adapters.client import MultiServerMCPClient
+from ...lang_graph import Workflow , toolCallInfo , State
 
-Tools = []
+Tools = None
 
 client = None
 
 
-async def set_tools():
+async def set_tools(state : State):
     try: 
         global client
         global Tools
