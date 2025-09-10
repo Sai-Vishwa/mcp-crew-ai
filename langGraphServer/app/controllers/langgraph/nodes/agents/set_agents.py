@@ -1,24 +1,19 @@
 
 import json
-from typing import Optional
 from langchain_google_genai import ChatGoogleGenerativeAI
 import os
 from langchain.agents import initialize_agent , AgentType
 from langchain.prompts import MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain_core.chat_history import BaseChatMessageHistory
-from pydantic import BaseModel, Field
 from langchain_core.messages import BaseMessage
-from cachetools import TTLCache
 from ..tools.set_tools import Tools
-from ...lang_graph import Workflow , toolCallInfo , State
+from ...lang_graph import State
 from langchain_community.chat_message_histories import RedisChatMessageHistory
-from langchain_core.messages import BaseMessage, message_to_dict, messages_from_dict
+from langchain_core.messages import BaseMessage, message_to_dict
 import logging
 
 logger = logging.getLogger(__name__)
 
-store = None
 dev_prompt_reasoning_agent = None
 dev_prompt_execution_agent = None
 llm = None
@@ -26,45 +21,22 @@ reasoning_agent = None
 reasoning_agent_with_memory = None
 execution_agent = None 
 
-
-
-class MemoryClass (BaseChatMessageHistory , BaseModel):
-    
-    messages: list[BaseMessage] = Field(default_factory=list)
-    
-    chat_session : str = ""
-    
-    user_session : str = ""
-    
-    user_name : str = ""
-    
-    max_messages : int = 10
-    
-    def add_messages(self, messages: list[BaseMessage]) -> None:
-        
-        self.messages.extend(messages)
-        
-        if(len(self.messages) > self.max_messages):
-            self.messages = self.messages[-self.max_messages:]
-
-    def clear(self) -> None:
-        self.messages = []
-    
     
     
 class CustomRedisClass(RedisChatMessageHistory) :
     
         def __init__(
         self,
+        session_id: str,
         user_session: str,
         chat_session: str,
         url: str = "redis://localhost:6379/0",
         key_prefix: str = "message_store:",
-        ttl: Optional[int] = None,
-        max_messages: int = 10,   # 5 Human + 5 AI messages (total 10 entries)
+        ttl: int = 900,
+        max_messages: int = 10, 
         ):
 
-            super().__init__(session_id=chat_session, url=url, key_prefix=key_prefix, ttl=ttl)
+            super().__init__(session_id=session_id, url=url, key_prefix=key_prefix, ttl=ttl)
             
             self.user_session = user_session
             self.chat_session = chat_session
@@ -84,23 +56,41 @@ class CustomRedisClass(RedisChatMessageHistory) :
         
 
 
+
+async def is_redis_memory_not_created(chat_session : str):
+    
+    mmy = CustomRedisClass(
+        chat_session=chat_session,
+        session_id = chat_session
+    )
+    value = await mmy.redis_client.get(chat_session+"MeowDass")
+    
+    
+    if(value is None):
+        return True
+    return False
+    
+
 async def get_by_session_id(session_id: str) -> RedisChatMessageHistory:
     
-    global store
     
-    redis_mmy = RedisChatMessageHistory(
-        session_id=session_id , 
-        url= ""
+    redis_mmy = CustomRedisClass(
+        chat_session= session_id,
+        session_id = session_id,
+        url= "redis://localhost:6379/0",
+        ttl=900
     )
     
-    if session_id not in store:
+    value = await redis_mmy.redis_client.get(session_id+"MeowDass")
+
+    
+    if(value is None):
         print("AABATHU")
         print(session_id)
-        mmy = MemoryClass()
-        mmy.chat_session = session_id
-        store[session_id] = mmy
+        ##do some logs here 
         
-    return store[session_id]
+        
+    return redis_mmy
 
 
 
@@ -109,7 +99,6 @@ async def set_agents(state : State):
     
     try:
     
-        global store
         global dev_prompt_execution_agent
         global dev_prompt_reasoning_agent
         global llm
@@ -117,9 +106,6 @@ async def set_agents(state : State):
         global reasoning_agent_with_memory
         global execution_agent
         
-        
-        store = {}
-        store = TTLCache(maxsize=10000, ttl=600)
         
         dev_prompt_reasoning_agent = ""
         dev_prompt_execution_agent = ""

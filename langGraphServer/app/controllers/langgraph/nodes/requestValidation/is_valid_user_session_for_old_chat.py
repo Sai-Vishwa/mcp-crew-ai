@@ -1,7 +1,7 @@
 from flask import jsonify
 import httpx
-from ...lang_graph import Workflow , toolCallInfo , State
-from ..agents.set_agents import store , MemoryClass
+from ...lang_graph import State
+from ..agents.set_agents import CustomRedisClass , is_redis_memory_not_created
 from langchain.schema import HumanMessage, AIMessage
 
 
@@ -11,21 +11,22 @@ async def is_valid_user_session_for_old_chat(state : State) :
         user_session = state.user_session
         chat_session = state.chat_session
         
-        mmy : MemoryClass | None = store.get(chat_session)
-        
-        if(type(mmy)==MemoryClass and mmy.chat_session == chat_session and mmy.user_session == user_session):
+        mmy = CustomRedisClass(
+            user_session=user_session, 
+            chat_session=chat_session,
+            session_id=chat_session
+        )
+        value = mmy.redis_client.get(chat_session+"MeowDass")
+        if( mmy.user_session == value ):
             
             state.is_memory_loaded = True
             
             return {
                 "status" : "success" , 
                 "message" : "The user session is valid and the chat belongs to the user and the memory is loaded",
-                "answer" : "yes" , 
-                "state" : state , 
-                "store" : store
             }
         
-        elif(mmy is None) :
+        elif(value is None) :
              
             async with httpx.AsyncClient() as client:
                 
@@ -36,32 +37,21 @@ async def is_valid_user_session_for_old_chat(state : State) :
                     return {
                         "status" : "error" , 
                         "message" : "Cannot validate the user session and load the memory" , 
-                        "answer" : "no",
-                        "state" : state , 
-                        "store" : store
                     }
                 
-                new_mmy = MemoryClass()
-                
-                new_mmy.user_session = user_session
-                new_mmy.chat_session = chat_session
-                new_mmy.user_name = resp["user_name"]
+                mmy.redis_client.setex(chat_session+"MeowDass" , 900 , user_session)
                 
                 data = resp["data"]
                 
                 for row in data : 
-                    new_mmy.add_messages([HumanMessage(content=row["ques"])])
-                    new_mmy.add_messages([AIMessage(content=row["workflow"])])
+                    mmy.add_messages([HumanMessage(content=row["ques"])])
+                    mmy.add_messages([AIMessage(content=row["workflow"])])
                     
-                store[chat_session] = new_mmy
                 state.is_memory_loaded = True
                 
                 return {
                     "status" : "success" , 
                     "message" : "The user session is valid and the chat belongs to the user and the memory is loaded",
-                    "answer" : "yes" , 
-                    "state" : state , 
-                    "store" : store
                 }
         
         else : 
@@ -74,16 +64,10 @@ async def is_valid_user_session_for_old_chat(state : State) :
                 if resp["status"] == "error":
                     return {
                         "status" : "error" , 
-                        "message" : "Cannot validate the user session" , 
-                        "answer" : "no",
-                        "state" : state , 
-                        "store" : store
+                        "message" : "Cannot validate the user session" ,
                     }
                 
-
-                if(type(mmy)==MemoryClass):
-                    mmy.user_session = user_session
-                    mmy.user_name = resp["user_name"]
+                mmy.redis_client.setex(chat_session+"MeowDass" , 900 , user_session)
              
                     
                 state.is_memory_loaded = True
@@ -91,9 +75,6 @@ async def is_valid_user_session_for_old_chat(state : State) :
                 return {
                     "status" : "success" , 
                     "message" : "The user session is valid and the chat belongs to the user and the memory is loaded",
-                    "answer" : "yes" , 
-                    "state" : state , 
-                    "store" : store
                 }
     
     except Exception as e :
@@ -101,6 +82,5 @@ async def is_valid_user_session_for_old_chat(state : State) :
       return {
           "status" : "error" , 
           "message" : "Some internal error happened while validating user request" , 
-          "answer" : "no"
       }
     

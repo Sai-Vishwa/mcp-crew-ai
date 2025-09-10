@@ -1,7 +1,6 @@
 from flask import jsonify
-import httpx
-from ...lang_graph import Workflow , toolCallInfo , State
-from ..agents.set_agents import store
+from ...lang_graph import State
+from ..agents.set_agents import is_redis_memory_not_created
 
 async def is_new_chat(state : State) -> str:
     
@@ -10,7 +9,7 @@ async def is_new_chat(state : State) -> str:
         if(state.status != "success") :
             return "error"
         
-        if(state.is_new_chat == True and store.get(state.chat_session) is None) :
+        if(state.is_new_chat == True and is_redis_memory_not_created(state.chat_session)) :
             return "yes"
         else :
              return "no"
