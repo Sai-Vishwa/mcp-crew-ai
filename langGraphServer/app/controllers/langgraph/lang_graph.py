@@ -24,7 +24,7 @@ from langchain_core.chat_history import BaseChatMessageHistory
 from pydantic import BaseModel, Field
 from langchain_core.messages import BaseMessage, AIMessage
 from langchain.prompts import SystemMessagePromptTemplate
-from typing import List
+from typing import List , Dict
 import httpx
 from flask import jsonify
 from cachetools import TTLCache
@@ -167,6 +167,7 @@ class State(BaseModel):
     is_relevant_inputs_loaded : bool
     status : str
     message : str
+    relevant_workflows : Dict[str , List[Workflow]]
     
 graph = StateGraph(State)
 graph.add_node()

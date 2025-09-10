@@ -1,24 +1,17 @@
-from ...lang_graph import Workflow , toolCallInfo , State
-from ..agents.set_agents import CustomRedisClass , is_redis_memory_empty
+from ...lang_graph import State
+from ..agents.set_agents import is_redis_memory_not_created
 
-async def is_memory_loaded(state : State) : 
+async def is_memory_loaded(state : State) -> str : 
     try : 
-        if(state.is_memory_loaded == True and not(is_redis_memory_empty(state.chat_session))):
-            return {
-                "status" : "success", 
-                "message" : "The memory is successfully loaded",
-                "answer" : "yes"
-            }
+        
+        if(state.status != "success"):
+            return "error"
+        
+        if(state.is_memory_loaded == True and not(is_redis_memory_not_created(state.chat_session))):
+            return "yes"
                     
         else :
-            return {
-                "status" : "success", 
-                "message" : "The memory is not loaded",
-                "answer" : "no"
-            }
+            return "no"
+        
     except Exception as e:
-        return {
-                "status" : "error", 
-                "message" : "Encountered error while verifying memory status",
-                "answer" : "no"
-            }
+        return "error"

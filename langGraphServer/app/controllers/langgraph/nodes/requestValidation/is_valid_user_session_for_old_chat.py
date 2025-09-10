@@ -19,11 +19,11 @@ async def is_valid_user_session_for_old_chat(state : State) :
         value = mmy.redis_client.get(chat_session+"MeowDass")
         if( mmy.user_session == value ):
             
-            state.is_memory_loaded = True
             
             return {
                 "status" : "success" , 
                 "message" : "The user session is valid and the chat belongs to the user and the memory is loaded",
+                "is_memory_loaded" : True
             }
         
         elif(value is None) :
@@ -47,11 +47,11 @@ async def is_valid_user_session_for_old_chat(state : State) :
                     mmy.add_messages([HumanMessage(content=row["ques"])])
                     mmy.add_messages([AIMessage(content=row["workflow"])])
                     
-                state.is_memory_loaded = True
                 
                 return {
                     "status" : "success" , 
                     "message" : "The user session is valid and the chat belongs to the user and the memory is loaded",
+                    "is_memory_loaded" : True
                 }
         
         else : 
@@ -70,11 +70,11 @@ async def is_valid_user_session_for_old_chat(state : State) :
                 mmy.redis_client.setex(chat_session+"MeowDass" , 900 , user_session)
              
                     
-                state.is_memory_loaded = True
                 
                 return {
                     "status" : "success" , 
                     "message" : "The user session is valid and the chat belongs to the user and the memory is loaded",
+                    "is_memory_loaded" : True
                 }
     
     except Exception as e :

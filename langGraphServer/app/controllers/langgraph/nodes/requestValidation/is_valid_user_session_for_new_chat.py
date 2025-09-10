@@ -29,11 +29,11 @@ async def is_valid_user_session_for_new_chat(state : State) :
                 new_mmy.redis_client.setex(resp["chat_session"]+"MeowDass" , 900 , user_session)
                 
                     
-                state.is_memory_loaded = True
                 
                 return {
                     "status" : "success" , 
-                    "message" : "The user session is valid and a new chat memory is created for the user"
+                    "message" : "The user session is valid and a new chat memory is created for the user",
+                    "is_memory_loaded" : True
                 }
     except Exception as e :
         return {
