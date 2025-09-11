@@ -18,7 +18,14 @@ class Workflow(BaseModel):
     tool_name : str
     tool_description : str
 
-
+class ReasoningAgentResponse(BaseModel):
+    is_new_workflow : bool
+    workflow_id : int | None
+    workflow_name : str
+    workflow_description : str
+    workflow_steps : List[Workflow]
+    confidence_score : float
+    reasoning : str
 
 class State(BaseModel):
     user_input_id : int
@@ -27,9 +34,6 @@ class State(BaseModel):
     chat_session : str
     user_name : str
     is_new_chat : bool
-    workflow_name : str
-    workflow_description : str
-    steps : List[Workflow]
     current_step : Workflow
     completed_tools : List[Workflow]
     current_tool_call_info : toolCallInfo
@@ -39,5 +43,6 @@ class State(BaseModel):
     is_relevant_inputs_loaded : bool
     status : str
     message : str
-    relevant_workflows : Dict[str , List[Workflow]]
-    reasoning_agent_response : str
+    relevant_workflows : Dict[str , ReasoningAgentResponse]
+    reasoning_agent_response : str | Dict[str , ReasoningAgentResponse]
+    is_valid_response : int
