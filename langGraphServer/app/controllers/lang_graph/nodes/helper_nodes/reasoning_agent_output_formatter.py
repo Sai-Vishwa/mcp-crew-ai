@@ -1,20 +1,42 @@
-from ...state import State
-import ast
+from ...state import State,ReasoningAgentResponse
+import json
+from ..tools.set_tools import Tools
 
-async def reasoning_agent_output_formatter(state : State) -> str:
+async def reasoning_agent_output_formatter(state : State):
     try : 
-        response = ast.literal_eval(state.reasoning_agent_response)
-        if(state.status != "success"):
-            return "error"
-        is_valid = True
         
         
-        if(len(response) != 1 or isinstance(response , dict) == False):
-            is_valid = False
+        response = json.loads(state.reasoning_agent_response)
         
-        workflow = response.get(state.user_input)
+        response_object = ReasoningAgentResponse(**response)
         
-        if(workflow == None or isinstance(workflow , dict) == False or len(workflow))
+        if(response_object.is_new_workflow == True):
+            
+            for tool in response_object.workflow_steps:
+                if(tool.tool_name not in [t.name for t in Tools]):
+                    return {
+                        "status": "error" ,
+                        "message": f"Tool {tool.tool_name} not found in approved tools",
+                    }
+                    
+        else :
+            
+            if(response_object.workflow_id is None or response_object.workflow_id not in state.relevant_workflows.values()):
+                return {
+                    "status": "error" ,
+                    "message": "workflow_id is required when is_new_workflow is false",
+                }
+            
+        
+        return {
+            "status" : "success" , 
+            "message" : "Successfully formatted the reasoning agent output",
+            "reasoning_agent_response" : response_object
+        }
+        
         
     except Exception as e:
-        return "error"
+        return {
+            "status ": "error" ,
+            "message ": "Invalid output from reasoning agent ",
+        }

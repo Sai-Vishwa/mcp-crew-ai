@@ -2,7 +2,7 @@
 
 
 from typing import Any, Dict, List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel , Field
 
 
 class toolCallInfo(BaseModel):
@@ -44,5 +44,5 @@ class State(BaseModel):
     status : str
     message : str
     relevant_workflows : Dict[str , ReasoningAgentResponse]
-    reasoning_agent_response : str | Dict[str , ReasoningAgentResponse]
+    reasoning_agent_response : str | ReasoningAgentResponse
     is_valid_response : int
