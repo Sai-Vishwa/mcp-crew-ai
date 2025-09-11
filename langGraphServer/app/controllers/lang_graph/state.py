@@ -46,3 +46,4 @@ class State(BaseModel):
     relevant_workflows : Dict[str , ReasoningAgentResponse]
     reasoning_agent_response : str | ReasoningAgentResponse
     is_valid_response : int
+    additional_message_for_reasoning_agent : str

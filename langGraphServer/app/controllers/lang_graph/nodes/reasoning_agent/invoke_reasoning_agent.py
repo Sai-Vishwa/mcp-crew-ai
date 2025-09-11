@@ -11,7 +11,7 @@ async def invoke_reasoning_agent(state : State):
         tools_str = "\n".join([f"{tool.name}: {tool.description}" for tool in Tools])
         relevant_workflows_str = json.dumps(state.relevant_workflows)
         
-        final_prompt = user_prompt + '''
+        final_prompt = state.additional_message_for_reasoning_agent + user_prompt + '''
         TOOLS AVALABLE -
         ''' + tools_str + '''
         APPROVED WORKFLOWS FOR REFERENCE

@@ -1,4 +1,4 @@
-from langGraphServer.app.controllers.lang_graph.state import State
+from ...state import State
 
 
 async def is_invoke_success(state : State):

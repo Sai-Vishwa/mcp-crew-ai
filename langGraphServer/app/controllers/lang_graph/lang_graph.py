@@ -53,6 +53,9 @@ from lang_graph.nodes.loading_relevant_workflows.is_loading_workflow_successful 
 from lang_graph.nodes.loading_relevant_workflows.is_relevant_workflow_loaded import is_relevant_workflow_loaded
 from lang_graph.nodes.loading_relevant_workflows.load_relevant_workflows import load_relevant_workflows
 from lang_graph.nodes.reasoning_agent.invoke_reasoning_agent import invoke_reasoning_agent
+from lang_graph.nodes.reasoning_agent.is_invoke_success import is_invoke_success
+from lang_graph.nodes.reasoning_agent.is_reinvoke_required import is_reinvoke_required
+from lang_graph.nodes.reasoning_agent.reasoning_agent_output_formatter import reasoning_agent_output_formatter
 from lang_graph.state import State
 
 
@@ -129,7 +132,10 @@ nodes = {
     is_relevant_workflow_loaded : "is_relevant_workflow_loaded",
     load_relevant_workflows :"load_relevant_workflows",
     is_loading_workflow_successful : "is_loading_workflow_successful",
-    invoke_reasoning_agent : "invoke_reasoning_agent"
+    invoke_reasoning_agent : "invoke_reasoning_agent",
+    is_invoke_success : "is_invoke_success",
+    is_reinvoke_required : "is_reinvoke_required",
+    reasoning_agent_output_formatter : "reasoning_agent_output_formatter"
 }
 
 for key,value in nodes.items():
@@ -138,57 +144,123 @@ for key,value in nodes.items():
 
 
 # Add edges
-graph.add_edge(START, "are_tools_set")
-graph.add_edge("are_tools_set",END)
+graph.add_edge(
+    START, "are_tools_set"
+)
+
+graph.add_edge(
+    "are_tools_set",END
+)
 
 graph.add_conditional_edges(
     "are_tools_set",
     are_tools_set,
-    {"error": END, "no": "set_tools", "yes": "are_agents_set"}
+    {
+        "error": END,
+        "no": "set_tools",
+        "yes": "are_agents_set"
+    }
 )
 
-graph.add_edge("set_tools", "are_agents_set")
+graph.add_edge(
+    "set_tools", "are_agents_set"
+)
 
 graph.add_conditional_edges(
     "are_agents_set",
     are_agents_set,
-    {"error": END, "no": "set_agents", "yes": "is_new_chat"}
+    {
+        "error": END,
+        "no": "set_agents", 
+        "yes": "is_new_chat"
+    }
 )
 
-graph.add_edge("set_agents", "is_new_chat")
+graph.add_edge(
+    "set_agents", "is_new_chat"
+)
 
 graph.add_conditional_edges(
     "is_new_chat",
     is_new_chat,
-    {"error": END, "yes": "is_valid_user_session_for_new_chat", "no": "is_valid_user_session_for_old_chat"}
+    {
+        "error": END, 
+        "yes": "is_valid_user_session_for_new_chat",
+        "no": "is_valid_user_session_for_old_chat"
+    }
 )
 
-graph.add_edge("is_valid_user_session_for_new_chat", "is_memory_loaded")
-graph.add_edge("is_valid_user_session_for_old_chat", "is_memory_loaded")
+graph.add_edge(
+    "is_valid_user_session_for_new_chat", "is_memory_loaded"
+)
+
+graph.add_edge(
+    "is_valid_user_session_for_old_chat", "is_memory_loaded"
+)
 
 graph.add_conditional_edges(
     "is_memory_loaded",
     is_memory_loaded,
-    {"error": END, "yes": "is_relevant_workflow_loaded", "no": "load_memory"}
+    {
+        "error": END, 
+        "yes": "is_relevant_workflow_loaded", 
+        "no": "load_memory"
+    }
 )
 
-graph.add_edge("load_memory", "is_relevant_workflow_loaded")
+graph.add_edge(
+    "load_memory", "is_relevant_workflow_loaded"
+)
 
 graph.add_conditional_edges(
     "is_relevant_workflow_loaded",
     is_relevant_workflow_loaded,
-    {"error": END, "yes": "invoke_reasoning_agent", "no": "load_relevant_workflows"}
+    {
+        "error": END, 
+        "yes": "invoke_reasoning_agent",
+        "no": "load_relevant_workflows"
+    }
 )
 
-graph.add_edge("load_relevant_workflows", "is_loading_workflow_successful")
+graph.add_edge(
+    "load_relevant_workflows", "is_loading_workflow_successful"
+)
 
 graph.add_conditional_edges(
     "is_loading_workflow_successful",
     is_loading_workflow_successful,
-    {"error": END, "yes": "invoke_reasoning_agent", "no": END}
+    {
+        "error": END, 
+        "yes": "invoke_reasoning_agent", 
+        "no": END
+    }
 )
 
-graph.add_edge("invoke_reasoning_agent" , END)
+graph.add_edge(
+    "invoke_reasoning_agent" , "is_invoke_success"
+)
+
+graph.add_conditional_edges(
+    "is_invoke_success" , 
+    is_invoke_success,
+    {
+        "error" : END,
+        "yes" : "reasoning_agent_output_formatter"
+    }
+)
+
+graph.add_edge(
+    "reasoning_agent_output_formatter" , "is_reinvoke_required"
+)
+
+graph.add_conditional_edges(
+    "is_reinvoke_required" , 
+    is_reinvoke_required,
+    {
+        "no" : END,
+        "error" : "invoke_reasoning_agent"
+    }
+)
 
 compiled_graph = graph.compile()
 
