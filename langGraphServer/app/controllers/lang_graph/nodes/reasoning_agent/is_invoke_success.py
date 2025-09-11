@@ -8,3 +8,6 @@ async def is_invoke_success(state : State):
         return "yes"
     except Exception as e:
         return "error"
+    
+def is_invoke_success_wrapper(state: State) :  
+    return state

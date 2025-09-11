@@ -5,7 +5,7 @@ from langchain.agents import initialize_agent , AgentType
 from langchain.prompts import MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.messages import BaseMessage
-from ..tools.set_tools import Tools
+from ..tools.set_tools import expose_tools
 from ...state import State
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_core.messages import BaseMessage, message_to_dict
@@ -105,14 +105,15 @@ async def set_agents(state : State):
         global reasoning_agent_with_memory
         global execution_agent
         
+        Tools = expose_tools()
         
         dev_prompt_reasoning_agent = ""
         dev_prompt_execution_agent = ""
         
-        with open("reasoning_agent_developer_prompt.txt" , "r" , encoding="utf-8") as file :
+        with open("lang_graph/nodes/agents/reasoning_agent_developer_prompt.txt" , "r" , encoding="utf-8") as file :
             dev_prompt_reasoning_agent = file.read()
 
-        with open("execution_agent_developer_prompt.txt" , "r" , encoding="utf-8") as file :
+        with open("lang_graph/nodes/agents/execution_agent_developer_prompt.txt" , "r" , encoding="utf-8") as file :
             dev_prompt_execution_agent = file.read()
 
         llm = ChatGoogleGenerativeAI(
@@ -126,7 +127,7 @@ async def set_agents(state : State):
             llm= llm,
             agent= AgentType.OPENAI_MULTI_FUNCTIONS,
             verbose= True,
-            tools=[],
+            tools=Tools,
             agent_kwargs={
             "extra_prompt_messages": [
                     dev_prompt_reasoning_agent ,
@@ -160,6 +161,8 @@ async def set_agents(state : State):
         }
         
     except Exception as e:
+        print("INGA PAARU =====")
+        print(Tools)
         return {
             "status" : "error",
             "message" : "There is error in setting up agents"

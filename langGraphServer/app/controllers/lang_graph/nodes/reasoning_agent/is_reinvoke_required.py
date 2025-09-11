@@ -7,3 +7,6 @@ async def is_reinvoke_required(state : State):
         return "no"
     except Exception as e:
         return "error"
+    
+def is_reinvoke_required_wrapper(state: State) :
+    return state

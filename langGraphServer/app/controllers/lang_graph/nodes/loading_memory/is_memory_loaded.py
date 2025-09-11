@@ -15,3 +15,6 @@ async def is_memory_loaded(state : State) -> str :
         
     except Exception as e:
         return "error"
+    
+def is_memory_loaded_wrapper(state: State) :
+    return state

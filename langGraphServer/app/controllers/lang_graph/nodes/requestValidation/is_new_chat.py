@@ -16,3 +16,6 @@ async def is_new_chat(state : State) -> str:
 
     except Exception as e : 
         return "error"
+    
+def is_new_chat_wrapper(state: State) :
+    return state

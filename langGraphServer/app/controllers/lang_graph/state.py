@@ -34,16 +34,16 @@ class State(BaseModel):
     chat_session : str
     user_name : str
     is_new_chat : bool
-    current_step : Workflow
+    current_step : Workflow | None
     completed_tools : List[Workflow]
-    current_tool_call_info : toolCallInfo
+    current_tool_call_info : toolCallInfo | None
     completed_tool_calls_info : List[toolCallInfo]
     final_response : str
     is_memory_loaded : bool
     is_relevant_inputs_loaded : bool
     status : str
     message : str
-    relevant_workflows : Dict[str , ReasoningAgentResponse]
+    relevant_workflows : Dict[str , ReasoningAgentResponse] | None
     reasoning_agent_response : str | ReasoningAgentResponse
     is_valid_response : int
     additional_message_for_reasoning_agent : str

@@ -11,3 +11,6 @@ async def is_loading_workflow_successful(state : State) -> str :
     
     except Exception as e : 
         return "error"
+    
+def is_loading_workflow_successful_wrapper(state: State) :
+    return state

@@ -14,3 +14,6 @@ async def is_relevant_workflow_loaded(state : State) -> str :
             
     except Exception as e:
         return  "error"
+    
+def is_relevant_workflow_loaded_wrapper(state: State) :
+    return state

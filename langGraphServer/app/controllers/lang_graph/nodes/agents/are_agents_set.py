@@ -15,3 +15,6 @@ async def are_agents_set(state : State) -> str:
             
     except Exception as e:
         return  "error"
+    
+def are_agents_set_wrapper(state: State) :
+    return state

@@ -37,3 +37,6 @@ async def set_tools(state : State):
             "status" : "error",
             "message" : "Cannot load tools"
         }
+        
+def expose_tools():
+    return Tools
