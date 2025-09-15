@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import sessionChecker from "../../helpers/sessionChecker.js";
 import chatChecker from "../../helpers/chatChecker.js";
-import insertQdrant from "../../helpers/insertQdrant";
+import insertQdrant from "../../helpers/insertQdrant.js";
 import readQdrant from "../../helpers/readQdrant.js";
+import { connectSlave } from "../../connector/connectSlave.js";
 
 interface requestType{
     user_session : string;
@@ -17,8 +18,19 @@ interface top_matching_prompts {
     score : number;
     payload : {
         prompt : string , 
-        workflow_id : number
+        workflow_id : number , 
     }
+}
+
+interface workflow_type {
+    workflow_id : number;
+    workflow : string;
+}
+
+interface responseType {
+    prompt : string;
+    workflow_id : number;
+    workflow : string;
 }
 
 async function load_relevant_workflow(req : Request & {body : requestType} , res : Response) {
@@ -59,6 +71,49 @@ async function load_relevant_workflow(req : Request & {body : requestType} , res
             const top_matching_prompts = await readQdrant(ques)
 
             if(top_matching_prompts.status == "error"){
+                res.status(200).json({
+                    status: "error",
+                    message: "An error occurred during fetching relevant workflows"
+                });
+                return;
+            }
+
+            let workflow_id_arr : number[] = []
+
+            top_matching_prompts.data.forEach( (item) => {
+                workflow_id_arr.push(item.payload.workflow_id as number)
+            })
+
+            const connectionSlave = await connectSlave();
+
+            const [workflows] = await connectionSlave.query(
+                `SELECT * FROM workflow WHERE workflow_id IN (?)`, [workflow_id_arr]
+            )
+
+            const Workflows : workflow_type[] = workflows as workflow_type[]
+
+
+            let response_data : responseType[] = []
+
+            top_matching_prompts.data.forEach( (item , index) => {
+                let workflow_text = ""
+                Workflows.forEach( (workflow) => {
+                    if(workflow.workflow_id == item.payload.workflow_id){
+                        workflow_text = workflow.workflow
+                    }
+                })
+                response_data.push({
+                    prompt : item.payload.prompt as string,
+                    workflow_id : item.payload.workflow_id as number,
+                    workflow : workflow_text
+                })
+
+            })
+            return {
+                status : "success",
+                message : "Relevant workflows fetched successfully",
+                data : response_data
+            }
 
 
     }

@@ -16,6 +16,8 @@ async function seedDB() {
     await connection.query(`DROP TABLE IF EXISTS session`);
     await connection.query(`DROP TABLE IF EXISTS auth`);
     await connection.query(`DROP TABLE IF EXISTS workflow`);
+    await connection.query(`DROP TABLE IF EXISTS workflowsteps`);
+
 
     // Auth table with placement, exam-cell, transport roles
     await connection.query(`
@@ -29,11 +31,25 @@ async function seedDB() {
   `);
 
   await connection.query(`
-  CREATE TABLE workflow(
+  CREATE TABLE workflow (
     workflow_id INT AUTO_INCREMENT PRIMARY KEY,
-    workflow TEXT 
-  )
+    workflow_name VARCHAR(255) NOT NULL,
+    workflow_description TEXT,
+    confidence_score FLOAT,
+    reasoning TEXT
+);
   `)
+
+  await connection.query(`
+  CREATE TABLE workflow_steps (
+    step_id INT AUTO_INCREMENT PRIMARY KEY,
+    workflow_id INT NOT NULL,
+    step_number INT NOT NULL,
+    tool_name VARCHAR(255) NOT NULL,
+    tool_description TEXT,
+    FOREIGN KEY (workflow_id) REFERENCES workflow(workflow_id) ON DELETE CASCADE
+);
+    `)
 
 
    await connection.query(`

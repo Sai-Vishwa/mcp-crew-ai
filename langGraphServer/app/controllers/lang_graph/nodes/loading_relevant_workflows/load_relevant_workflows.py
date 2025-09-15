@@ -36,6 +36,9 @@ async def load_relevant_workflows(state : State) :
         
     except Exception as e :
         
+        print("controlling the ketta vaarthai")
+        print(e)
+        
         return {
             "status" : "error" , 
             "message" : "some internal error occured while fetching relevant workflows"
