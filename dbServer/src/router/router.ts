@@ -7,6 +7,7 @@ import { RequestHandler } from 'express';
 import login from '../controllers/login/login.js';
 import chatPage from '../controllers/chatPage/chatPage.js';
 import createPlacement from '../controllers/placement/createPlacement.js';
+import verify_user_session_and_create_new_chat from '../controllers/lang_graph/verify_user_session_and_create_new_chat.js';
 
 const router = Router();
 
@@ -37,6 +38,9 @@ const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => P
     await createPlacement(req,res);
   }));
 
+  router.post('/verify_user_session_and_create_new_chat', asyncHandler(async (req : Request, res : Response) => {
+    await verify_user_session_and_create_new_chat(req , res);
+  }));
 
 
 export default router;

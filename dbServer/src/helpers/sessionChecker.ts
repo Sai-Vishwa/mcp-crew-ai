@@ -9,7 +9,7 @@ interface responseType {
     uname: string;
 }
 
-async function sessionChecker(session : string) : Promise<responseType | undefined> {
+async function sessionChecker(session : string) : Promise<responseType> {
     try{
             const connectionSlave = await connectSlave();
             const [username] = await connectionSlave.query(`SELECT uname FROM session WHERE session = ?`, [session]);

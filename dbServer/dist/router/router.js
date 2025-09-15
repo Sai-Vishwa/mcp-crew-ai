@@ -2,6 +2,7 @@ import { Router } from 'express';
 import login from '../controllers/login/login.js';
 import chatPage from '../controllers/chatPage/chatPage.js';
 import createPlacement from '../controllers/placement/createPlacement.js';
+import verify_user_session_and_create_new_chat from '../controllers/lang_graph/verify_user_session_and_create_new_chat.js';
 const router = Router();
 const asyncHandler = (fn) => {
     return (req, res, next) => {
@@ -23,5 +24,8 @@ router.post('/chat-history', asyncHandler(async (req, res) => {
 router.post('/create-placement', asyncHandler(async (req, res) => {
     console.log("im in router and this is the request i got -> ", req.body);
     await createPlacement(req, res);
+}));
+router.post('/verify_user_session_and_create_new_chat', asyncHandler(async (req, res) => {
+    await verify_user_session_and_create_new_chat(req, res);
 }));
 export default router;

@@ -292,7 +292,9 @@ async def main():
     additional_message_for_reasoning_agent=""
 )
     async for event in compiled_graph.astream(dummy_state, config={"configurable": {"thread_id": "test_thread"}}):
-        print(event)
+        print(event.keys())
+        print()
+        print(list(event.values())[0]["message"])
         print()
         print()
         

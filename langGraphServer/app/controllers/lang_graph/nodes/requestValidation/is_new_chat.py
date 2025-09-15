@@ -18,4 +18,5 @@ async def is_new_chat(state : State) -> str:
         return "error"
     
 def is_new_chat_wrapper(state: State) :
+    state.message = "Checking if this is a new chat request"
     return state

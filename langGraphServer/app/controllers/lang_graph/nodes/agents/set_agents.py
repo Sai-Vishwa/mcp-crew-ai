@@ -10,6 +10,7 @@ from ...state import State
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_core.messages import BaseMessage, message_to_dict
 import logging
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,7 @@ reasoning_agent = None
 reasoning_agent_with_memory = None
 execution_agent = None 
 
+load_dotenv()
     
     
 class CustomRedisClass(RedisChatMessageHistory) :
@@ -167,3 +169,13 @@ async def set_agents(state : State):
             "status" : "error",
             "message" : "There is error in setting up agents"
         }
+        
+def expose_agents():
+    return {
+        "reasoning_agent" : reasoning_agent,
+        "reasoning_agent_with_memory" : reasoning_agent_with_memory,
+        "dev_prompt_reasoning_agent" : dev_prompt_reasoning_agent,
+        "dev_prompt_execution_agent" : dev_prompt_execution_agent,
+        "llm" : llm,
+        "execution_agent" : execution_agent
+    }

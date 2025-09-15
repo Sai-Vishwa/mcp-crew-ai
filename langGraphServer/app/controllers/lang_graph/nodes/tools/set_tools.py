@@ -40,3 +40,6 @@ async def set_tools(state : State):
         
 def expose_tools():
     return Tools
+
+def expose_client():
+    return client

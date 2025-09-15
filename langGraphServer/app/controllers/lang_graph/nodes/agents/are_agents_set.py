@@ -1,9 +1,15 @@
-from .set_agents import reasoning_agent , reasoning_agent_with_memory , dev_prompt_reasoning_agent , dev_prompt_execution_agent , llm , execution_agent
+from .set_agents import expose_agents
 from ...state import State
 
 async def are_agents_set(state : State) -> str:
     try: 
-        
+        agents = expose_agents()
+        reasoning_agent = agents["reasoning_agent"]
+        reasoning_agent_with_memory = agents["reasoning_agent_with_memory"]
+        dev_prompt_reasoning_agent = agents["dev_prompt_reasoning_agent"]
+        dev_prompt_execution_agent = agents["dev_prompt_execution_agent"]
+        llm = agents["llm"]
+        execution_agent = agents["execution_agent"]
         if(state.status != "success") :
             return "error"
         
@@ -17,4 +23,5 @@ async def are_agents_set(state : State) -> str:
         return  "error"
     
 def are_agents_set_wrapper(state: State) :
+    state.message = "Checking if agents are set"
     return state

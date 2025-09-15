@@ -2,7 +2,11 @@ from flask import jsonify
 import httpx
 from ...state import Workflow , toolCallInfo , State
 from ..agents.set_agents import CustomRedisClass , is_redis_memory_not_created
+import sys
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 
 async def is_valid_user_session_for_new_chat(state : State) :
@@ -10,9 +14,11 @@ async def is_valid_user_session_for_new_chat(state : State) :
         
         user_session = state.user_session
         
+        lang_graph_server_secret = os.getenv("MASTER_PASSWORD")
+        
         async with httpx.AsyncClient() as client:
                 
-                response = await client.post("http://localhost:4004/verify_user_session_and_create_new_chat", json={"user_session" : user_session})
+                response = await client.post("http://localhost:4004/verify_user_session_and_create_new_chat", json={"user_session" : user_session , "lang_graph_server_secret" : lang_graph_server_secret})
                 resp = response.json()
                 
                 if resp["status"] == "error":
