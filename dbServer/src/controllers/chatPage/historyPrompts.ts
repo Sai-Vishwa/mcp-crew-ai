@@ -31,7 +31,7 @@ async function historyPrompts(req : Request & {body : requestType}, res : Respon
         })
         return
     }
-    const isValidChat = await chatChecker(isValidSession?.uname as string , chatSession as string);
+    const isValidChat = await chatChecker(isValidSession?.uname as string , chatSession );
     if(isValidChat.status == "error"){
         res.status(200).json({
             status : "error",

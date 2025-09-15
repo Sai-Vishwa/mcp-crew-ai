@@ -44,7 +44,7 @@ async function matchingPrompts(req : Request & {body : requestType} , res : Resp
         })
         return
     }
-    const isValidChat = await chatChecker(isValidSession?.uname as string , chatSession as string);
+    const isValidChat = await chatChecker(isValidSession?.uname as string , chatSession);
     if(isValidChat.status == "error"){
         res.status(200).json({
             status : "error",

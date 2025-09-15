@@ -4,7 +4,7 @@ interface respType {
     uname : string
 }
 
-async function chatChecker(userName : string , chatSession : string) {
+async function chatChecker(userName : string , chatSession : number) {
     try{
         const connectionSlave =  await connectSlave();
         const [resp]= await connectionSlave.execute("select uname from chathistory where chatid=?",[chatSession])

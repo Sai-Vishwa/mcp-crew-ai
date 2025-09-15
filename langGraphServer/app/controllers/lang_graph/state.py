@@ -31,7 +31,7 @@ class State(BaseModel):
     user_input_id : int
     user_input : str
     user_session : str
-    chat_session : str
+    chat_session : int
     user_name : str
     is_new_chat : bool
     current_step : Workflow | None

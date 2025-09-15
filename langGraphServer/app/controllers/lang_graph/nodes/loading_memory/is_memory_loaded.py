@@ -17,4 +17,5 @@ async def is_memory_loaded(state : State) -> str :
         return "error"
     
 def is_memory_loaded_wrapper(state: State) :
+    state.message = "Checking if the memory is loaded"
     return state
