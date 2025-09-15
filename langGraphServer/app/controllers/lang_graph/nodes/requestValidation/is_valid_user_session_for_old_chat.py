@@ -22,8 +22,8 @@ async def is_valid_user_session_for_old_chat(state : State) :
             session_id=chat_session
         )
         value = await mmy.redis_client.get(chat_session+"MeowDass")
-        print("value va paara == ")
-        print(value)
+        # print("value va paara == ")
+        # print(value)
         if(value and mmy.user_session == value ):
             
             
@@ -40,8 +40,8 @@ async def is_valid_user_session_for_old_chat(state : State) :
                 response = await client.post("http://localhost:4004/verify_user_session_and_load_memory", json={"user_session" : user_session , "chat_session" : chat_session , "ques" : state.user_input , "lang_graph_server_secret" : os.getenv("MASTER_PASSWORD") , "ques" : state.user_input})
                 resp = response.json()
                 
-                print("response ah paaru")
-                print(resp)
+                # print("response ah paaru")
+                # print(resp)
                 
                 if resp["status"] == "error":
                     return {
@@ -51,7 +51,7 @@ async def is_valid_user_session_for_old_chat(state : State) :
                 
                 await mmy.redis_client.setex(chat_session+"MeowDass" , 900 , user_session)
                 
-                print("ra ta ta... ra ta ta ...")
+                # print("ra ta ta... ra ta ta ...")
 
 
                 data = resp["data"]
@@ -93,8 +93,8 @@ async def is_valid_user_session_for_old_chat(state : State) :
     
     except Exception as e :
         
-        print("enna da un prechana")
-        print(e)
+        # print("enna da un prechana")
+        # print(e)
         
         return {
           "status" : "error" , 

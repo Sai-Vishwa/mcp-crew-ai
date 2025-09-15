@@ -7,23 +7,42 @@ interface top_matching_prompts {
     version : number;
     score : number;
     payload : {
-        prompt : string
+        prompt : string , 
+        workflow_id : number
     }
 }
 
-async function readQdrant(prompt : string) : Promise<top_matching_prompts[] > {
-    const qdrantClient = await connectQdrant();
-    const result = await model.embedContent(prompt);
-    const vector = result.embedding.values
+interface returnType {
+    status : "error" | "success";
+    data : top_matching_prompts[];
+}
 
-    const [matching_results] = await qdrantClient.search("MeowDass", {
-        vector : vector , 
-        limit : 2
-    })
+async function readQdrant(prompt : string) : Promise<returnType> {
+    try{
+        const qdrantClient = await connectQdrant();
+        const result = await model.embedContent(prompt);
+        const vector = result.embedding.values
 
-    const match : top_matching_prompts[]  = matching_results as unknown as top_matching_prompts[]
-    
-    return match;
+        const [matching_results] = await qdrantClient.search("MeowDass", {
+            vector : vector , 
+            limit : 2
+        })
+
+        const match : top_matching_prompts[]  = matching_results as unknown as top_matching_prompts[]
+        
+        return {
+            status : "success",
+            data : match
+        }
+    }
+
+    catch(error : unknown){
+        console.log(error);
+        return {
+            status : "error" ,
+            data : []
+        }
+    }
 }
 
 

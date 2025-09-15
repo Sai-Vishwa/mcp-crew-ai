@@ -16,4 +16,5 @@ async def is_relevant_workflow_loaded(state : State) -> str :
         return  "error"
     
 def is_relevant_workflow_loaded_wrapper(state: State) :
+    state.message = "Checking if relevant workflows are loaded"
     return state

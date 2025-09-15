@@ -4,7 +4,7 @@ import {v4} from "uuid";
 import connectQdrant from "../connector/connectQdrant";
 
 
-async function insertQdrant(prompt : string) {
+async function insertQdrant(prompt : string , workflow_id : number) {
 
     try{
         const result = await model.embedContent(prompt);
@@ -17,7 +17,7 @@ async function insertQdrant(prompt : string) {
                 {
                    id : v4(),
                    vector,
-                   payload : {prompt}
+                   payload : {"prompt" : prompt , "workflow_id" : workflow_id}
                 }
             ],
         })
@@ -39,14 +39,3 @@ async function insertQdrant(prompt : string) {
 }
 
 export default insertQdrant
-
-async function main() {
-    await insertQdrant("I like cats")
-    await insertQdrant("Java is difficult")
-    await insertQdrant("I hate AI development")
-    await insertQdrant("I am meow")
-    await insertQdrant("Parotta is my favourite food")
-    await insertQdrant("I also like poori")
-}
-
-main()
