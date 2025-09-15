@@ -5,6 +5,7 @@ import createPlacement from '../controllers/placement/createPlacement.js';
 import verify_user_session_and_create_new_chat from '../controllers/lang_graph/verify_user_session_and_create_new_chat.js';
 import verify_user_session from '../controllers/lang_graph/verify_user_session.js';
 import verify_user_session_and_load_memory from '../controllers/lang_graph/verify_user_session_and_load_memory.js';
+import load_relevant_workflow from '../controllers/lang_graph/load_relevant_workflows.js';
 const router = Router();
 const asyncHandler = (fn) => {
     return (req, res, next) => {
@@ -35,5 +36,8 @@ router.post('/verify_user_session', asyncHandler(async (req, res) => {
 }));
 router.post('/verify_user_session_and_load_memory', asyncHandler(async (req, res) => {
     await verify_user_session_and_load_memory(req, res);
+}));
+router.post('/load_relevant_workflows', asyncHandler(async (req, res) => {
+    await load_relevant_workflow(req, res);
 }));
 export default router;

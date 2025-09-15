@@ -1,5 +1,5 @@
-import model from "../connector/connectModel";
-import connectQdrant from "../connector/connectQdrant"
+import { getEmbeddingModel } from "../connector/connectModel.js";
+import connectQdrant from "../connector/connectQdrant.js"
 
 
 interface top_matching_prompts {
@@ -20,11 +20,15 @@ interface returnType {
 async function readQdrant(prompt : string) : Promise<returnType> {
     try{
         const qdrantClient = await connectQdrant();
-        const result = await model.embedContent(prompt);
-        const vector = result.embedding.values
+        // console.log("ITHU ORU CALL")
+        // const model = getEmbeddingModel();
+        // const result = await model.embedContent(prompt);
+        // const vector = result.embedding.values
 
-        const [matching_results] = await qdrantClient.search("MeowDass", {
-            vector : vector , 
+        const size = 768;
+        const dummyEmbedding = Array.from({ length: size }, () => Math.random());
+        const matching_results = await qdrantClient.search("MeowDass", {
+            vector : dummyEmbedding, 
             limit : 2
         })
 

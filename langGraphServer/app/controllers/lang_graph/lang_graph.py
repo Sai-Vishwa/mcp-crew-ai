@@ -276,7 +276,7 @@ async def main():
     user_session="sess1234",
     chat_session=7,
     user_name="Leo",
-    is_new_chat=False,
+    is_new_chat=True,
     current_step=None,
     completed_tools=[],
     current_tool_call_info=None,

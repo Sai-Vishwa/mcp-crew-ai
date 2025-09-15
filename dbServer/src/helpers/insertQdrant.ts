@@ -1,16 +1,18 @@
 import { text } from "stream/consumers";
-import model from "../connector/connectModel";
 import {v4} from "uuid";
 import connectQdrant from "../connector/connectQdrant";
+import { getEmbeddingModel } from "../connector/connectModel.js";
 
 
 async function insertQdrant(prompt : string , workflow_id : number) {
 
     try{
+        const model = await getEmbeddingModel()
         const result = await model.embedContent(prompt);
         const vector = result.embedding.values
 
         const qdrantClient = await connectQdrant();
+
 
         await qdrantClient.upsert("texts",{
             points: [

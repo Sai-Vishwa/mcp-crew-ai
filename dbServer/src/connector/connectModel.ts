@@ -12,8 +12,7 @@ dotenv.config({ path: resolve(__dirname, '.env') });
 
 console.log("Hey inga paaru ==> " , process.env.GEMINI_API)
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API!);
-
-const model = genAI.getGenerativeModel({ model: "models/embedding-001" });
-
-export default model
+export function getEmbeddingModel() {
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API!);
+  return genAI.getGenerativeModel({ model: "models/embedding-001" });
+}

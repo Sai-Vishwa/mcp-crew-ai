@@ -33,6 +33,22 @@ interface responseType {
     workflow : string;
 }
 
+interface WorkflowStep {
+  step_number: number;
+  tool_name: string;
+  tool_description: string;
+}
+
+interface Workflow {
+  workflow_id: number;
+  workflow_name: string;
+  workflow_description: string;
+  confidence_score: number;
+  reasoning: string;
+  workflow_steps: WorkflowStep[];
+}
+
+
 async function load_relevant_workflow(req : Request & {body : requestType} , res : Response) {
     try {
             const user_session = req.body.user_session;
@@ -80,44 +96,84 @@ async function load_relevant_workflow(req : Request & {body : requestType} , res
 
             let workflow_id_arr : number[] = []
 
-            top_matching_prompts.data.forEach( (item) => {
+            console.log("The top matching prompts are ==> " , JSON.stringify(top_matching_prompts))
+
+            top_matching_prompts.data.map( (item) => {
                 workflow_id_arr.push(item.payload.workflow_id as number)
             })
 
             const connectionSlave = await connectSlave();
 
             const [workflows] = await connectionSlave.query(
-                `SELECT * FROM workflow WHERE workflow_id IN (?)`, [workflow_id_arr]
+                `
+                SELECT 
+                    w.workflow_id,
+                    w.workflow_name,
+                    w.workflow_description,
+                    w.confidence_score,
+                    w.reasoning,
+                    s.step_number,
+                    s.tool_name,
+                    s.tool_description
+                FROM workflow w
+                LEFT JOIN workflow_steps s ON w.workflow_id = s.workflow_id
+                WHERE w.workflow_id IN (?)
+                ORDER BY w.workflow_id, s.step_number;
+                `,[workflow_id_arr]
             )
 
-            const Workflows : workflow_type[] = workflows as workflow_type[]
+
+            const workflowMap = new Map<number, Workflow>();
+
+            for (const row of workflows as any[]) {
+                if (!workflowMap.has(row.workflow_id)) {
+                    workflowMap.set(row.workflow_id, {
+                        workflow_id: row.workflow_id,
+                        workflow_name: row.workflow_name,
+                        workflow_description: row.workflow_description,
+                        confidence_score: row.confidence_score,
+                        reasoning: row.reasoning,
+                        workflow_steps: [],
+                    });
+                }
+
+                if (row.step_number !== null) {
+                    workflowMap.get(row.workflow_id)!.workflow_steps.push({
+                        step_number: row.step_number,
+                        tool_name: row.tool_name,
+                        tool_description: row.tool_description,
+                    });
+                }
+            }
+
+            const result: (Workflow & { prompt: string })[] = [];
+            for (const prompt of top_matching_prompts.data) {
+                const wf = workflowMap.get(prompt.payload.workflow_id);
+                if (wf) {
+                result.push({
+                    ...wf,
+                    prompt: prompt.payload.prompt,
+                });
+                }
+            }
 
 
-            let response_data : responseType[] = []
+            console.log("The result is ==> " , result)
 
-            top_matching_prompts.data.forEach( (item , index) => {
-                let workflow_text = ""
-                Workflows.forEach( (workflow) => {
-                    if(workflow.workflow_id == item.payload.workflow_id){
-                        workflow_text = workflow.workflow
-                    }
-                })
-                response_data.push({
-                    prompt : item.payload.prompt as string,
-                    workflow_id : item.payload.workflow_id as number,
-                    workflow : workflow_text
-                })
-
-            })
-            return {
+            
+            res.status(200).json({
                 status : "success",
                 message : "Relevant workflows fetched successfully",
-                data : response_data
-            }
+                data : result
+            })
+
+            return 
 
 
     }
     catch (err : unknown) {
+        console.log("db serever la tha error")
+        console.log(err)
         let message = "An error occurred during fetching relevant workflows";
         if (err instanceof Error) {
             message = err.message;

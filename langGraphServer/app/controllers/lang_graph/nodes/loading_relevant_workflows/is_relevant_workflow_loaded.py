@@ -13,6 +13,8 @@ async def is_relevant_workflow_loaded(state : State) -> str :
             return "yes"
             
     except Exception as e:
+        print("itho paathuten ")
+        print(e)
         return  "error"
     
 def is_relevant_workflow_loaded_wrapper(state: State) :
