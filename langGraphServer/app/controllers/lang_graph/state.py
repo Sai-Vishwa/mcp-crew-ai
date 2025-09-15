@@ -39,7 +39,7 @@ class State(BaseModel):
     current_tool_call_info : toolCallInfo | None
     completed_tool_calls_info : List[toolCallInfo]
     final_response : str
-    is_memory_loaded : bool
+    is_memory_loaded : bool 
     is_relevant_inputs_loaded : bool
     status : str
     message : str

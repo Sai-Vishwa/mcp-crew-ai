@@ -11,6 +11,8 @@ interface responseType {
 
 async function sessionChecker(session : string) : Promise<responseType> {
     try{
+
+            console.log("INGA PAARU = " ,session)
             const connectionSlave = await connectSlave();
             const [username] = await connectionSlave.query(`SELECT uname FROM session WHERE session = ?`, [session]);
             const uname : unameType[] = username as unameType[];

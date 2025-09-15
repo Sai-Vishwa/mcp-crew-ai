@@ -9,12 +9,16 @@ async def is_new_chat(state : State) -> str:
         if(state.status != "success") :
             return "error"
         
-        if(state.is_new_chat == True and is_redis_memory_not_created(state.chat_session)) :
+        flag = await is_redis_memory_not_created(state.chat_session , state.user_session)
+        
+        if(state.is_new_chat == True and flag):
             return "yes"
         else :
              return "no"
 
     except Exception as e : 
+        # print("inga paaru vro")
+        # print(e)
         return "error"
     
 def is_new_chat_wrapper(state: State) :

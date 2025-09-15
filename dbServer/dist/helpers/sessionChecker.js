@@ -1,6 +1,7 @@
 import { connectSlave } from "../connector/connectSlave.js";
 async function sessionChecker(session) {
     try {
+        console.log("INGA PAARU = ", session);
         const connectionSlave = await connectSlave();
         const [username] = await connectionSlave.query(`SELECT uname FROM session WHERE session = ?`, [session]);
         const uname = username;

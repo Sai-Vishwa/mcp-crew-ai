@@ -42,16 +42,18 @@ async function seedDB() {
   )
 `);
     await connection.query(`
-  CREATE TABLE chat (
+CREATE TABLE chat (
     id INT AUTO_INCREMENT PRIMARY KEY,
     chatid INT NOT NULL,
     ques TEXT NOT NULL,
     ans TEXT NOT NULL,
     q_time DATETIME NOT NULL,
-    workflow_id INT NOT NULL,
+    workflow_id INT NULL,           
+    status ENUM('pending','done','failed') NOT NULL,  
     FOREIGN KEY (chatid) REFERENCES chathistory(chatid) ON DELETE CASCADE,
     FOREIGN KEY (workflow_id) REFERENCES workflow(workflow_id) ON DELETE CASCADE
-  )
+);
+
 `);
     await connection.query(`
     CREATE TABLE session (

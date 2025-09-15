@@ -58,11 +58,12 @@ class CustomRedisClass(RedisChatMessageHistory) :
 
 
 
-async def is_redis_memory_not_created(chat_session : str):
+async def is_redis_memory_not_created(chat_session : str , user_session : str) -> bool:
     
     mmy = CustomRedisClass(
         chat_session=chat_session,
-        session_id = chat_session
+        session_id = chat_session,
+        user_session=user_session
     )
     value = await mmy.redis_client.get(chat_session+"MeowDass")
     

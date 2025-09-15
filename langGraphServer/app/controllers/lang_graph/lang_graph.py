@@ -273,7 +273,7 @@ async def main():
     dummy_state = State(
     user_input_id=1,
     user_input="Find restaurants nearby",
-    user_session="sess_123",
+    user_session="sess1234",
     chat_session="chat_456",
     user_name="Leo",
     is_new_chat=True,
