@@ -66,6 +66,8 @@ async function load_relevant_workflow(req : Request & {body : requestType} , res
 
             const isValidSession = await sessionChecker(user_session)
 
+            console.log("The valid session in load relevant workflow is ==> " , isValidSession)
+
             if(isValidSession.status == "error"){
                 res.status(200).json({
                     status: "error",

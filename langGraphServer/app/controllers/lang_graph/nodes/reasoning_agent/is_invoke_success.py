@@ -10,4 +10,5 @@ async def is_invoke_success(state : State):
         return "error"
     
 def is_invoke_success_wrapper(state: State) :  
+    state.message = "Checking if the reasoning agent invocation was successful"
     return state

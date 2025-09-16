@@ -1,14 +1,36 @@
 from ...state import State,ReasoningAgentResponse
 import json
-from ..tools.set_tools import Tools
+from ..tools.set_tools import expose_tools
 
 async def reasoning_agent_output_formatter(state : State):
     try : 
         
+        if(type(state.reasoning_agent_response) != str and type(state.reasoning_agent_response) != dict and type(state.reasoning_agent_response) != ReasoningAgentResponse):
+            
+            print("actual type returned is ==> " , type(state.reasoning_agent_response))
+            return {
+                "status": "error" ,
+                "message": "Invalid output from reasoning agent ",
+                "additional_message_for_reasoning_agent": "Please provide the output in the correct format"
+            }
+            
+        response = state.reasoning_agent_response
         
-        response = json.loads(state.reasoning_agent_response)
+        response = response.get("output")
+        
+        cleaned = response.split("{", 1)[1].rsplit("}", 1)[0]
+        cleaned = "{" + cleaned + "}"        
+        
+        response = json.loads(cleaned)
+        
+        print("response from reasoning agent ==> " , response)
+        
+        Tools = expose_tools()
+        
         
         response_object = ReasoningAgentResponse(**response)
+        
+        print("response object ==> " , response_object)
         
         if(response_object.is_new_workflow == True):
             
@@ -34,13 +56,16 @@ async def reasoning_agent_output_formatter(state : State):
         return {
             "status" : "success" , 
             "message" : "Successfully formatted the reasoning agent output",
-            "reasoning_agent_response" : response_object
+            "reasoning_agent_response" : response
         }
         
         
     except Exception as e:
+        
+        print("error in formatting reasoning agent output")
+        print(e)
         return {
-            "status ": "error" ,
-            "message ": "Invalid output from reasoning agent ",
+            "status": "error" ,
+            "message": "Invalid output from reasoning agent ",
             "additional_message_for_reasoning_agent": "Please provide the output in the correct format"
         }

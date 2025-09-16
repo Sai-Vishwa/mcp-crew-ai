@@ -1,7 +1,7 @@
 
 
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional 
 from pydantic import BaseModel , Field
 
 
@@ -17,7 +17,8 @@ class Workflow(BaseModel):
     step_number : int
     tool_name : str
     tool_description : str
-
+    params_required: List[str]    
+    
 class ReasoningAgentResponse(BaseModel):
     is_new_workflow : bool
     workflow_id : int | None
@@ -44,6 +45,6 @@ class State(BaseModel):
     status : str
     message : str
     relevant_workflows : Dict[str , ReasoningAgentResponse] | None
-    reasoning_agent_response : str | ReasoningAgentResponse
+    reasoning_agent_response : str | ReasoningAgentResponse | dict | Any
     is_valid_response : int
     additional_message_for_reasoning_agent : str

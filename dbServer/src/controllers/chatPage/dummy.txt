@@ -56,3 +56,92 @@ prompt=PromptTemplate(input_variables=['\n  "workflow"'], input_types={}, partia
   reasoning_agent = initialize_agent(
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    {
+  "is_new_workflow": true,
+  "workflow_id": null,
+  "workflow_name": "Reschedule Final Exams",
+  "workflow_description": "Reschedule final exams and update transport accordingly",
+  "workflow_steps": [
+    {
+      "step_number": 1,
+      "tool_name": "ReadExam",
+      "tool_description": "This tool is used to read all exam schedule entries",
+      "params_required": []
+    },
+    {
+      "step_number": 2,
+      "tool_name": "UpdateExam",
+      "tool_description": "This tool is used to update a exam entry on the database by the changing the exam date , start time and end time of the provided exam name",
+      "params_required": [
+        "exam_name",
+        "new_exam_date",
+        "new_exam_start",
+        "new_exam_end",
+        "old_exam_date",
+        "old_exam_start",
+        "old_exam_end",
+        "session"
+      ]
+    },
+    {
+      "step_number": 3,
+      "tool_name": "ReadTransport",
+      "tool_description": "This tool is used to read all transport entries",
+      "params_required": []
+    },
+    {
+      "step_number": 4,
+      "tool_name": "UpdateTransport",
+      "tool_description": "This tool is used to update a transport entry in the database by changing the start and leave time for the provided bus date",
+      "params_required": [
+        "bus_date",
+        "new_start_time",
+        "new_leave_time",
+        "old_start_time",
+        "old_leave_time",
+        "session"
+      ]
+    }
+  ],
+  "confidence_score": 1.0,
+  "reasoning": "Generated a new workflow to reschedule final exams. The workflow first reads existing exam schedules, then updates the exam dates using UpdateExam.  To maintain consistency, it reads existing transport schedules and updates them using UpdateTransport to reflect the new exam dates. This workflow strictly adheres to the hierarchy (Exam > Transport)."
+}
+
+
