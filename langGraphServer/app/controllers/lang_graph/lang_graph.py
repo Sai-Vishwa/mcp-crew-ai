@@ -272,7 +272,7 @@ async def main():
     
     dummy_state = State(
     user_input_id=1,
-    user_input="Find restaurants nearby",
+    user_input="Reschedule final exams from 20th Sept to 25th Sept",
     user_session="sess1234",
     chat_session=7,
     user_name="Leo",
@@ -298,4 +298,4 @@ async def main():
         print()
         print()
         
-asyncio.run(main())
+# asyncio.run(main())

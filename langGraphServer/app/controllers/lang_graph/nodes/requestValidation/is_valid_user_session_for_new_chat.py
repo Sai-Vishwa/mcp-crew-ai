@@ -37,7 +37,7 @@ async def is_valid_user_session_for_new_chat(state : State) :
                 # print("response itha")
                 # print(resp)
                 
-                await new_mmy.redis_client.setex(str(resp["chatid"])+"MeowDass" , 900 , user_session)
+                new_mmy.redis_client.setex(str(resp["chatid"])+"MeowDass" , 900 , user_session)
                 # await new_mmy.redis_client.setex(str(resp["chatid"])+"MeowDass" , 900 , user_session)
                 
                     
@@ -51,8 +51,8 @@ async def is_valid_user_session_for_new_chat(state : State) :
                     "user_name" : resp["uname"]
                 }
     except Exception as e :
-        # print("enna da prechana")
-        # print(e)
+        print("enna da prechana")
+        print(e)
         
         return {
           "status" : "error" , 

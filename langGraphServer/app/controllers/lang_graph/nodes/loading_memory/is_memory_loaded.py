@@ -7,7 +7,7 @@ async def is_memory_loaded(state : State) -> str :
         if(state.status != "success"):
             return "error"
         
-        if(state.is_memory_loaded == True and not(await is_redis_memory_not_created(str(state.chat_session ), state.user_session))):
+        if(state.is_memory_loaded == True and not( is_redis_memory_not_created(str(state.chat_session ), state.user_session))):
             return "yes"
                     
         else :

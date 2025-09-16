@@ -21,7 +21,7 @@ async def is_valid_user_session_for_old_chat(state : State) :
             chat_session=chat_session,
             session_id=chat_session
         )
-        value = await mmy.redis_client.get(chat_session+"MeowDass")
+        value =  mmy.redis_client.get(chat_session+"MeowDass")
         # print("value va paara == ")
         # print(value)
         if(value and mmy.user_session == value ):
@@ -49,7 +49,7 @@ async def is_valid_user_session_for_old_chat(state : State) :
                         "message" : "Cannot validate the user session and load the memory" , 
                     }
                 
-                await mmy.redis_client.setex(chat_session+"MeowDass" , 900 , user_session)
+                mmy.redis_client.setex(chat_session+"MeowDass" , 900 , user_session)
                 
                 # print("ra ta ta... ra ta ta ...")
 
@@ -80,7 +80,7 @@ async def is_valid_user_session_for_old_chat(state : State) :
                         "message" : "Cannot validate the user session" ,
                     }
                 
-                await mmy.redis_client.setex(chat_session+"MeowDass" , 900 , user_session)
+                mmy.redis_client.setex(chat_session+"MeowDass" , 900 , user_session)
              
                     
                 

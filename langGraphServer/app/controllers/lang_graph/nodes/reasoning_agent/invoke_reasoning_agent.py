@@ -1,11 +1,14 @@
 from ...state import State
-from ..agents.set_agents import reasoning_agent_with_memory
-from ..tools.set_tools import Tools
+from ..agents.set_agents import expose_agents
+from ..tools.set_tools import expose_tools
 import json
 
 async def invoke_reasoning_agent(state : State):
     
     try : 
+        
+        reasoning_agent_with_memory = expose_agents()["reasoning_agent_with_memory"]
+        Tools = expose_tools()
         
         user_prompt = state.user_input    
         tools_str = "\n".join([f"{tool.name}: {tool.description}" for tool in Tools])
@@ -17,9 +20,11 @@ async def invoke_reasoning_agent(state : State):
         APPROVED WORKFLOWS FOR REFERENCE
         ''' + relevant_workflows_str
         
+        print("aivoke is getting called")
+        
         outcome = await reasoning_agent_with_memory.ainvoke(
             {"input" : final_prompt} , 
-            config= {"configurable" : {"session_id" : state.chat_session}}
+            config= {"configurable" : {"session_id" : str(state.chat_session)}}
         )
         
         
@@ -31,6 +36,8 @@ async def invoke_reasoning_agent(state : State):
         }
         
     except Exception as e:
+        print("reasonig agent call la prechana")
+        print(e)
         return {
             "status" : "error" , 
             "message" : "Some error occured while calling the reasoning agent",

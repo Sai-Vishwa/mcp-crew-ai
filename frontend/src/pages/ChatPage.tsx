@@ -473,7 +473,7 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 let chats: Chat[] = [];
                 fetchedChats.forEach((chat: any) => {
                     chats.push({
-                        id: chat.id.toString(),
+                        id: chat?.id?.toString(),
                         name: chat.chatName,
                         timestamp: new Date(chat.lastchatdate),
                         lastMessage: chat.lastchatdate ? "Last message at " + chat.lastchatdate : ""

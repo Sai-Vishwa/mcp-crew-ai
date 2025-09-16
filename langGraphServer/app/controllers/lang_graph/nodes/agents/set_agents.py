@@ -11,6 +11,7 @@ from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_core.messages import BaseMessage, message_to_dict
 import logging
 from dotenv import load_dotenv
+import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -54,45 +55,57 @@ class CustomRedisClass(RedisChatMessageHistory) :
 
             except Exception as e:
                 logger.error(f"Failed to add message to Redis: {e}")
+                
+                
+                
+        
         
 
 
 
-async def is_redis_memory_not_created(chat_session : str , user_session : str) -> bool:
+def is_redis_memory_not_created(chat_session : str , user_session : str) -> bool:
     
     mmy = CustomRedisClass(
         chat_session=chat_session,
         session_id = chat_session,
         user_session=user_session
     )
-    value = await mmy.redis_client.get(chat_session+"MeowDass")
-    
+    value = mmy.redis_client.get(chat_session+"MeowDass")
     
     if(value is None):
         return True
     return False
     
 
-async def get_by_session_id(session_id: str) -> RedisChatMessageHistory:
+def get_by_session_id(session_id: str) -> CustomRedisClass:
     
+        print("get by session id is getting called")
     
-    redis_mmy = CustomRedisClass(
+        redis_mmy = CustomRedisClass(
         chat_session= session_id,
         session_id = session_id,
+        user_session= "anything",
         url= "redis://localhost:6379/0",
         ttl=900
     )
+        
     
-    value = await redis_mmy.redis_client.get(session_id+"MeowDass")
+        value = redis_mmy.redis_client.get(session_id+"MeowDass")
+        
+        redis_mmy.user_session = value
+        
+        print("Na iruken vro")
 
+        if(value is None):
+            print("AABATHU")
+            print(session_id)
+            ##do some logs here 
+            
+            
+        return redis_mmy
     
-    if(value is None):
-        print("AABATHU")
-        print(session_id)
-        ##do some logs here 
-        
-        
-    return redis_mmy
+    
+    
 
 
 

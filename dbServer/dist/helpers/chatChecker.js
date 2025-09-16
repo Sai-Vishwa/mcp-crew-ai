@@ -15,6 +15,7 @@ async function chatChecker(userName, chatSession) {
         };
     }
     catch (err) {
+        console.log("Error in chatChecker: ", err);
         return {
             status: "error",
             message: "internal error"
