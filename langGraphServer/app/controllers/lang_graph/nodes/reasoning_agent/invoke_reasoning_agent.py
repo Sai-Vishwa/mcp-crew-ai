@@ -1,5 +1,5 @@
 from ...state import State
-from ..agents.set_agents import expose_agents
+from ..agents.set_agents import expose_reasoning_agent_with_memory
 from ..tools.set_tools import expose_tools
 import json
 
@@ -7,7 +7,7 @@ async def invoke_reasoning_agent(state : State):
     
     try : 
         
-        reasoning_agent_with_memory = expose_agents()["reasoning_agent_with_memory"]
+        reasoning_agent_with_memory = expose_reasoning_agent_with_memory()
         Tools = expose_tools()
         
         user_prompt = state.user_input    

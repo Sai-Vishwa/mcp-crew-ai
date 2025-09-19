@@ -48,3 +48,27 @@ class State(BaseModel):
     reasoning_agent_response : str | ReasoningAgentResponse | dict | Any
     is_valid_response : int
     additional_message_for_reasoning_agent : str
+    
+class inputState(BaseModel):
+    user_input : str
+    user_session : str
+    chat_session : int
+    is_new_chat : bool
+    message : str
+    status : str
+    
+class flagState(BaseModel):
+    message : str
+    status : str
+    
+class loaderState(BaseModel):
+    is_memory_loaded : bool 
+    is_relevant_inputs_loaded : bool
+    user_input_id : int
+    user_input : str
+    user_session : str
+    chat_session : int
+    user_name : str
+    message : str
+    status : str
+    

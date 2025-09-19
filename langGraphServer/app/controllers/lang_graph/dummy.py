@@ -3,8 +3,12 @@ import uuid
 
 from langgraph.constants import START, END
 from langgraph.graph import StateGraph
-from langgraph.types import interrupt, Command
+from langgraph.types import interrupt, Command , StateSnapshot
 from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
+
+from langchain.embeddings import init_embeddings
+
 
 class State(TypedDict):
     decision: str
@@ -47,10 +51,25 @@ checkpointer = InMemorySaver()
 graph = builder.compile(checkpointer=checkpointer)
 
 config = {"configurable": {"thread_id": uuid.uuid4()}}
-result = graph.invoke({}, config=config)
+result = graph.invoke({"decision" : "na tha da meow"}, config=config)
 
-result["__interrupt__"]
+id = (result['__interrupt__'][0].id)
+
+result.pop('__interrupt__')
+
+state_val = StateSnapshot(
+    values = result,
+    next= None,
+    config=config,
+    metadata={"decision": "approve"},
+    created_at=None,
+    parent_config=None,
+    tasks=None,
+    interrupts=None
+)
+
+# result["__interrupt__"]
 
 print("na 2nd uh")
-final_result = graph.invoke(Command(resume="approve"), config=config)
+final_result = graph.invoke(Command(resume=state_val), config=config)
 print(final_result)

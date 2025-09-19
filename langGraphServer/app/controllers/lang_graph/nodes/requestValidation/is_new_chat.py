@@ -1,30 +1,27 @@
 from flask import jsonify
-from ...state import State
+from ...state import State , flagState , inputState
 from ..agents.set_agents import is_redis_memory_not_created
 
-async def is_new_chat(state : State) -> str:
+async def is_new_chat(state : inputState) -> str:
     
     try : 
-        
         if(state.status != "success") :
             return "error"
         
-        print("before flag")
-        flag = is_redis_memory_not_created(str(state.chat_session) , state.user_session)
-        print("after flag")
+        flag = await is_redis_memory_not_created(str(state.chat_session) , state.user_session)
         
         if(state.is_new_chat == True and flag):
-            print("i return yes")
+            print("yes uh tha")
             return "yes"
         else :
-            print("i return no")
+            print("no tha")
             return "no"
 
     except Exception as e : 
-        print("inga paaru vro")
+        print("inga tha error")
         print(e)
         return "error"
     
-def is_new_chat_wrapper(state: State) :
+def is_new_chat_wrapper(state: flagState) -> inputState:
     state.message = "Checking if this is a new chat request"
     return state

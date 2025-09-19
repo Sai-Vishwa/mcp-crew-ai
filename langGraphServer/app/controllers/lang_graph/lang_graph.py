@@ -57,7 +57,7 @@ from lang_graph.nodes.reasoning_agent.is_invoke_success import is_invoke_success
 from lang_graph.nodes.reasoning_agent.is_reinvoke_required import is_reinvoke_required ,is_reinvoke_required_wrapper
 from lang_graph.nodes.reasoning_agent.reasoning_agent_output_formatter import reasoning_agent_output_formatter
 from lang_graph.nodes.requestValidation.is_new_workflow import is_new_workflow , is_new_workflow_wrapper
-from lang_graph.state import State , Workflow , toolCallInfo
+from lang_graph.state import State , Workflow , toolCallInfo , inputState , flagState
 
 
 load_dotenv()
@@ -270,26 +270,13 @@ except Exception as e :
     
 async def main():
     
-    dummy_state = State(
-    user_input_id=1,
+    dummy_state = inputState(
     user_input="Reschedule final exams from 20th Sept to 25th Sept",
     user_session="sess1234",
     chat_session=7,
-    user_name="Leo",
     is_new_chat=True,
-    current_step=None,
-    completed_tools=[],
-    current_tool_call_info=None,
-    completed_tool_calls_info=[],
-    final_response="",
-    is_memory_loaded=False,
-    is_relevant_inputs_loaded=False,
-    status="success",
     message="",
-    relevant_workflows={},
-    reasoning_agent_response="",
-    is_valid_response=0,
-    additional_message_for_reasoning_agent=""
+    status= ""
 )
     async for event in compiled_graph.astream(dummy_state, config={"configurable": {"thread_id": "test_thread"}}):
         print(event.keys())

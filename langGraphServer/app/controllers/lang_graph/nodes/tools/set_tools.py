@@ -1,13 +1,13 @@
 
 from langchain_mcp_adapters.client import MultiServerMCPClient
-from ...state import State
+from ...state import State , inputState , flagState
 
 Tools = None
 
 client = None
 
 
-async def set_tools(state : State):
+async def set_tools(state : flagState) -> flagState:
     try: 
         global client
         global Tools
@@ -32,7 +32,9 @@ async def set_tools(state : State):
             "status" : "success", 
             "message" : "Tools are successfully loaded in the Tools variable"
         }
+        
     except Exception as e:
+        print(e)
         return {
             "status" : "error",
             "message" : "Cannot load tools"

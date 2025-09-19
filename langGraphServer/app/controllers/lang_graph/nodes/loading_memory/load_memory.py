@@ -1,7 +1,7 @@
 from flask import jsonify
 import httpx
 from ...state import State
-from ..agents.set_agents import CustomRedisClass , is_redis_memory_not_created
+from ..agents.set_agents import CustomRedisClass , is_redis_memory_not_created , CustomClassTry
 from langchain.schema import HumanMessage, AIMessage
 
 async def load_memory(state : State):
@@ -22,18 +22,19 @@ async def load_memory(state : State):
                     "message" : "Cannot validate the user session and load the memory" , 
                 }
             
-            new_mmy = CustomRedisClass(
+            new_mmy = await CustomClassTry.create_memory(
                 user_session= user_session , 
-                chat_session= chat_session 
+                chat_session= chat_session ,
+                session_id= chat_session
             )
             
-            new_mmy.redis_client.setex(chat_session+"MeowDass" , 900 , user_session )
+            await new_mmy.redis_client.setex(chat_session+"MeowDass" , 900 , user_session )
             
             data = resp["data"]
             
             for row in data : 
-                new_mmy.add_messages([HumanMessage(content=row["ques"])])
-                new_mmy.add_messages([AIMessage(content=row["workflow"])])
+                await new_mmy.add_messages([HumanMessage(content=row["ques"])])
+                await new_mmy.add_messages([AIMessage(content=row["workflow"])])
                             
             return {
                 "status" : "success" , 

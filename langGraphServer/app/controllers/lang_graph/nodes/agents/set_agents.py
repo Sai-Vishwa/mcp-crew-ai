@@ -5,13 +5,33 @@ from langchain.agents import initialize_agent , AgentType
 from langchain.prompts import MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.messages import BaseMessage
+from redis.asyncio import Redis
 from ..tools.set_tools import expose_tools
-from ...state import State
+from ...state import State , flagState
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_core.messages import BaseMessage, message_to_dict
 import logging
 from dotenv import load_dotenv
 import asyncio
+from langchain_core.chat_history import BaseChatMessageHistory
+
+
+import json
+import logging
+from typing import List, Optional, Any
+
+from langchain_core.chat_history import BaseChatMessageHistory
+from langchain_core.messages import (
+    BaseMessage,
+    message_to_dict,
+    messages_from_dict,
+)
+
+from .trial import get_client
+
+logger = logging.getLogger(__name__)
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +45,106 @@ execution_agent = None
 load_dotenv()
     
     
-class CustomRedisClass(RedisChatMessageHistory) :
+    
+class CustomClassTry(BaseChatMessageHistory) : 
+    
+
+    def __init__(
+         self,
+        session_id: str,
+        user_session: str,
+        chat_session: str,
+        redis_client: Redis,
+        key_prefix: str = "message_store:",
+        ttl: int = 900,
+        max_messages: int = 10, 
+    ):
+    
+        self.session_id = session_id
+        self.key_prefix = key_prefix
+        self.ttl = ttl
+        self.redis_client = redis_client
+        self.user_session = user_session
+        self.chat_session = chat_session
+        self.max_messages = max_messages
+        
+    @classmethod
+    async def create_memory(cls, 
+                            session_id: str,
+                            user_session: str,
+                            chat_session: str,
+                            url: str = "redis://localhost:6379/0",
+                            key_prefix: str = "message_store:",
+                            ttl: int = 900,
+                            max_messages: int = 10, 
+    ) : 
+        try:
+            import redis.asyncio as redis
+        except ImportError:
+            raise ImportError(
+                "Could not import redis python package. "
+                "Please install it with `pip install redis`."
+            )
+
+        try:
+            redis_client = await get_client(redis_url=url)
+            instance = cls(
+                session_id=session_id,
+                user_session=user_session,
+                chat_session=chat_session,
+                redis_client=redis_client,
+                key_prefix=key_prefix,
+                ttl=ttl,
+                max_messages=max_messages
+            )   
+            return instance
+                
+        except redis.ConnectionError as error:
+            logger.error(error)
+
+    @property
+    def key(self) -> str:
+        """Construct the record key to use"""
+        return self.key_prefix + self.session_id
+
+    @property
+    def messages(self) -> List[BaseMessage]:
+        """Retrieve the messages from Redis"""
+        _items = self.redis_client.lrange(self.key, 0, -1)
+        items = [json.loads(m.decode("utf-8")) for m in _items[::-1]]
+        messages = messages_from_dict(items)
+        return messages
+
+    @messages.setter
+    def messages(self, messages: List[BaseMessage]) -> None:
+        raise NotImplementedError(
+            "Direct assignment to 'messages' is not allowed."
+            " Use the 'add_messages' instead."
+        )
+
+    async def aadd_message(self, message: BaseMessage) -> None:
+            try:
+                await self.redis_client.lpush(self.key, json.dumps(message_to_dict(message)))
+
+                await self.redis_client.ltrim(self.key, 0, self.max_messages - 1)
+
+                if self.ttl:
+                    await self.redis_client.expire(self.key, self.ttl)
+
+            except Exception as e:
+                logger.error(f"Failed to add message to Redis: {e}")
+
+    async def aclear(self) -> None:
+        """Clear session memory from Redis"""
+        await self.redis_client.delete(self.key)
+        
+    async def clear(self) -> None:
+        """Clear session memory from Redis"""
+        await self.redis_client.delete(self.key)
+
+    
+    
+class CustomRedisClass(CustomClassTry) :
     
         def __init__(
         self,
@@ -63,25 +182,25 @@ class CustomRedisClass(RedisChatMessageHistory) :
 
 
 
-def is_redis_memory_not_created(chat_session : str , user_session : str) -> bool:
+async def is_redis_memory_not_created(chat_session : str , user_session : str) -> bool:
     
-    mmy = CustomRedisClass(
+    mmy = await CustomClassTry.create_memory(
         chat_session=chat_session,
         session_id = chat_session,
         user_session=user_session
     )
-    value = mmy.redis_client.get(chat_session+"MeowDass")
+    value = await mmy.redis_client.get(chat_session+"MeowDass")
     
     if(value is None):
         return True
     return False
     
 
-def get_by_session_id(session_id: str) -> CustomRedisClass:
+async def get_by_session_id(session_id: str) -> CustomClassTry:
     
         print("get by session id is getting called")
     
-        redis_mmy = CustomRedisClass(
+        redis_mmy = await CustomClassTry.create_memory(
         chat_session= session_id,
         session_id = session_id,
         user_session= "anything",
@@ -90,7 +209,7 @@ def get_by_session_id(session_id: str) -> CustomRedisClass:
     )
         
     
-        value = redis_mmy.redis_client.get(session_id+"MeowDass")
+        value = await redis_mmy.redis_client.get(session_id+"MeowDass")
         
         redis_mmy.user_session = value
         
@@ -110,7 +229,7 @@ def get_by_session_id(session_id: str) -> CustomRedisClass:
 
 
 
-async def set_agents(state : State):
+async def set_agents(state : flagState) -> flagState:
     
     try:
     
@@ -177,14 +296,14 @@ async def set_agents(state : State):
         }
         
     except Exception as e:
-        print("INGA PAARU =====")
-        print(Tools)
+        print(e)
+        
         return {
             "status" : "error",
             "message" : "There is error in setting up agents"
         }
         
-def expose_agents():
+def expose_all():
     return {
         "reasoning_agent" : reasoning_agent,
         "reasoning_agent_with_memory" : reasoning_agent_with_memory,
@@ -193,3 +312,9 @@ def expose_agents():
         "llm" : llm,
         "execution_agent" : execution_agent
     }
+    
+def expose_reasoning_agent_with_memory():
+    return reasoning_agent_with_memory
+
+def expose_execution_agent():
+    return execution_agent
