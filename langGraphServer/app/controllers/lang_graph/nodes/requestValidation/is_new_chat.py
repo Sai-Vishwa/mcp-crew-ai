@@ -22,6 +22,10 @@ async def is_new_chat(state : inputState) -> str:
         print(e)
         return "error"
     
+    
 def is_new_chat_wrapper(state: flagState) -> inputState:
-    state.message = "Checking if this is a new chat request"
-    return state
+    if(state.status != "success") :
+        return state
+    return {
+        "message" : "Checking if this is a new chat request"
+    }

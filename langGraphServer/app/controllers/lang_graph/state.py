@@ -63,7 +63,6 @@ class flagState(BaseModel):
     
 class loaderState(BaseModel):
     is_memory_loaded : bool 
-    is_relevant_inputs_loaded : bool
     user_input_id : int
     user_input : str
     user_session : str
@@ -72,3 +71,14 @@ class loaderState(BaseModel):
     message : str
     status : str
     
+class RelevantWorkFlowState(BaseModel) : 
+    
+    user_input : str
+    workflow_generated : ReasoningAgentResponse
+    
+class ListOfRelevantWorkflowState(BaseModel):
+    
+    relevant_workflows : List[RelevantWorkFlowState]
+    status : str
+    message : str
+    is_relevant_inputs_loaded : bool

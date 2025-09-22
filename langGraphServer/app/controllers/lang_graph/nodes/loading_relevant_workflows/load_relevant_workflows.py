@@ -1,12 +1,12 @@
 import httpx
-from ...state import State
+from ...state import State  ,loaderState , ListOfRelevantWorkflowState , RelevantWorkFlowState
 import sys
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-async def load_relevant_workflows(state : State) :
+async def load_relevant_workflows(state : loaderState) -> ListOfRelevantWorkflowState:
     
     try: 
         

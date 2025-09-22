@@ -119,7 +119,7 @@ class CustomClassTry(BaseChatMessageHistory) :
     def messages(self, messages: List[BaseMessage]) -> None:
         raise NotImplementedError(
             "Direct assignment to 'messages' is not allowed."
-            " Use the 'add_messages' instead."
+            " Use the 'aadd_message' instead."
         )
 
     async def aadd_message(self, message: BaseMessage) -> None:

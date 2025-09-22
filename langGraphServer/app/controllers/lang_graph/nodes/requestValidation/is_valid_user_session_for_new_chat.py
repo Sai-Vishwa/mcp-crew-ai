@@ -49,7 +49,6 @@ async def is_valid_user_session_for_new_chat(state : inputState) -> loaderState:
                     "user_input_id" : resp["user_input_id"],
                     "chat_session" : str(resp["chatid"]),
                     "user_name" : resp["uname"],
-                    "is_relevant_inputs_loaded" : False,
                     "user_input" : state.user_input,
                     "user_session" : state.user_session
                 }
