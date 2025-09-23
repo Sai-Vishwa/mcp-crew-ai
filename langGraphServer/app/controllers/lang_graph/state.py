@@ -3,7 +3,7 @@
 
 from typing import Any, Dict, List, Optional 
 from pydantic import BaseModel , Field
-
+from langchain_core.prompts import ChatPromptTemplate
   
 
 class SingleWorkflowStepFormat(BaseModel) :
@@ -79,3 +79,4 @@ class ReasoningAgentInputState(BaseModel) :  # this state holds the user chat hi
     
     relevant_workflows : Optional[List[SingleRelevantWorkflowFormat]]# List of relevant workflows
     
+    prompt : Optional[ChatPromptTemplate]
