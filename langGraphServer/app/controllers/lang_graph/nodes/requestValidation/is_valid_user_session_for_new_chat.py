@@ -1,15 +1,12 @@
-from flask import jsonify
 import httpx
 from ...state import InputState , FlagState
-from ..agents.set_agents import CustomRedisClass , is_redis_memory_not_created , CustomClassTry
-import sys
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-
 async def is_valid_user_session_for_new_chat(state : InputState) -> FlagState:
+    
     try :
         
         user_session = state.user_session
@@ -27,22 +24,6 @@ async def is_valid_user_session_for_new_chat(state : InputState) -> FlagState:
                         "status" : "error" , 
                         "message" : "Cannot create a new chat session for the user" , 
                     }
-                    
-                #CHANGES 
-                
-                new_mmy = await CustomClassTry.create_memory(
-                    session_id=resp["chatid"],
-                    user_session=user_session,
-                    chat_session=resp["chatid"]
-                )
-                
-                # print("response itha")
-                # print(resp)
-                
-                await new_mmy.redis_client.setex(str(resp["chatid"])+"MeowDass" , 900 , user_session)
-                # await new_mmy.redis_client.setex(str(resp["chatid"])+"MeowDass" , 900 , user_session)
-                
-                    
                 
                 return {
                     "status" : "success" , 

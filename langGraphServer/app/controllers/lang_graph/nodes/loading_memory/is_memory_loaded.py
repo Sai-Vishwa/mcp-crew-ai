@@ -1,16 +1,22 @@
 from ...state import FlagState , InputState
 from ..agents.set_agents import is_redis_memory_not_created
+import redis.asyncio as redis
+from ..helpers.redis_connector import async_redis_client_provider
 
 async def is_memory_loaded(state : InputState) -> str : 
     try : 
 
+        if(state.is_new_chat == True) : 
+            return "no"
         
-        # CHANGES
+        async_client = await async_redis_client_provider()
         
-        if(state.is_memory_loaded == True and not(await is_redis_memory_not_created(str(state.chat_session ), state.user_session))):
+        is_memory_present = await async_client.get(state.chat_session)
+        
+        if(is_memory_present) : 
             return "yes"
-                    
-        else :
+        
+        else : 
             return "no"
         
     except Exception as e:

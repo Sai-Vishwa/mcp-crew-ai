@@ -27,9 +27,7 @@ async def is_valid_user_session_for_old_chat(state : InputState) -> FlagState:
                         "status" : "error" , 
                         "message" : "Cannot validate the user session" ,
                     }
-                    
-                    # changes              
-                
+                                    
                 return {
                     "status" : "success" , 
                     "message" : "The user session is valid and the chat belongs to the user and the memory is loaded",
