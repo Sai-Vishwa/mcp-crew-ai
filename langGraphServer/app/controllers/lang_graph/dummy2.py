@@ -14,7 +14,7 @@ from pydantic import BaseModel , Field
 
 class State1(TypedDict):
     count : int
-    extra : str
+    message : str
     
 class State2(TypedDict):
     counter : int
@@ -24,10 +24,13 @@ class FlagState(BaseModel) :
     message : str
     
 
-def node1(state: State1) -> State2:
-    return {"counter" : 5000 , "extra" : "na meow ila meow dass" , "status" : "success" , "message" : "unaku ellame vetri tha"}
+def node1(state: State1) -> FlagState:
+    
+    print("state of state 1")
+    print(state)
+    return {"counter" : 5000 , "status" : "success" , "message" : "unaku ellame vetri tha"}
 
-def node2(state: State2 ) -> FlagState:
+def node2(state: FlagState ) -> State1:
     print("inga paaru thala")
     print(state)
     return {}
@@ -47,6 +50,7 @@ graph = builder.compile()
 
 final_result = graph.invoke({
     "count" : 5,
-    "extra" : "na meow"
+    "extra" : "na meow",
+    "message" : "enna aava potho"
 })
 print(final_result)

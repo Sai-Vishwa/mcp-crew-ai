@@ -1,53 +1,77 @@
 from flask import jsonify
 import httpx
 from ...state import InputState , ReasoningAgentInputState , FlagState
-from ..agents.set_agents import CustomRedisClass , is_redis_memory_not_created , CustomClassTry
 from langchain.schema import HumanMessage, AIMessage
+from ..helpers.redis_connector import async_redis_client_provider
+import json
 
 async def load_memory(state : InputState) -> FlagState:
     
     try :
         
-        # CHANGES 
         
         user_session = state.user_session
         chat_session = state.chat_session
         
-        async with httpx.AsyncClient() as client:
-                    
-            response = await client.post("http://localhost:4004/verify_user_session_and_load_memory", json={"user_session" : user_session , "chat_session" : chat_session})
-            resp = response.json()
+        if(state.is_new_chat == True) : 
             
-            if resp["status"] == "error":
-                return {
-                    "status" : "error" , 
-                    "message" : "Cannot validate the user session and load the memory" , 
-                }
+            async_redis_client = await async_redis_client_provider()
             
-            new_mmy = await CustomClassTry.create_memory(
-                user_session= user_session , 
-                chat_session= chat_session ,
-                session_id= chat_session
+            memory_object = ReasoningAgentInputState(
+                user_input_id= state.user_input_id , 
+                chat_session= chat_session , 
+                history_messages= [],
+                summary= "",
             )
             
-            await new_mmy.redis_client.setex(chat_session+"MeowDass" , 900 , user_session )
+            await async_redis_client.execute_command("JSON.SET" , str(chat_session)+"MeowMemory" , "$" , memory_object.model_dump_json(exclude_none=True))
             
-            data = resp["data"]
+            await async_redis_client.expire(str(chat_session)+"MeowMWmory" , 900)
             
-            for row in data : 
-                
-                await new_mmy.aadd_message([HumanMessage(content=row["ques"])])
-                await new_mmy.aadd_message([AIMessage(content=row["workflow"])])
-                            
+            
             return {
                 "status" : "success" , 
-                "message" : "The user session is valid and the chat belongs to the user and the memory is loaded",
-                "is_memory_loaded" : True,
-                "user_input_id" : resp["user_input_id"],
-                "user_name" : resp["user_name"]
+                "message" : "as this is a new chat , a new memory instance is set in redis" , 
+                "user_input_id" : state.user_input_id , 
+                "chat_session" : chat_session , 
+                "history_messages" : [] , 
+                "summary" : "" , 
+                "relevant_workflows" : []
             }
+        
+        else : 
             
+            async with httpx.AsyncClient() as client:
+                    
+                response = await client.post("http://localhost:4004/load_memory", json={"user_session" : user_session , "chat_session" : chat_session})
+                resp = response.json()
+                
+                if(resp["status"] != "success") : 
+                    
+                    return {
+                        "status" : "error" , 
+                        "message" : "some internal error happened while loading the existing memory"
+                    }
+                
+                data = resp["data"]
+            
+                memory_object = ReasoningAgentInputState(**data)
+                
+                async_redis_client = await async_redis_client_provider()
+                
+                await async_redis_client.execute_command("JSON.SET" , str(chat_session)+"MeowMemory" , "$" , memory_object.model_dump_json(exclude_none=True))
+                
+                await async_redis_client.expire(str(chat_session)+"MeowMemory" , 900)
+                
+                return {
+                    "status" : "success" , 
+                    "message" : "Chat memory is loaded successfully",
+                    **data
+                }  
+                
     except Exception as e :
+        
+      print(e)
         
       return {
           "status" : "error" , 
