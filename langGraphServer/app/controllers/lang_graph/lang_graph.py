@@ -50,14 +50,16 @@ from lang_graph.nodes.requestValidation.is_new_chat import is_new_chat , is_new_
 from lang_graph.nodes.requestValidation.is_valid_user_session_for_new_chat import is_valid_user_session_for_new_chat
 from lang_graph.nodes.requestValidation.is_valid_user_session_for_old_chat import is_valid_user_session_for_old_chat
 from lang_graph.nodes.loading_relevant_workflows.is_loading_workflow_successful import is_loading_workflow_successful , is_loading_workflow_successful_wrapper
-from lang_graph.nodes.loading_relevant_workflows.is_relevant_workflow_loaded import is_relevant_workflow_loaded , is_relevant_workflow_loaded_wrapper
+from lang_graph.nodes.loading_relevant_workflows.is_relevant_workflow_loaded import  is_relevant_workflow_loaded_wrapper
 from lang_graph.nodes.loading_relevant_workflows.load_relevant_workflows import load_relevant_workflows
 from lang_graph.nodes.reasoning_agent.invoke_reasoning_agent import invoke_reasoning_agent
 from lang_graph.nodes.reasoning_agent.is_invoke_success import is_invoke_success , is_invoke_success_wrapper
 from lang_graph.nodes.reasoning_agent.is_reinvoke_required import is_reinvoke_required ,is_reinvoke_required_wrapper
 from lang_graph.nodes.reasoning_agent.reasoning_agent_output_formatter import reasoning_agent_output_formatter
 from lang_graph.nodes.requestValidation.is_new_workflow import is_new_workflow , is_new_workflow_wrapper
-from lang_graph.state import State , Workflow , toolCallInfo , inputState , flagState
+from lang_graph.state import InputState , ReasoningAgentInputState 
+from lang_graph.nodes.error_checker.error_checker import error_checker , error_checker_wrapper
+
 
 
 load_dotenv()
@@ -113,34 +115,36 @@ date_clash_checker_tool = StructuredTool.from_function(
 
 
 
-graph = StateGraph(State)
-
-
-# graph.add_node(START)
-# graph.add_node(END)
-
+graph = StateGraph(InputState)
     
 nodes = {
-    are_tools_set_wrapper : "are_tools_set",
-    set_tools : "set_tools", 
-    are_agents_set_wrapper : "are_agents_set", 
-    set_agents : "set_agents",
-    is_new_chat_wrapper : "is_new_chat",
-    is_valid_user_session_for_old_chat : "is_valid_user_session_for_old_chat",
-    is_valid_user_session_for_new_chat :"is_valid_user_session_for_new_chat",
-    is_memory_loaded_wrapper :"is_memory_loaded",
-    load_memory : "load_memory", 
-    is_relevant_workflow_loaded_wrapper : "is_relevant_workflow_loaded",
-    load_relevant_workflows :"load_relevant_workflows",
-    is_loading_workflow_successful_wrapper : "is_loading_workflow_successful",
-    invoke_reasoning_agent : "invoke_reasoning_agent",
-    is_invoke_success_wrapper : "is_invoke_success",
-    is_reinvoke_required_wrapper : "is_reinvoke_required",
-    reasoning_agent_output_formatter : "reasoning_agent_output_formatter"
+    "are_tools_set": are_tools_set_wrapper,
+    "set_tools": set_tools,
+    "are_agents_set": are_agents_set_wrapper,
+    "set_agents": set_agents,
+    "is_new_chat": is_new_chat_wrapper,
+    "is_valid_user_session_for_old_chat": is_valid_user_session_for_old_chat,
+    "is_valid_user_session_for_new_chat": is_valid_user_session_for_new_chat,
+    "is_memory_loaded": is_memory_loaded_wrapper,
+    "load_memory": load_memory,
+    "load_relevant_workflows": load_relevant_workflows,
+    "invoke_reasoning_agent": invoke_reasoning_agent,
+    "is_reinvoke_required": is_reinvoke_required_wrapper,
+    "reasoning_agent_output_formatter": reasoning_agent_output_formatter,
+    "error_checker1": error_checker_wrapper,
+    "error_checker2": error_checker_wrapper,
+    "error_checker3": error_checker_wrapper,
+    "error_checker4": error_checker_wrapper,
+    "error_checker5": error_checker_wrapper,
+    "error_checker6": error_checker_wrapper,
+    "error_checker7": error_checker_wrapper
 }
 
+
 for key,value in nodes.items():
-    graph.add_node(value , key)
+    graph.add_node(key , value)
+
+
 
 
 
@@ -160,7 +164,15 @@ graph.add_conditional_edges(
 )
 
 graph.add_edge(
-    "set_tools", "are_agents_set"
+    "set_tools" , "error_checker1"
+)
+
+graph.add_conditional_edges(
+    "error_checker1",
+    error_checker, {
+        "success" : "are_agents_set",
+        "error" : END
+    } 
 )
 
 graph.add_conditional_edges(
@@ -173,8 +185,17 @@ graph.add_conditional_edges(
     }
 )
 
+
 graph.add_edge(
-    "set_agents", "is_new_chat"
+    "set_agents" , "error_checker2"
+)
+
+graph.add_conditional_edges(
+    "error_checker2",
+    error_checker, {
+        "success" : "is_new_chat",
+        "error" : END
+    } 
 )
 
 graph.add_conditional_edges(
@@ -188,11 +209,27 @@ graph.add_conditional_edges(
 )
 
 graph.add_edge(
-    "is_valid_user_session_for_new_chat", "is_memory_loaded"
+    "is_valid_user_session_for_new_chat" , "error_checker3"
+)
+
+graph.add_conditional_edges(
+    "error_checker3",
+    error_checker, {
+        "success" : "is_memory_loaded",
+        "error" : END
+    } 
 )
 
 graph.add_edge(
-    "is_valid_user_session_for_old_chat", "is_memory_loaded"
+    "is_valid_user_session_for_old_chat" , "error_checker4"
+)
+
+graph.add_conditional_edges(
+    "error_checker4",
+    error_checker, {
+        "success" : "is_memory_loaded",
+        "error" : END
+    } 
 )
 
 graph.add_conditional_edges(
@@ -200,49 +237,47 @@ graph.add_conditional_edges(
     is_memory_loaded,
     {
         "error": END, 
-        "yes": "is_relevant_workflow_loaded", 
+        "yes": "load_relevant_workflows", 
         "no": "load_memory"
     }
 )
 
 graph.add_edge(
-    "load_memory", "is_relevant_workflow_loaded"
+    "load_memory" , "error_checker5"
 )
 
 graph.add_conditional_edges(
-    "is_relevant_workflow_loaded",
-    is_relevant_workflow_loaded,
+    "error_checker5",
+    error_checker, {
+        "success" : "load_relevant_workflows",
+        "error" : END
+    } 
+)
+
+
+graph.add_edge(
+    "load_relevant_workflows", "error_checker6"
+)
+
+graph.add_conditional_edges(
+    "error_checker6",
+    error_checker,
     {
         "error": END, 
-        "yes": "invoke_reasoning_agent",
-        "no": "load_relevant_workflows"
+        "success": "invoke_reasoning_agent", 
     }
 )
 
 graph.add_edge(
-    "load_relevant_workflows", "is_loading_workflow_successful"
+    "invoke_reasoning_agent" , "error_checker7"
 )
 
 graph.add_conditional_edges(
-    "is_loading_workflow_successful",
-    is_loading_workflow_successful,
-    {
-        "error": END, 
-        "yes": "invoke_reasoning_agent", 
-        "no": END
-    }
-)
-
-graph.add_edge(
-    "invoke_reasoning_agent" , "is_invoke_success"
-)
-
-graph.add_conditional_edges(
-    "is_invoke_success" , 
-    is_invoke_success,
+    "error_checker7", 
+    error_checker,
     {
         "error" : END,
-        "yes" : "reasoning_agent_output_formatter"
+        "success" : "reasoning_agent_output_formatter"
     }
 )
 
@@ -261,28 +296,28 @@ graph.add_conditional_edges(
 
 compiled_graph = graph.compile()
 
-try:
-   with open("graph.png", "wb") as f:
-        f.write(compiled_graph.get_graph().draw_mermaid_png())
-        
-except Exception as e :
-    print("pongada")
+# export to PNG using graphviz
+with open("graph.png", "wb") as f:
+    f.write(compiled_graph.get_graph().draw_png())
+
     
 async def main():
     
-    dummy_state = inputState(
-    user_input="Reschedule final exams from 20th Sept to 25th Sept",
-    user_session="sess1234",
-    chat_session=7,
-    is_new_chat=True,
-    message="",
-    status= ""
-)
-    async for event in compiled_graph.astream(dummy_state, config={"configurable": {"thread_id": "test_thread"}}):
-        print(event.keys())
-        print()
-        print(list(event.values())[0]["message"])
-        print()
-        print()
+    return "hlo"
+    
+    # dummy_state = inputState(
+    # user_input="Reschedule final exams from 20th Sept to 25th Sept",
+    # user_session="sess1234",
+    # chat_session=7,
+    # is_new_chat=True,
+    # message="",
+    # status= ""
+# )
+    # async for event in compiled_graph.astream(dummy_state, config={"configurable": {"thread_id": "test_thread"}}):
+    #     print(event.keys())
+    #     print()
+    #     print(list(event.values())[0]["message"])
+    #     print()
+    #     print()
         
 asyncio.run(main())

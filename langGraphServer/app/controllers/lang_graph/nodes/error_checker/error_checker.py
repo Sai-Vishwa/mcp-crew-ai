@@ -15,3 +15,6 @@ def error_checker(state : FlagState) -> str :
         print(e)
         
         return "error"
+    
+def error_checker_wrapper(state : FlagState) -> FlagState : 
+    return {}

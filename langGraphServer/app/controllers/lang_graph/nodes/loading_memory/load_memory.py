@@ -1,6 +1,6 @@
 from flask import jsonify
 import httpx
-from ...state import InputState , MemoryState , FlagState
+from ...state import InputState , ReasoningAgentInputState , FlagState
 from ..agents.set_agents import CustomRedisClass , is_redis_memory_not_created , CustomClassTry
 from langchain.schema import HumanMessage, AIMessage
 

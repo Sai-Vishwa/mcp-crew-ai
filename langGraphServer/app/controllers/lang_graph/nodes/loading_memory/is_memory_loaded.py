@@ -1,11 +1,9 @@
-from ...state import FlagState
+from ...state import FlagState , InputState
 from ..agents.set_agents import is_redis_memory_not_created
 
-async def is_memory_loaded(state : FlagState) -> str : 
+async def is_memory_loaded(state : InputState) -> str : 
     try : 
-        
-        if(state.status != "success"):
-            return "error"
+
         
         # CHANGES
         
@@ -20,7 +18,7 @@ async def is_memory_loaded(state : FlagState) -> str :
         print(e)
         return "error"
     
-def is_memory_loaded_wrapper(state: FlagState) -> FlagState:
+def is_memory_loaded_wrapper(state: FlagState) -> InputState:
     if(state.status != "success") :
         return state
     return {
