@@ -299,7 +299,7 @@ async def set_agents(state : flagState) -> flagState:
             model="gemini-1.5-flash",  
             google_api_key=os.getenv("GEMINI_API"),
             temperature=0.2,
-            max_output_tokens=1000,
+            max_output_tokens=1500,
         )
         
         reasoning_agent = initialize_agent(

@@ -1,8 +1,12 @@
 from ...state import ReasoningAgentInputState , FlagState
+import tiktoken
 
 async def set_prompt_for_user_request(state : ReasoningAgentInputState) -> FlagState : 
     
     try :
+        
+        system_prompt = ""
+        
         
         return {
             "status" : "success" , 
