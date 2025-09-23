@@ -1,16 +1,16 @@
-from ...state import State
+from ...state import State , ListOfRelevantWorkflowState , ReasoningAgentResponse , TemporaryHolderForReasoningAgentOutcome
 from ..agents.set_agents import expose_reasoning_agent_with_memory
 from ..tools.set_tools import expose_tools
 import json
 
-async def invoke_reasoning_agent(state : State):
+async def invoke_reasoning_agent(state : ListOfRelevantWorkflowState) -> TemporaryHolderForReasoningAgentOutcome    :
     
     try : 
         
         reasoning_agent_with_memory = expose_reasoning_agent_with_memory()
         Tools = expose_tools()
         
-        user_prompt = state.user_input    
+        user_prompt = state.user_input  
         tools_str = "\n".join([f"{tool.name}: {tool.description}" for tool in Tools])
         relevant_workflows_str = json.dumps(state.relevant_workflows)
         

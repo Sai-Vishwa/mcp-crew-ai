@@ -1,7 +1,7 @@
 from .set_tools import expose_tools , expose_client 
-from ...state import inputState , flagState
+from ...state import InputState , FlagState
 
-async def are_tools_set(state : flagState) -> str:
+async def are_tools_set(state : FlagState) -> str:
     try:
         Tools = expose_tools()
         client = expose_client()
@@ -14,5 +14,5 @@ async def are_tools_set(state : flagState) -> str:
         print(e)
         return  "error"
     
-def are_tools_set_wrapper(state: inputState) -> flagState:
+def are_tools_set_wrapper(state: InputState) -> FlagState:
     return {"message" : "Checking if tools are set" , "status" : "success"}

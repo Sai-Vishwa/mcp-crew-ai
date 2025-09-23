@@ -4,6 +4,9 @@ async function chatChecker(userName, chatSession) {
         const connectionSlave = await connectSlave();
         const [resp] = await connectionSlave.execute("select uname from chathistory where chatid=?", [chatSession]);
         const Response = resp;
+        console.log("ENNA THA DA RESP ==== ");
+        console.log(JSON.stringify(Response));
+        console.log("chat id is ==> ", chatSession);
         if (Response[0].uname === userName) {
             return {
                 status: "success",

@@ -1,6 +1,6 @@
-from ...state import State
+from ...state import State , ListOfRelevantWorkflowState
 
-async def is_loading_workflow_successful(state : State) -> str :
+async def is_loading_workflow_successful(state : ListOfRelevantWorkflowState) -> str :
     
     try :
         
@@ -12,5 +12,5 @@ async def is_loading_workflow_successful(state : State) -> str :
     except Exception as e : 
         return "error"
     
-def is_loading_workflow_successful_wrapper(state: State) :
+def is_loading_workflow_successful_wrapper(state: ListOfRelevantWorkflowState) -> ListOfRelevantWorkflowState:
     return state

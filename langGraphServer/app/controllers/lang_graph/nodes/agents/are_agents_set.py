@@ -1,7 +1,7 @@
 from .set_agents import expose_all
-from ...state import State , flagState , inputState
+from ...state import FlagState
 
-async def are_agents_set(state : flagState) -> str:
+async def are_agents_set(state : FlagState) -> str:
     try: 
         agents = expose_all()
         reasoning_agent = agents["reasoning_agent"]
@@ -24,7 +24,8 @@ async def are_agents_set(state : flagState) -> str:
         print(e)
         return  "error"
     
-def are_agents_set_wrapper(state: flagState) -> flagState:
+def are_agents_set_wrapper(state: FlagState) -> FlagState:
+    
     if(state.status != "success") :
         return state
     return {

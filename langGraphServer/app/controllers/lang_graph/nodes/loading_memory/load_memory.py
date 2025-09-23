@@ -1,12 +1,14 @@
 from flask import jsonify
 import httpx
-from ...state import State , loaderState , inputState
+from ...state import InputState , MemoryState , FlagState
 from ..agents.set_agents import CustomRedisClass , is_redis_memory_not_created , CustomClassTry
 from langchain.schema import HumanMessage, AIMessage
 
-async def load_memory(state : loaderState) -> loaderState:
+async def load_memory(state : InputState) -> FlagState:
     
     try :
+        
+        # CHANGES 
         
         user_session = state.user_session
         chat_session = state.chat_session

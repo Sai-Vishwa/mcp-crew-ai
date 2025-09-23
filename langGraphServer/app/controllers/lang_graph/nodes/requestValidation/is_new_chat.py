@@ -1,8 +1,8 @@
 from flask import jsonify
-from ...state import State , flagState , inputState
+from ...state import FlagState , InputState
 from ..agents.set_agents import is_redis_memory_not_created
 
-async def is_new_chat(state : inputState) -> str:
+async def is_new_chat(state : InputState) -> str:
     
     try : 
         if(state.status != "success") :
@@ -23,7 +23,7 @@ async def is_new_chat(state : inputState) -> str:
         return "error"
     
     
-def is_new_chat_wrapper(state: flagState) -> inputState:
+def is_new_chat_wrapper(state: FlagState) -> InputState:
     if(state.status != "success") :
         return state
     return {

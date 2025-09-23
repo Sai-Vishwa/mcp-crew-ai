@@ -1,12 +1,14 @@
 import httpx
-from ...state import State  ,loaderState , ListOfRelevantWorkflowState , RelevantWorkFlowState
+from ...state import InputState , RelevantWorkflowsState , FlagState
 import sys
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-async def load_relevant_workflows(state : loaderState) -> ListOfRelevantWorkflowState:
+async def load_relevant_workflows(state : InputState) -> FlagState:
+    
+    # CHANGES
     
     try: 
         
@@ -16,6 +18,8 @@ async def load_relevant_workflows(state : loaderState) -> ListOfRelevantWorkflow
                 resp = response.json()
                 print("the resp i got from db server")
                 print(resp)
+                
+                print("CHAT SESSION IS ==" , state.chat_session)
                 
                 if resp["status"] == "error":
                     return {
@@ -27,15 +31,18 @@ async def load_relevant_workflows(state : loaderState) -> ListOfRelevantWorkflow
                 
                 
                 
-                relevant_workflows = {}
+                relevant_workflows = [] 
                 
                 # logic to set relevant workflows ( json conversion )
                 
                 return {
                     "status" : "success" , 
-                    "message" : "The user session is valid and a new chat memory is created for the user",
+                    "message" : resp["message"],
                     "relevant_workflows" : relevant_workflows,
-                    "is_relevant_inputs_loaded" : True
+                    "is_relevant_inputs_loaded" : True,
+                    "user_input" : state.user_input,
+                    "additional_message_for_reasoning_agent" : "",
+                    "chat_session" : state.chat_session
                 }
         
     except Exception as e :

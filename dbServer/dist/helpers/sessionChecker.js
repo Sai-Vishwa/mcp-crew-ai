@@ -8,19 +8,26 @@ async function sessionChecker(session) {
         if (uname.length !== 1) {
             return {
                 status: "error",
-                uname: ""
+                uname: "error"
             };
         }
+        if (typeof uname[0].uname != "string") {
+            return {
+                status: "error",
+                uname: "error"
+            };
+        }
+        const USER = uname[0].uname;
         return {
             status: "success",
-            uname: uname[0].uname
+            uname: USER
         };
     }
     catch (err) {
         console.error("Error in login function: ", err);
         return {
             status: "error",
-            uname: ""
+            uname: "error"
         };
     }
 }

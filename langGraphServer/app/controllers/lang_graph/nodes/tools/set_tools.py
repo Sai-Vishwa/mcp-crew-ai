@@ -1,13 +1,13 @@
 
 from langchain_mcp_adapters.client import MultiServerMCPClient
-from ...state import State , inputState , flagState
+from ...state import FlagState
 
 Tools = None
 
 client = None
 
 
-async def set_tools(state : flagState) -> flagState:
+async def set_tools(state : FlagState) -> FlagState:
     try: 
         global client
         global Tools

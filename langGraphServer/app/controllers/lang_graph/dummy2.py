@@ -8,6 +8,8 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 
 from langchain.embeddings import init_embeddings
+from pydantic import BaseModel , Field
+
 
 
 class State1(TypedDict):
@@ -16,20 +18,24 @@ class State1(TypedDict):
     
 class State2(TypedDict):
     counter : int
-    
 
+class FlagState(BaseModel) : 
+    status : str
+    message : str
     
 
 def node1(state: State1) -> State2:
+    return {"counter" : 5000 , "extra" : "na meow ila meow dass" , "status" : "success" , "message" : "unaku ellame vetri tha"}
+
+def node2(state: State2 ) -> FlagState:
+    print("inga paaru thala")
     print(state)
-    return {"counter" : state["count"]}
-
-def node2(state: State1) -> State1:
-    print(state)
-    return {"Count" : state["counter"]}
+    return {}
 
 
-builder = StateGraph(State1  ,input_schema= State1 , output_schema= State1)
+
+
+builder = StateGraph(State1  ,input_schema= State1 , output_schema= FlagState)
 builder.add_node("node1", node1)
 builder.add_node("node2", node2)
 builder.set_entry_point("node1")

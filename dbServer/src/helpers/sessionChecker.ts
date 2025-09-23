@@ -19,19 +19,29 @@ async function sessionChecker(session : string) : Promise<responseType> {
             if(uname.length !== 1){
                 return {
                     status: "error",
-                    uname: ""
+                    uname: "error"
                 } as responseType;
             }
+            if(typeof uname[0].uname != "string"){
+                return {
+                    status : "error", 
+                    uname : "error"
+                } as responseType
+            }
+                
+            
+            const USER = uname[0].uname as string
+
             return {
                 status: "success",
-                uname: uname[0].uname
+                uname: USER
             } as responseType;
     }
     catch(err: any){
         console.error("Error in login function: ", err);
         return {
             status: "error",
-            uname: ""
+            uname: "error"
         } as responseType;
     }
     

@@ -1,8 +1,8 @@
-from ...state import State,ReasoningAgentResponse
+from ...state import State,ReasoningAgentResponse , TemporaryHolderForReasoningAgentOutcome
 import json
 from ..tools.set_tools import expose_tools
 
-async def reasoning_agent_output_formatter(state : State):
+async def reasoning_agent_output_formatter(state : TemporaryHolderForReasoningAgentOutcome) -> ReasoningAgentResponse:
     try : 
         
         if(type(state.reasoning_agent_response) != str and type(state.reasoning_agent_response) != dict and type(state.reasoning_agent_response) != ReasoningAgentResponse):
@@ -14,11 +14,17 @@ async def reasoning_agent_output_formatter(state : State):
                 "additional_message_for_reasoning_agent": "Please provide the output in the correct format"
             }
             
-        response = state.reasoning_agent_response
+        response = {}
+            
+        if(type(state.reasoning_agent_response) == str ):
+            response : dict = json.loads(state.reasoning_agent_response)
         
-        response = response.get("output")
+        if(type(state.reasoning_agent_response) == dict):
+            response : dict = state.reasoning_agent_response
         
-        cleaned = response.split("{", 1)[1].rsplit("}", 1)[0]
+        response_str : str = response.get("output")
+        
+        cleaned = response_str.split("{", 1)[1].rsplit("}", 1)[0]
         cleaned = "{" + cleaned + "}"        
         
         response = json.loads(cleaned)
@@ -56,7 +62,8 @@ async def reasoning_agent_output_formatter(state : State):
         return {
             "status" : "success" , 
             "message" : "Successfully formatted the reasoning agent output",
-            "reasoning_agent_response" : response
+            "reasoning_agent_response" : response,
+            "additional_message_for_reasoning_agent" : ""
         }
         
         

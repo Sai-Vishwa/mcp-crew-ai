@@ -7,13 +7,18 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.messages import BaseMessage
 from redis.asyncio import Redis
 from ..tools.set_tools import expose_tools
-from ...state import State , flagState
+from ...state import FlagState
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_core.messages import BaseMessage, message_to_dict
 import logging
 from dotenv import load_dotenv
 import asyncio
 from langchain_core.chat_history import BaseChatMessageHistory
+from typing import Callable, Any
+
+
+
+from langchain_redis.chat_message_history import RedisChatMessageHistory
 
 
 import json
@@ -108,9 +113,9 @@ class CustomClassTry(BaseChatMessageHistory) :
         return self.key_prefix + self.session_id
 
     @property
-    def messages(self) -> List[BaseMessage]:
+    async def messages(self) -> List[BaseMessage]:
         """Retrieve the messages from Redis"""
-        _items = self.redis_client.lrange(self.key, 0, -1)
+        _items = await self.redis_client.lrange(self.key, 0, -1)
         items = [json.loads(m.decode("utf-8")) for m in _items[::-1]]
         messages = messages_from_dict(items)
         return messages
@@ -142,7 +147,11 @@ class CustomClassTry(BaseChatMessageHistory) :
         """Clear session memory from Redis"""
         await self.redis_client.delete(self.key)
 
-    
+    async def aget_messages(self):
+        _items = await self.redis_client.lrange(self.key, 0, -1)
+        items = [json.loads(m.decode("utf-8")) for m in _items[::-1]]
+        messages = messages_from_dict(items)
+        return messages
     
 class CustomRedisClass(CustomClassTry) :
     
@@ -179,6 +188,41 @@ class CustomRedisClass(CustomClassTry) :
                 
         
         
+class AsyncRunnableWithMessageHistory :
+    
+    def __init__(
+        self,
+        runnable: Any,
+        get_session_history: Callable[[str], Any],
+        **kwargs
+    ):
+        self.sync_chain = RunnableWithMessageHistory(
+            runnable=runnable,
+            get_session_history=self._sync_session_wrapper(get_session_history),
+            **kwargs
+        )
+        self.get_session_history_async = get_session_history
+    
+    def _sync_session_wrapper(self, async_getter):
+        """Wrap async getter to work with sync RunnableWithMessageHistory"""
+        def sync_getter(session_id: str) -> BaseChatMessageHistory:
+            try:
+                loop = asyncio.get_running_loop()
+                # This might block, but it's what LangChain expects
+                future = asyncio.run_coroutine_threadsafe(
+                    async_getter(session_id), loop
+                )
+                return future.result()
+            except RuntimeError:
+                return asyncio.run(async_getter(session_id))
+        return sync_getter
+    
+    async def ainvoke(self, input: dict, config: dict = None):
+        """Async invoke that uses your async session history"""
+        # Your custom async implementation here
+        # You'd need to handle the session history async properly
+        pass
+
 
 
 
@@ -196,11 +240,11 @@ async def is_redis_memory_not_created(chat_session : str , user_session : str) -
     return False
     
 
-async def get_by_session_id(session_id: str) -> CustomClassTry:
+def aget_by_session_id(session_id: str) -> CustomClassTry:
     
         print("get by session id is getting called")
     
-        redis_mmy = await CustomClassTry.create_memory(
+        redis_mmy =  CustomClassTry.create_memory(
         chat_session= session_id,
         session_id = session_id,
         user_session= "anything",
@@ -208,8 +252,9 @@ async def get_by_session_id(session_id: str) -> CustomClassTry:
         ttl=900
     )
         
+        
     
-        value = await redis_mmy.redis_client.get(session_id+"MeowDass")
+        value =  redis_mmy.redis_client.get(session_id+"MeowDass")
         
         redis_mmy.user_session = value
         
@@ -229,7 +274,7 @@ async def get_by_session_id(session_id: str) -> CustomClassTry:
 
 
 
-async def set_agents(state : flagState) -> flagState:
+async def set_agents(state : FlagState) -> FlagState:
     
     try:
     
@@ -272,7 +317,7 @@ async def set_agents(state : flagState) -> flagState:
         )
         reasoning_agent_with_memory = RunnableWithMessageHistory(
             reasoning_agent , 
-            get_by_session_id , 
+            aget_by_session_id, 
             input_messages_key= "input",
             history_messages_key= "chat_history",
             output_messages_key= "output"

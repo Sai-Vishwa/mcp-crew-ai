@@ -1,6 +1,6 @@
 from flask import jsonify
 import httpx
-from ...state import Workflow , toolCallInfo , State , inputState , flagState , loaderState
+from ...state import InputState , FlagState
 from ..agents.set_agents import CustomRedisClass , is_redis_memory_not_created , CustomClassTry
 import sys
 import os
@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-async def is_valid_user_session_for_new_chat(state : inputState) -> loaderState:
+async def is_valid_user_session_for_new_chat(state : InputState) -> FlagState:
     try :
         
         user_session = state.user_session
@@ -27,6 +27,8 @@ async def is_valid_user_session_for_new_chat(state : inputState) -> loaderState:
                         "status" : "error" , 
                         "message" : "Cannot create a new chat session for the user" , 
                     }
+                    
+                #CHANGES 
                 
                 new_mmy = await CustomClassTry.create_memory(
                     session_id=resp["chatid"],
@@ -45,13 +47,11 @@ async def is_valid_user_session_for_new_chat(state : inputState) -> loaderState:
                 return {
                     "status" : "success" , 
                     "message" : "The user session is valid and a new chat memory is created for the user",
-                    "is_memory_loaded" : True ,
                     "user_input_id" : resp["user_input_id"],
-                    "chat_session" : str(resp["chatid"]),
-                    "user_name" : resp["uname"],
-                    "user_input" : state.user_input,
-                    "user_session" : state.user_session
+                    "chat_session" : resp["chatid"],
+                    "user_name" : resp["uname"]
                 }
+                
     except Exception as e :
         print("enna da prechana")
         print(e)

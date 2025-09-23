@@ -15,8 +15,8 @@ async function seedDB() {
     await connection.query(`DROP TABLE IF EXISTS specialaccess`);
     await connection.query(`DROP TABLE IF EXISTS session`);
     await connection.query(`DROP TABLE IF EXISTS auth`);
+    await connection.query(`DROP TABLE IF EXISTS workflow_steps`);
     await connection.query(`DROP TABLE IF EXISTS workflow`);
-    await connection.query(`DROP TABLE IF EXISTS workflowsteps`);
     // Auth table with placement, exam-cell, transport roles
     await connection.query(`
     CREATE TABLE auth (

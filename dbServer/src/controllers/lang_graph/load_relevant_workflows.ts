@@ -68,6 +68,10 @@ async function load_relevant_workflow(req : Request & {body : requestType} , res
 
             console.log("The valid session in load relevant workflow is ==> " , isValidSession)
 
+            console.log("ayayoooo" , isValidSession.uname)
+
+            const UNAME = isValidSession.uname
+
             if(isValidSession.status == "error"){
                 res.status(200).json({
                     status: "error",
@@ -76,7 +80,7 @@ async function load_relevant_workflow(req : Request & {body : requestType} , res
                 return;
             }
 
-            const isValidChat = await chatChecker(isValidSession.uname as string , chat_session)
+            const isValidChat = await chatChecker(UNAME as string, chat_session)
 
             if(isValidChat.status == "error"){
                 res.status(200).json({
