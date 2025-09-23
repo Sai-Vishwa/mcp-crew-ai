@@ -1,18 +1,16 @@
-from .set_agents import expose_all
+from .set_prompt_template import expose_chat_prompt_template
 from ...state import FlagState
 
-async def are_agents_set(state : FlagState) -> str:
+async def is_prompt_template_set(state : FlagState) -> str:
     try: 
         
-        agents = expose_all()
-        reasoning_agent = agents["reasoning_agent"]
-        llm = agents["llm"]
-        execution_agent = agents["execution_agent"]
+        chat_prompt_template = expose_chat_prompt_template()
+
         
         if(state.status != "success") :
             return "error"
         
-        if(reasoning_agent is None or execution_agent is None or llm is None ):
+        if(chat_prompt_template is None):
             return "no"
             
         else:
@@ -22,7 +20,7 @@ async def are_agents_set(state : FlagState) -> str:
         print(e)
         return  "error"
     
-def are_agents_set_wrapper(state: FlagState) -> FlagState:
+def is_prompt_template_set_wrapper(state: FlagState) -> FlagState:
     
     if(state.status != "success") :
         return state

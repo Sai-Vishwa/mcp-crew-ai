@@ -71,6 +71,8 @@ class ReasoningAgentInputState(BaseModel) :  # this state holds the user chat hi
     
     user_input_id : int # this is the config id for unique identification 
     
+    user_input : str
+    
     chat_session : int # the chat session whose memory is stored
     
     history_messages : List[SingleMessageFormat] # List of Messages from history

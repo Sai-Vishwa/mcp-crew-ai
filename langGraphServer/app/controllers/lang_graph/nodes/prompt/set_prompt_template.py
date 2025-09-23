@@ -48,3 +48,6 @@ async def set_prompt_template(state : FlagState) -> FlagState:
             "message" : "cannot set the chat prompt template"
         }
     
+    
+def expose_chat_prompt_template():
+    return chat_prompt_template
