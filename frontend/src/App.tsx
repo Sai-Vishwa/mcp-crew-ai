@@ -3,7 +3,7 @@ import { BrowserRouter , Routes , Route } from 'react-router-dom'
 import LoginPage from './pages/LoginPage'
 import ChatPage from './pages/ChatPage'
 import AdminPage from './pages/AdminPage'
-import DummyPage from './pages/DummyPage'
+// import DummyPage from './pages/DummyPage'
 
 
 
@@ -15,7 +15,7 @@ function App() {
         <Route path="/" element={<LoginPage />}/>
         <Route path="/chat-page" element={<ChatPage />}/>
         <Route path='/admin' element={<AdminPage/>} />
-        <Route path='/dummy' element={<DummyPage/>} />
+        {/* <Route path='/dummy' element={<DummyPage/>} /> */}
       </Routes>
    </BrowserRouter>
   )

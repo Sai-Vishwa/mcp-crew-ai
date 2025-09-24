@@ -11,17 +11,18 @@ import {
   Plus,
   Clock,
   Wrench,
-  Lock,
-  CheckCircle,
-  XCircle,
+  // Lock,
+  // CheckCircle,
+  // XCircle,
   User,
   Bot,
-  Filter,
+  // Filter,
   X
 } from 'lucide-react';
 
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
+import { ToolsPanel } from '../components/ChatPage/ToolsPanel';
 
 // TypeScript interfaces
 interface Message {
@@ -42,9 +43,7 @@ interface Tool {
   id: number;
   name: string;
   description: string;
-  available: boolean;
-  requested: boolean;
-  addedAsContext: boolean;
+  available: number;
 }
 
 interface Theme {
@@ -464,9 +463,7 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                         id: tool.id,
                         name: tool.name,
                         description: tool.description,
-                        available: tool.available === 1,
-                        requested: false,
-                        addedAsContext: false
+                        available: tool.available,
                     });
                 })
                 const fetchedChats = data.data.chatHistory;
@@ -693,148 +690,148 @@ const PreviousChats: React.FC = () => {
   );
 };
 
-// Tools sidebar
-const ToolsSidebar: React.FC = () => {
-  const { state, actions } = useAppContext();
+// // Tools sidebar
+// const ToolsSidebar: React.FC = () => {
+//   const { state, actions } = useAppContext();
   
-  const filteredTools = state.tools.filter(tool => {
-    const matchesSearch = tool.name.toLowerCase().includes(state.toolSearchTerm.toLowerCase()) ||
-      tool.description.toLowerCase().includes(state.toolSearchTerm.toLowerCase());
+//   const filteredTools = state.tools.filter(tool => {
+//     const matchesSearch = tool.name.toLowerCase().includes(state.toolSearchTerm.toLowerCase()) ||
+//       tool.description.toLowerCase().includes(state.toolSearchTerm.toLowerCase());
 
-    if (state.toolFilter === 'available') return matchesSearch && tool.available;
-    if (state.toolFilter === 'unavailable') return matchesSearch && !tool.available;
-    return matchesSearch;
-  });
+//     if (state.toolFilter === 'available') return matchesSearch && tool.available;
+//     if (state.toolFilter === 'unavailable') return matchesSearch && !tool.available;
+//     return matchesSearch;
+//   });
 
-  return (
-    <motion.div
-      className={`w-80 h-full ${state.theme.sidebarBackground} backdrop-blur-md border-l flex flex-col`}
-      variants={sidebarVariants}
-      initial="initial"
-      animate="animate"
-      transition={{ delay: 0.2 }}
-    >
-      <div className="p-4 border-b border-gray-200/10">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className={`text-lg font-semibold ${state.theme.textPrimary}`}>Tools</h2>
-        </div>
+//   return (
+//     <motion.div
+//       className={`w-80 h-full ${state.theme.sidebarBackground} backdrop-blur-md border-l flex flex-col`}
+//       variants={sidebarVariants}
+//       initial="initial"
+//       animate="animate"
+//       transition={{ delay: 0.2 }}
+//     >
+//       <div className="p-4 border-b border-gray-200/10">
+//         <div className="flex items-center justify-between mb-4">
+//           <h2 className={`text-lg font-semibold ${state.theme.textPrimary}`}>Tools</h2>
+//         </div>
 
-        <div className="space-y-3">
-          <SearchBar
-            placeholder="Search tools..."
-            value={state.toolSearchTerm}
-            onChange={actions.setToolSearch}
-            theme={state.theme}
-          />
+//         <div className="space-y-3">
+//           <SearchBar
+//             placeholder="Search tools..."
+//             value={state.toolSearchTerm}
+//             onChange={actions.setToolSearch}
+//             theme={state.theme}
+//           />
 
-          <div className="flex space-x-1">
-            {(['all', 'available', 'unavailable'] as ToolFilter[]).map((filter) => (
-              <Button
-                key={filter}
-                onClick={() => actions.setToolFilter(filter)}
-                variant={state.toolFilter === filter ? "default" : "ghost"}
-                size="sm"
-                className={`text-xs capitalize h-7 px-2 ${
-                  state.toolFilter === filter
-                    ? state.theme.buttonBackground
-                    : state.theme.buttonHover
-                }`}
-              >
-                <Filter className="h-3 w-3 mr-1" />
-                {filter}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </div>
+//           <div className="flex space-x-1">
+//             {(['all', 'available', 'unavailable'] as ToolFilter[]).map((filter) => (
+//               <Button
+//                 key={filter}
+//                 onClick={() => actions.setToolFilter(filter)}
+//                 variant={state.toolFilter === filter ? "default" : "ghost"}
+//                 size="sm"
+//                 className={`text-xs capitalize h-7 px-2 ${
+//                   state.toolFilter === filter
+//                     ? state.theme.buttonBackground
+//                     : state.theme.buttonHover
+//                 }`}
+//               >
+//                 <Filter className="h-3 w-3 mr-1" />
+//                 {filter}
+//               </Button>
+//             ))}
+//           </div>
+//         </div>
+//       </div>
 
-      <div className="flex-1 overflow-y-auto p-2">
-        <AnimatePresence>
-          {filteredTools.map((tool, index) => (
-            <motion.div
-              key={tool.id}
-              variants={itemVariants}
-              initial="initial"
-              animate="animate"
-              exit="initial"
-              transition={{ delay: index * 0.05 }}
-              className={`p-4 rounded-lg mb-3 transition-all duration-200 ${state.theme.cardBackground} backdrop-blur-sm`}
-            >
-              <div className="flex items-start justify-between mb-2">
-                <h3 className={`text-sm font-semibold ${state.theme.textPrimary}`}>
-                  {tool.name}
-                </h3>
-                {tool.available ? (
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                ) : (
-                  <XCircle className="h-4 w-4 text-red-500" />
-                )}
-              </div>
-              <p className={`text-xs ${state.theme.textSecondary} mb-3 leading-relaxed`}>
-                {tool.description}
-              </p>
+//       <div className="flex-1 overflow-y-auto p-2">
+//         <AnimatePresence>
+//           {filteredTools.map((tool, index) => (
+//             <motion.div
+//               key={tool.id}
+//               variants={itemVariants}
+//               initial="initial"
+//               animate="animate"
+//               exit="initial"
+//               transition={{ delay: index * 0.05 }}
+//               className={`p-4 rounded-lg mb-3 transition-all duration-200 ${state.theme.cardBackground} backdrop-blur-sm`}
+//             >
+//               <div className="flex items-start justify-between mb-2">
+//                 <h3 className={`text-sm font-semibold ${state.theme.textPrimary}`}>
+//                   {tool.name}
+//                 </h3>
+//                 {tool.available ? (
+//                   <CheckCircle className="h-4 w-4 text-green-500" />
+//                 ) : (
+//                   <XCircle className="h-4 w-4 text-red-500" />
+//                 )}
+//               </div>
+//               <p className={`text-xs ${state.theme.textSecondary} mb-3 leading-relaxed`}>
+//                 {tool.description}
+//               </p>
 
-              {tool.available ? (
-                <Button
-                  onClick={() => 
-                    tool.addedAsContext 
-                      ? actions.removeToolFromContext(tool.id) 
-                      : actions.addToolToContext(tool.id)
-                  }
-                  size="sm"
-                  variant={tool.addedAsContext ? "default" : "outline"}
-                  className={`w-full text-xs h-8 transition-all duration-200 ${
-                    tool.addedAsContext
-                      ? state.theme.buttonBackground
-                      : state.theme.buttonHover
-                  }`}
-                >
-                  <div className="flex items-center space-x-1">
-                    {tool.addedAsContext ? (
-                      <>
-                        <X className="h-3 w-3" />
-                        <span>Remove from Context</span>
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="h-3 w-3" />
-                        <span>Add as Context</span>
-                      </>
-                    )}
-                  </div>
-                </Button>
-              ) : (
-                <Button
-                  onClick={() => actions.requestToolAccess(tool.id)}
-                  disabled={tool.requested}
-                  size="sm"
-                  variant="outline"
-                  className={`w-full text-xs h-8 transition-all duration-200 ${
-                    tool.requested
-                      ? 'opacity-60 cursor-not-allowed'
-                      : state.theme.buttonHover
-                  }`}
-                >
-                  {tool.requested ? (
-                    <div className="flex items-center space-x-1">
-                      <CheckCircle className="h-3 w-3" />
-                      <span>Request Sent</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center space-x-1">
-                      <Lock className="h-3 w-3" />
-                      <span>Request Access</span>
-                    </div>
-                  )}
-                </Button>
-              )}
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
-    </motion.div>
-  );
-};
+//               {tool.available ? (
+//                 <Button
+//                   onClick={() => 
+//                     tool.addedAsContext 
+//                       ? actions.removeToolFromContext(tool.id) 
+//                       : actions.addToolToContext(tool.id)
+//                   }
+//                   size="sm"
+//                   variant={tool.addedAsContext ? "default" : "outline"}
+//                   className={`w-full text-xs h-8 transition-all duration-200 ${
+//                     tool.addedAsContext
+//                       ? state.theme.buttonBackground
+//                       : state.theme.buttonHover
+//                   }`}
+//                 >
+//                   <div className="flex items-center space-x-1">
+//                     {tool.addedAsContext ? (
+//                       <>
+//                         <X className="h-3 w-3" />
+//                         <span>Remove from Context</span>
+//                       </>
+//                     ) : (
+//                       <>
+//                         <Plus className="h-3 w-3" />
+//                         <span>Add as Context</span>
+//                       </>
+//                     )}
+//                   </div>
+//                 </Button>
+//               ) : (
+//                 <Button
+//                   onClick={() => actions.requestToolAccess(tool.id)}
+//                   disabled={tool.requested}
+//                   size="sm"
+//                   variant="outline"
+//                   className={`w-full text-xs h-8 transition-all duration-200 ${
+//                     tool.requested
+//                       ? 'opacity-60 cursor-not-allowed'
+//                       : state.theme.buttonHover
+//                   }`}
+//                 >
+//                   {tool.requested ? (
+//                     <div className="flex items-center space-x-1">
+//                       <CheckCircle className="h-3 w-3" />
+//                       <span>Request Sent</span>
+//                     </div>
+//                   ) : (
+//                     <div className="flex items-center space-x-1">
+//                       <Lock className="h-3 w-3" />
+//                       <span>Request Access</span>
+//                     </div>
+//                   )}
+//                 </Button>
+//               )}
+//             </motion.div>
+//           ))}
+//         </AnimatePresence>
+//       </div>
+//     </motion.div>
+//   );
+// };
 
 // Chat interface
 const ChatInterface: React.FC = () => {
@@ -1080,7 +1077,7 @@ const ThemeToggle: React.FC = () => {
   
   return (
     <motion.div
-      className="absolute top-4 right-4 z-30"
+      className="absolute top-4 right-4 z-50"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 0.8, duration: 0.4 }}
@@ -1122,7 +1119,14 @@ const ChatPage: React.FC = () => {
       <ThemeToggle />
       <PreviousChats />
       <ChatInterface />
-      <ToolsSidebar />
+      {/* <ToolsSidebar /> */}
+       <ToolsPanel
+      tools={state.tools}
+      theme={state.theme.isDark == true ? "dark" : "light"}
+      onAddToContext={()=>{}}
+      onRemoveFromContext={()=>{}}
+      onRequestAccess={()=>{}}
+      />
     </motion.div>
   );
 };

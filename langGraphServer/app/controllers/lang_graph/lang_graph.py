@@ -53,7 +53,6 @@ from lang_graph.nodes.requestValidation.is_valid_user_session_for_old_chat impor
 from lang_graph.nodes.loading_relevant_workflows.load_relevant_workflows import load_relevant_workflows
 from lang_graph.nodes.reasoning_agent.invoke_reasoning_agent import invoke_reasoning_agent
 # from lang_graph.nodes.reasoning_agent.is_invoke_success import is_invoke_success , is_invoke_success_wrapper
-from lang_graph.nodes.reasoning_agent.is_reinvoke_required import is_reinvoke_required ,is_reinvoke_required_wrapper
 from lang_graph.nodes.reasoning_agent.reasoning_agent_output_formatter import reasoning_agent_output_formatter
 # from lang_graph.nodes.requestValidation.is_new_workflow import is_new_workflow , is_new_workflow_wrapper
 from lang_graph.state import InputState , ReasoningAgentInputState 
@@ -134,7 +133,6 @@ nodes = {
     "load_memory": load_memory,
     "load_relevant_workflows": load_relevant_workflows,
     "invoke_reasoning_agent": invoke_reasoning_agent,
-    "is_reinvoke_required": is_reinvoke_required_wrapper,
     "reasoning_agent_output_formatter": reasoning_agent_output_formatter,
     "is_prompt_template_set": is_prompt_template_set_wrapper,
     "set_prompt_template" : set_prompt_template,
@@ -147,7 +145,8 @@ nodes = {
     "error_checker6": error_checker_wrapper,
     "error_checker7": error_checker_wrapper,
     "error_checker8": error_checker_wrapper,
-    "error_checker9": error_checker_wrapper
+    "error_checker9": error_checker_wrapper,
+    "error_checker10": error_checker_wrapper
 }
 
 
@@ -309,7 +308,7 @@ graph.add_conditional_edges(
     "error_checker8",
     error_checker,
     {
-        "success" : END,
+        "success" : "invoke_reasoning_agent",
         "error" : END
     }
 )
@@ -328,14 +327,14 @@ graph.add_conditional_edges(
 )
 
 graph.add_edge(
-    "reasoning_agent_output_formatter" , "is_reinvoke_required"
+    "reasoning_agent_output_formatter" , "error_checker10"
 )
 
 graph.add_conditional_edges(
-    "is_reinvoke_required" , 
-    is_reinvoke_required,
+    "error_checker10" , 
+    error_checker,
     {
-        "no" : END,
+        "success" : END,
         "error" : "invoke_reasoning_agent"
     }
 )
@@ -351,7 +350,7 @@ async def main():
     
     
     dummy_state = InputState(
-    user_input="Reschedule final exams from 20th Sept to 25th Sept",
+    user_input="Reschedule final exams from 20th Sept to 25th Sept remember to check for clash with placements",
     user_session="sess1234",
     is_new_chat=True,
     user_input_id=-1
@@ -363,4 +362,4 @@ async def main():
         print()
         print()
         
-asyncio.run(main())
+# asyncio.run(main())

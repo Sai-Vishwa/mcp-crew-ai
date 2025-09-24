@@ -12,7 +12,7 @@ class SingleWorkflowStepFormat(BaseModel) :
     
     tool_name : str # name of the tool to call
     
-    tool_desc : str # description of the tool to call 
+    tool_description : str # description of the tool to call 
     
     params_required : List[str] # parameters for the tool call
   
@@ -21,7 +21,7 @@ class ReasoningAgentResponseFormat(BaseModel) : # response format expected from 
     
     is_new_workflow : bool # to verify the workflow is new or not
     
-    workflow_id : Optional[int] = None # if using a old workflow what's it's id
+    workflow_id : Optional[int] | None = None # if using a old workflow what's it's id
     
     workflow_name : str # a name for this new workflow 
     
@@ -87,7 +87,7 @@ class ReasoningAgentInputState(BaseModel) :  # this state holds the user chat hi
     
 class ReasoningAgentResponseState(BaseModel) : 
     
-    raw_response : str
+    raw_response : str | dict
     
-    formatted_response : ReasoningAgentResponseFormat
+    formatted_response : Optional[ReasoningAgentResponseFormat] = None
     

@@ -17,15 +17,13 @@ async def invoke_reasoning_agent(state : ReasoningAgentInputState) -> FlagState 
         
         outcome = await reasoning_agent_with_memory.ainvoke(
             {"input" : final_prompt} , 
-            config= {"configurable" : {"session_id" : str(state.chat_session)}}
+            config= {"configurable" : {"session_id" : str(state.user_input_id)}}
         )
-        
-        
         
         return {
             "status" : "success" , 
             "message" : "Reasoning agent predicted the workflow",
-            "reasoning_agent_response" : outcome
+            "raw_response" : outcome
         }
         
     except Exception as e:
