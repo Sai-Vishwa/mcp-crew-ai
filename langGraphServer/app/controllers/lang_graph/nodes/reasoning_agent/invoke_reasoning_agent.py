@@ -1,24 +1,17 @@
-from ...state import State , ListOfRelevantWorkflowState , ReasoningAgentResponse , TemporaryHolderForReasoningAgentOutcome
-from ..agents.set_agents import expose_reasoning_agent_with_memory
+from ...state import ReasoningAgentInputState , FlagState
+from ..agents.set_agents import expose_reasoning_agent
 from ..tools.set_tools import expose_tools
 import json
 
-async def invoke_reasoning_agent(state : ListOfRelevantWorkflowState) -> TemporaryHolderForReasoningAgentOutcome    :
-    
+async def invoke_reasoning_agent(state : ReasoningAgentInputState) -> FlagState   :
+
     try : 
         
-        reasoning_agent_with_memory = expose_reasoning_agent_with_memory()
+        reasoning_agent_with_memory = expose_reasoning_agent()
         Tools = expose_tools()
         
-        user_prompt = state.user_input  
-        tools_str = "\n".join([f"{tool.name}: {tool.description}" for tool in Tools])
-        relevant_workflows_str = json.dumps(state.relevant_workflows)
         
-        final_prompt = state.additional_message_for_reasoning_agent + user_prompt + '''
-        TOOLS AVALABLE -
-        ''' + tools_str + '''
-        APPROVED WORKFLOWS FOR REFERENCE
-        ''' + relevant_workflows_str
+        final_prompt = state.prompt
         
         print("aivoke is getting called")
         

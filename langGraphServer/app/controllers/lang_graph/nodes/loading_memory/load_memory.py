@@ -19,9 +19,10 @@ async def load_memory(state : InputState) -> FlagState:
             
             memory_object = ReasoningAgentInputState(
                 user_input_id= state.user_input_id , 
+                user_input=state.user_input,
                 chat_session= chat_session , 
                 history_messages= [],
-                summary= "",
+                summary= ""
             )
             
             await async_redis_client.execute_command("JSON.SET" , str(chat_session)+"MeowMemory" , "$" , memory_object.model_dump_json(exclude_none=True))
@@ -36,7 +37,8 @@ async def load_memory(state : InputState) -> FlagState:
                 "chat_session" : chat_session , 
                 "history_messages" : [] , 
                 "summary" : "" , 
-                "relevant_workflows" : []
+                "relevant_workflows" : [] , 
+                "prompt" : ""
             }
         
         else : 

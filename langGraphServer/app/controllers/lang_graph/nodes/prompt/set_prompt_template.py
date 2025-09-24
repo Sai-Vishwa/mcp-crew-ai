@@ -23,16 +23,22 @@ async def set_prompt_template(state : FlagState) -> FlagState:
         async with aiofiles.open("lang_graph/nodes/prompt/reasoning_agent_developer_prompt.txt" ,mode="r" , encoding="utf-8") as f :
             system_message_str =  await f.read()
 
-        system_message = SystemMessagePromptTemplate(system_message_str)
+        system_message = SystemMessagePromptTemplate.from_template(system_message_str)
         
-        current_user_message = HumanMessagePromptTemplate("{user_input}")
+        current_user_message = HumanMessagePromptTemplate.from_template("{user_input}")
         
         history_messages = MessagesPlaceholder(variable_name="history_messages")
         
+        summary = MessagesPlaceholder(variable_name="summary")
+        
+        tools = MessagesPlaceholder(variable_name="tools")
+
         relevant_prompts = MessagesPlaceholder(variable_name="relevant_prompts")
         
+        additional_system_message = MessagesPlaceholder(variable_name="additional_system_message")
+        
         chat_prompt_template = ChatPromptTemplate.from_messages([
-            system_message , current_user_message , history_messages , relevant_prompts
+            system_message , current_user_message , history_messages , relevant_prompts , summary , tools , additional_system_message
         ])
         
         return {

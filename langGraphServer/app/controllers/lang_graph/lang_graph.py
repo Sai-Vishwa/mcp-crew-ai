@@ -31,6 +31,7 @@ from cachetools import TTLCache
 from typing import TypedDict , NotRequired , Any , Optional
 from langgraph.graph import StateGraph , END , START
 
+
 # lang_graph.py (top of the file)
 import sys
 from pathlib import Path
@@ -49,16 +50,20 @@ from lang_graph.nodes.loading_memory.load_memory import load_memory
 from lang_graph.nodes.requestValidation.is_new_chat import is_new_chat , is_new_chat_wrapper
 from lang_graph.nodes.requestValidation.is_valid_user_session_for_new_chat import is_valid_user_session_for_new_chat
 from lang_graph.nodes.requestValidation.is_valid_user_session_for_old_chat import is_valid_user_session_for_old_chat
-from lang_graph.nodes.loading_relevant_workflows.is_loading_workflow_successful import is_loading_workflow_successful , is_loading_workflow_successful_wrapper
-from lang_graph.nodes.loading_relevant_workflows.is_relevant_workflow_loaded import  is_relevant_workflow_loaded_wrapper
 from lang_graph.nodes.loading_relevant_workflows.load_relevant_workflows import load_relevant_workflows
 from lang_graph.nodes.reasoning_agent.invoke_reasoning_agent import invoke_reasoning_agent
-from lang_graph.nodes.reasoning_agent.is_invoke_success import is_invoke_success , is_invoke_success_wrapper
+# from lang_graph.nodes.reasoning_agent.is_invoke_success import is_invoke_success , is_invoke_success_wrapper
 from lang_graph.nodes.reasoning_agent.is_reinvoke_required import is_reinvoke_required ,is_reinvoke_required_wrapper
 from lang_graph.nodes.reasoning_agent.reasoning_agent_output_formatter import reasoning_agent_output_formatter
-from lang_graph.nodes.requestValidation.is_new_workflow import is_new_workflow , is_new_workflow_wrapper
+# from lang_graph.nodes.requestValidation.is_new_workflow import is_new_workflow , is_new_workflow_wrapper
 from lang_graph.state import InputState , ReasoningAgentInputState 
+from lang_graph.nodes.loading_relevant_workflows.load_relevant_workflows import load_relevant_workflows
+
 from lang_graph.nodes.error_checker.error_checker import error_checker , error_checker_wrapper
+
+from lang_graph.nodes.prompt.is_prompt_template_set import is_prompt_template_set , is_prompt_template_set_wrapper
+from lang_graph.nodes.prompt.set_prompt_for_user_request import set_prompt_for_user_request
+from lang_graph.nodes.prompt.set_prompt_template import set_prompt_template
 
 
 
@@ -131,13 +136,18 @@ nodes = {
     "invoke_reasoning_agent": invoke_reasoning_agent,
     "is_reinvoke_required": is_reinvoke_required_wrapper,
     "reasoning_agent_output_formatter": reasoning_agent_output_formatter,
+    "is_prompt_template_set": is_prompt_template_set_wrapper,
+    "set_prompt_template" : set_prompt_template,
+    "set_prompt_for_user_request" : set_prompt_for_user_request,
     "error_checker1": error_checker_wrapper,
     "error_checker2": error_checker_wrapper,
     "error_checker3": error_checker_wrapper,
     "error_checker4": error_checker_wrapper,
     "error_checker5": error_checker_wrapper,
     "error_checker6": error_checker_wrapper,
-    "error_checker7": error_checker_wrapper
+    "error_checker7": error_checker_wrapper,
+    "error_checker8": error_checker_wrapper,
+    "error_checker9": error_checker_wrapper
 }
 
 
@@ -264,16 +274,52 @@ graph.add_conditional_edges(
     error_checker,
     {
         "error": END, 
-        "success": "invoke_reasoning_agent", 
+        "success": "is_prompt_template_set", 
+    }
+)
+
+graph.add_conditional_edges(
+    "is_prompt_template_set",
+    is_prompt_template_set,
+    {
+        "error" : END,
+        "yes" : "set_prompt_for_user_request",
+        "no" : "set_prompt_template"
     }
 )
 
 graph.add_edge(
-    "invoke_reasoning_agent" , "error_checker7"
+    "set_prompt_template" , "error_checker7"
 )
 
 graph.add_conditional_edges(
-    "error_checker7", 
+    "error_checker7",
+    error_checker,
+    {
+        "success" : "set_prompt_for_user_request",
+        "error" : END
+    }
+)
+
+graph.add_edge(
+    "set_prompt_for_user_request" , "error_checker8"
+)
+
+graph.add_conditional_edges(
+    "error_checker8",
+    error_checker,
+    {
+        "success" : END,
+        "error" : END
+    }
+)
+
+graph.add_edge(
+    "invoke_reasoning_agent" , "error_checker9"
+)
+
+graph.add_conditional_edges(
+    "error_checker9", 
     error_checker,
     {
         "error" : END,
@@ -303,21 +349,18 @@ with open("graph.png", "wb") as f:
     
 async def main():
     
-    return "hlo"
     
-    # dummy_state = inputState(
-    # user_input="Reschedule final exams from 20th Sept to 25th Sept",
-    # user_session="sess1234",
-    # chat_session=7,
-    # is_new_chat=True,
-    # message="",
-    # status= ""
-# )
-    # async for event in compiled_graph.astream(dummy_state, config={"configurable": {"thread_id": "test_thread"}}):
-    #     print(event.keys())
-    #     print()
-    #     print(list(event.values())[0]["message"])
-    #     print()
-    #     print()
+    dummy_state = InputState(
+    user_input="Reschedule final exams from 20th Sept to 25th Sept",
+    user_session="sess1234",
+    is_new_chat=True,
+    user_input_id=-1
+)
+    async for event in compiled_graph.astream(dummy_state, config={"configurable": {"thread_id": "test_thread"}}):
+        print(event.keys())
+        print()
+        print(list(event.values())[0]["message"])
+        print()
+        print()
         
 asyncio.run(main())

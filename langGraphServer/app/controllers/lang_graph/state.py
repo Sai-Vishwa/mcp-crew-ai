@@ -21,7 +21,7 @@ class ReasoningAgentResponseFormat(BaseModel) : # response format expected from 
     
     is_new_workflow : bool # to verify the workflow is new or not
     
-    workflow_id : Optional[int] # if using a old workflow what's it's id
+    workflow_id : Optional[int] = None # if using a old workflow what's it's id
     
     workflow_name : str # a name for this new workflow 
     
@@ -41,7 +41,7 @@ class InputState(BaseModel) : # state to be passed as input
     
     is_new_chat : bool # True / False helps to set memory
     
-    chat_session : Optional[int] # chat session -> not needed if a new chat
+    chat_session : Optional[int] = None # chat session -> not needed if a new chat
     
     user_input_id : int # initially set to -1 will be updated to the proper id on verifying the user
     
@@ -79,6 +79,15 @@ class ReasoningAgentInputState(BaseModel) :  # this state holds the user chat hi
     
     summary : str # summary of the previous messages to reduce context window
     
-    relevant_workflows : Optional[List[SingleRelevantWorkflowFormat]]# List of relevant workflows
+    relevant_workflows : Optional[List[SingleRelevantWorkflowFormat]] = []# List of relevant workflows
     
-    prompt : Optional[ChatPromptTemplate]
+    prompt : Optional[str] = "" # the final prompt to send to the agent
+    
+    additional_message : Optional[str] = ""
+    
+class ReasoningAgentResponseState(BaseModel) : 
+    
+    raw_response : str
+    
+    formatted_response : ReasoningAgentResponseFormat
+    

@@ -25,5 +25,5 @@ def is_prompt_template_set_wrapper(state: FlagState) -> FlagState:
     if(state.status != "success") :
         return state
     return {
-        "message" : "Checking if agents are set"
+        "message" : "Checking if prompt template is set"
     }

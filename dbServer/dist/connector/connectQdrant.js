@@ -18,6 +18,8 @@ async function connectQdrant() {
         await qdrantClient.getCollection("MeowDass");
     }
     catch (err) {
+        console.log("connect panna enna error uh ?????")
+        console.log(err)
         await qdrantClient.createCollection("MeowDass", {
             vectors: {
                 size: 768,
