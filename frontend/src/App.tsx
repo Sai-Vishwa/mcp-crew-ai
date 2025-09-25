@@ -4,7 +4,7 @@ import LoginPage from './pages/LoginPage'
 import ChatPage from './pages/ChatPage'
 import AdminPage from './pages/AdminPage'
 // import DummyPage from './pages/DummyPage'
-
+// import ChatHistorySidebar from './components/ChatPage/PreviousChat'
 
 
 function App() {
@@ -15,6 +15,8 @@ function App() {
         <Route path="/" element={<LoginPage />}/>
         <Route path="/chat-page" element={<ChatPage />}/>
         <Route path='/admin' element={<AdminPage/>} />
+        {/* <Route path='/dummy' element={<ChatHistorySidebar />} /> */}
+
         {/* <Route path='/dummy' element={<DummyPage/>} /> */}
       </Routes>
    </BrowserRouter>

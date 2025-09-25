@@ -23,6 +23,7 @@ import {
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import { ToolsPanel } from '../components/ChatPage/ToolsPanel';
+import { ChatHistorySidebar } from '@/components/ChatPage/PreviousChat';
 
 // TypeScript interfaces
 interface Message {
@@ -33,7 +34,7 @@ interface Message {
 }
 
 interface Chat {
-  id: string;
+  id: number;
   name: string;
   timestamp: Date;
   lastMessage?: string;
@@ -470,7 +471,7 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 let chats: Chat[] = [];
                 fetchedChats.forEach((chat: any) => {
                     chats.push({
-                        id: chat?.id?.toString(),
+                        id: chat?.chatid,
                         name: chat.chatName,
                         timestamp: new Date(chat.lastchatdate),
                         lastMessage: chat.lastchatdate ? "Last message at " + chat.lastchatdate : ""
@@ -1108,6 +1109,8 @@ const ThemeToggle: React.FC = () => {
 // Main Chat Page Component
 const ChatPage: React.FC = () => {
   const { state } = useAppContext();
+  const [activeChatId, setActiveChatId] = useState<number>(-1);
+
 
   return (
     <motion.div
@@ -1117,7 +1120,21 @@ const ChatPage: React.FC = () => {
       animate="animate"
     >
       <ThemeToggle />
-      <PreviousChats />
+      {/* <PreviousChats /> */}
+      <ChatHistorySidebar 
+        Chat={state.chats}
+        theme={state.theme.isDark == true ? "dark" : "light"}
+        activeChatId={activeChatId}
+        onChatSelect={(id) => {
+          setActiveChatId(id);
+          // console.log('Selected chat:', id);
+          // console.log(JSON.stringify(id))
+          // console.table(state.chats)
+        }}
+        onNewChat={() => {
+          setActiveChatId(-1)
+          console.log('New chat clicked')}}
+      />
       <ChatInterface />
       {/* <ToolsSidebar /> */}
        <ToolsPanel
