@@ -24,6 +24,7 @@ import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import { ToolsPanel } from '../components/ChatPage/ToolsPanel';
 import { ChatHistorySidebar } from '@/components/ChatPage/PreviousChat';
+import { ChatInterface } from '@/components/ChatPage/ChatInterface';
 
 // TypeScript interfaces
 interface Message {
@@ -835,242 +836,242 @@ const PreviousChats: React.FC = () => {
 // };
 
 // Chat interface
-const ChatInterface: React.FC = () => {
-  const { state, actions } = useAppContext();
-  const [inputValue, setInputValue] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+// const ChatInterface: React.FC = () => {
+//   const { state, actions } = useAppContext();
+//   const [inputValue, setInputValue] = useState('');
+//   const messagesEndRef = useRef<HTMLDivElement>(null);
+//   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+//   const scrollToBottom = () => {
+//     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+//   };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [state.messages]);
+//   useEffect(() => {
+//     scrollToBottom();
+//   }, [state.messages]);
 
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
+//   const handleSendMessage = async () => {
+//     if (!inputValue.trim()) return;
 
-    await actions.sendMessage(inputValue);
-    setInputValue('');
+//     await actions.sendMessage(inputValue);
+//     setInputValue('');
 
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-    }
-  };
+//     if (textareaRef.current) {
+//       textareaRef.current.style.height = 'auto';
+//     }
+//   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
+//   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+//     if (e.key === 'Enter' && !e.shiftKey) {
+//       e.preventDefault();
+//       handleSendMessage();
+//     }
+//   };
 
-  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInputValue(e.target.value);
+//   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+//     setInputValue(e.target.value);
 
-    const textarea = e.target;
-    textarea.style.height = 'auto';
-    const newHeight = Math.min(textarea.scrollHeight, 120);
-    textarea.style.height = `${newHeight}px`;
-  };
+//     const textarea = e.target;
+//     textarea.style.height = 'auto';
+//     const newHeight = Math.min(textarea.scrollHeight, 120);
+//     textarea.style.height = `${newHeight}px`;
+//   };
 
-  return (
-    <motion.div
-      className="flex-1 flex flex-col h-full"
-      variants={centerVariants}
-    >
-      {/* Chat header with context tools */}
-      <div className={`p-4 border-b ${state.theme.borderColor} ${state.theme.sidebarBackground} backdrop-blur-md`}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className={`text-xl font-semibold ${state.theme.textPrimary}`}>
-              AI Assistant
-            </h1>
-            <p className={`text-sm ${state.theme.textSecondary}`}>
-              Professional AI-powered assistance
-            </p>
-          </div>
-        </div>
+//   return (
+//     <motion.div
+//       className="flex-1 flex flex-col h-full"
+//       variants={centerVariants}
+//     >
+//       {/* Chat header with context tools */}
+//       <div className={`p-4 border-b ${state.theme.borderColor} ${state.theme.sidebarBackground} backdrop-blur-md`}>
+//         <div className="flex items-center justify-between">
+//           <div>
+//             <h1 className={`text-xl font-semibold ${state.theme.textPrimary}`}>
+//               AI Assistant
+//             </h1>
+//             <p className={`text-sm ${state.theme.textSecondary}`}>
+//               Professional AI-powered assistance
+//             </p>
+//           </div>
+//         </div>
 
-        {/* Context tools display */}
-        {state.contextTools.length > 0 && (
-          <motion.div
-            className="mt-3 pt-3 border-t border-gray-200/10"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-          >
-            <p className={`text-xs ${state.theme.textMuted} mb-2`}>Active Context:</p>
-            <div className="flex flex-wrap gap-2">
-              {state.contextTools.map((tool) => (
-                <motion.div
-                  key={tool.id}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs ${
-                    state.theme.isDark ? 'bg-[#2a2a2a]/60 text-[#f5f5f5]' : 'bg-gray-100/80 text-gray-700'
-                  }`}
-                >
-                  <Wrench className="h-3 w-3" />
-                  <span>{tool.name}</span>
-                  <Button
-                    onClick={() => actions.removeToolFromContext(tool.id)}
-                    variant="ghost"
-                    size="icon"
-                    className="h-4 w-4 p-0 hover:bg-red-500/20"
-                  >
-                    <X className="h-2.5 w-2.5" />
-                  </Button>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </div>
+//         {/* Context tools display */}
+//         {state.contextTools.length > 0 && (
+//           <motion.div
+//             className="mt-3 pt-3 border-t border-gray-200/10"
+//             initial={{ opacity: 0, height: 0 }}
+//             animate={{ opacity: 1, height: 'auto' }}
+//             exit={{ opacity: 0, height: 0 }}
+//           >
+//             <p className={`text-xs ${state.theme.textMuted} mb-2`}>Active Context:</p>
+//             <div className="flex flex-wrap gap-2">
+//               {state.contextTools.map((tool) => (
+//                 <motion.div
+//                   key={tool.id}
+//                   initial={{ opacity: 0, scale: 0.8 }}
+//                   animate={{ opacity: 1, scale: 1 }}
+//                   exit={{ opacity: 0, scale: 0.8 }}
+//                   className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs ${
+//                     state.theme.isDark ? 'bg-[#2a2a2a]/60 text-[#f5f5f5]' : 'bg-gray-100/80 text-gray-700'
+//                   }`}
+//                 >
+//                   <Wrench className="h-3 w-3" />
+//                   <span>{tool.name}</span>
+//                   <Button
+//                     onClick={() => actions.removeToolFromContext(tool.id)}
+//                     variant="ghost"
+//                     size="icon"
+//                     className="h-4 w-4 p-0 hover:bg-red-500/20"
+//                   >
+//                     <X className="h-2.5 w-2.5" />
+//                   </Button>
+//                 </motion.div>
+//               ))}
+//             </div>
+//           </motion.div>
+//         )}
+//       </div>
 
-      {/* Messages area */}
-      <div className="flex-1 overflow-y-auto p-4">
-        {state.messages.length === 0 ? (
-          <motion.div
-            className="flex items-center justify-center h-full"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.8 }}
-          >
-            <div className="text-center space-y-4 max-w-md">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.7, duration: 0.5 }}
-              >
-                <Bot className={`h-12 w-12 mx-auto ${state.theme.textMuted}`} />
-              </motion.div>
-              <div>
-                <TypewriterText
-                  text="How can I assist you today?"
-                  className={`text-xl font-medium ${state.theme.textPrimary}`}
-                  delay={10}
-                />
-              </div>
-              <motion.p
-                className={`${state.theme.textSecondary} text-sm`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 3, duration: 0.6 }}
-              >
-                Start a conversation to begin using the AI assistant
-              </motion.p>
-            </div>
-          </motion.div>
-        ) : (
-          <AnimatePresence>
-            {state.messages.map((message) => (
-              <motion.div
-                key={message.id}
-                variants={messageVariants}
-                initial="initial"
-                animate="animate"
-                className={`flex mb-4 ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div className={`flex items-start space-x-3 max-w-[80%] ${
-                  message.sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''
-                }`}>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    message.sender === 'user'
-                      ? (state.theme.isDark ? 'bg-[#2a2a2a]' : 'bg-gray-200')
-                      : (state.theme.isDark ? 'bg-[#2a2a2a]' : 'bg-gray-200')
-                  }`}>
-                    {message.sender === 'user' ? (
-                      <User className={`h-4 w-4 ${state.theme.isDark ? 'text-[#f5f5f5]' : 'text-gray-700'}`} />
-                    ) : (
-                      <Bot className={`h-4 w-4 ${state.theme.isDark ? 'text-[#f5f5f5]' : 'text-gray-700'}`} />
-                    )}
-                  </div>
-                  <div className={`p-3 rounded-lg ${
-                    message.sender === 'user'
-                      ? `${state.theme.cardBackground} ${state.theme.textPrimary}`
-                      : `${state.theme.cardBackground} ${state.theme.textPrimary}`
-                  }`}>
-                    <p className="text-sm leading-relaxed">{message.content}</p>
-                    <span className={`text-xs mt-2 block opacity-70 ${state.theme.textMuted}`}>
-                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-            {state.isTyping && (
-              <motion.div
-                variants={messageVariants}
-                initial="initial"
-                animate="animate"
-                className="flex justify-start mb-4"
-              >
-                <div className="flex items-start space-x-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    state.theme.isDark ? 'bg-[#2a2a2a]' : 'bg-gray-200'
-                  }`}>
-                    <Bot className={`h-4 w-4 ${state.theme.isDark ? 'text-[#f5f5f5]' : 'text-gray-700'}`} />
-                  </div>
-                  <div className={`p-3 rounded-lg ${state.theme.cardBackground}`}>
-                    <div className="flex space-x-1">
-                      {[0, 1, 2].map((i) => (
-                        <motion.div
-                          key={i}
-                          className={`w-2 h-2 rounded-full ${state.theme.isDark ? 'bg-[#737373]' : 'bg-gray-500'}`}
-                          animate={{ opacity: [0.4, 1, 0.4] }}
-                          transition={{
-                            duration: 1.4,
-                            repeat: Infinity,
-                            delay: i * 0.2,
-                            ease: "easeInOut"
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+//       {/* Messages area */}
+//       <div className="flex-1 overflow-y-auto p-4">
+//         {state.messages.length === 0 ? (
+//           <motion.div
+//             className="flex items-center justify-center h-full"
+//             initial={{ opacity: 0 }}
+//             animate={{ opacity: 1 }}
+//             transition={{ delay: 0.5, duration: 0.8 }}
+//           >
+//             <div className="text-center space-y-4 max-w-md">
+//               <motion.div
+//                 initial={{ scale: 0 }}
+//                 animate={{ scale: 1 }}
+//                 transition={{ delay: 0.7, duration: 0.5 }}
+//               >
+//                 <Bot className={`h-12 w-12 mx-auto ${state.theme.textMuted}`} />
+//               </motion.div>
+//               <div>
+//                 <TypewriterText
+//                   text="How can I assist you today?"
+//                   className={`text-xl font-medium ${state.theme.textPrimary}`}
+//                   delay={10}
+//                 />
+//               </div>
+//               <motion.p
+//                 className={`${state.theme.textSecondary} text-sm`}
+//                 initial={{ opacity: 0 }}
+//                 animate={{ opacity: 1 }}
+//                 transition={{ delay: 3, duration: 0.6 }}
+//               >
+//                 Start a conversation to begin using the AI assistant
+//               </motion.p>
+//             </div>
+//           </motion.div>
+//         ) : (
+//           <AnimatePresence>
+//             {state.messages.map((message) => (
+//               <motion.div
+//                 key={message.id}
+//                 variants={messageVariants}
+//                 initial="initial"
+//                 animate="animate"
+//                 className={`flex mb-4 ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+//               >
+//                 <div className={`flex items-start space-x-3 max-w-[80%] ${
+//                   message.sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''
+//                 }`}>
+//                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+//                     message.sender === 'user'
+//                       ? (state.theme.isDark ? 'bg-[#2a2a2a]' : 'bg-gray-200')
+//                       : (state.theme.isDark ? 'bg-[#2a2a2a]' : 'bg-gray-200')
+//                   }`}>
+//                     {message.sender === 'user' ? (
+//                       <User className={`h-4 w-4 ${state.theme.isDark ? 'text-[#f5f5f5]' : 'text-gray-700'}`} />
+//                     ) : (
+//                       <Bot className={`h-4 w-4 ${state.theme.isDark ? 'text-[#f5f5f5]' : 'text-gray-700'}`} />
+//                     )}
+//                   </div>
+//                   <div className={`p-3 rounded-lg ${
+//                     message.sender === 'user'
+//                       ? `${state.theme.cardBackground} ${state.theme.textPrimary}`
+//                       : `${state.theme.cardBackground} ${state.theme.textPrimary}`
+//                   }`}>
+//                     <p className="text-sm leading-relaxed">{message.content}</p>
+//                     <span className={`text-xs mt-2 block opacity-70 ${state.theme.textMuted}`}>
+//                       {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+//                     </span>
+//                   </div>
+//                 </div>
+//               </motion.div>
+//             ))}
+//             {state.isTyping && (
+//               <motion.div
+//                 variants={messageVariants}
+//                 initial="initial"
+//                 animate="animate"
+//                 className="flex justify-start mb-4"
+//               >
+//                 <div className="flex items-start space-x-3">
+//                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+//                     state.theme.isDark ? 'bg-[#2a2a2a]' : 'bg-gray-200'
+//                   }`}>
+//                     <Bot className={`h-4 w-4 ${state.theme.isDark ? 'text-[#f5f5f5]' : 'text-gray-700'}`} />
+//                   </div>
+//                   <div className={`p-3 rounded-lg ${state.theme.cardBackground}`}>
+//                     <div className="flex space-x-1">
+//                       {[0, 1, 2].map((i) => (
+//                         <motion.div
+//                           key={i}
+//                           className={`w-2 h-2 rounded-full ${state.theme.isDark ? 'bg-[#737373]' : 'bg-gray-500'}`}
+//                           animate={{ opacity: [0.4, 1, 0.4] }}
+//                           transition={{
+//                             duration: 1.4,
+//                             repeat: Infinity,
+//                             delay: i * 0.2,
+//                             ease: "easeInOut"
+//                           }}
+//                         />
+//                       ))}
+//                     </div>
+//                   </div>
+//                 </div>
+//               </motion.div>
+//             )}
+//           </AnimatePresence>
+//         )}
+//         <div ref={messagesEndRef} />
+//       </div>
 
-      {/* Input area */}
-      <div className={`p-4 border-t ${state.theme.borderColor} ${state.theme.sidebarBackground} backdrop-blur-md`}>
-        <div className="flex space-x-2">
-          <div className="flex-1 relative">
-            <textarea
-              ref={textareaRef}
-              placeholder="Type your message... (Shift + Enter for new line)"
-              value={inputValue}
-              onChange={handleInput}
-              onKeyDown={handleKeyDown}
-              className={`w-full resize-none pr-12 py-2 px-3 text-sm rounded-md border transition-colors duration-200 ${state.theme.inputBackground}`}
-              style={{ minHeight: '40px', maxHeight: '120px' }}
-              disabled={state.isTyping}
-              rows={1}
-            />
-            <Button
-              onClick={handleSendMessage}
-              disabled={!inputValue.trim() || state.isTyping}
-              size="icon"
-              className={`absolute h-8 w-8 bottom-3 right-1 ${
-                !inputValue.trim() || state.isTyping ? 'opacity-50' : state.theme.buttonBackground
-              }`}
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
+//       {/* Input area */}
+//       <div className={`p-4 border-t ${state.theme.borderColor} ${state.theme.sidebarBackground} backdrop-blur-md`}>
+//         <div className="flex space-x-2">
+//           <div className="flex-1 relative">
+//             <textarea
+//               ref={textareaRef}
+//               placeholder="Type your message... (Shift + Enter for new line)"
+//               value={inputValue}
+//               onChange={handleInput}
+//               onKeyDown={handleKeyDown}
+//               className={`w-full resize-none pr-12 py-2 px-3 text-sm rounded-md border transition-colors duration-200 ${state.theme.inputBackground}`}
+//               style={{ minHeight: '40px', maxHeight: '120px' }}
+//               disabled={state.isTyping}
+//               rows={1}
+//             />
+//             <Button
+//               onClick={handleSendMessage}
+//               disabled={!inputValue.trim() || state.isTyping}
+//               size="icon"
+//               className={`absolute h-8 w-8 bottom-3 right-1 ${
+//                 !inputValue.trim() || state.isTyping ? 'opacity-50' : state.theme.buttonBackground
+//               }`}
+//             >
+//               <Send className="h-4 w-4" />
+//             </Button>
+//           </div>
+//         </div>
+//       </div>
+//     </motion.div>
+//   );
+// };
 
 // Theme toggle
 const ThemeToggle: React.FC = () => {
@@ -1121,7 +1122,8 @@ const ChatPage: React.FC = () => {
     >
       <ThemeToggle />
       {/* <PreviousChats /> */}
-      <ChatHistorySidebar 
+      <div className='w-1/6'>
+    <ChatHistorySidebar 
         Chat={state.chats}
         theme={state.theme.isDark == true ? "dark" : "light"}
         activeChatId={activeChatId}
@@ -1135,8 +1137,21 @@ const ChatPage: React.FC = () => {
           setActiveChatId(-1)
           console.log('New chat clicked')}}
       />
-      <ChatInterface />
+      </div>
+      
+      <ChatInterface 
+            theme={state.theme.isDark == true ? "dark" : "light"}
+          contextTools={[]}
+        onSendMessage={(message) => {
+          console.log('Message sent:', message);
+        }}
+        onRemoveToolFromContext={(id) => console.log('Remove tool:', id)}
+        initialMessages={[]}
+      />
       {/* <ToolsSidebar /> */}
+
+      <div className='w-1/6'>
+        
        <ToolsPanel
       tools={state.tools}
       theme={state.theme.isDark == true ? "dark" : "light"}
@@ -1144,6 +1159,9 @@ const ChatPage: React.FC = () => {
       onRemoveFromContext={()=>{}}
       onRequestAccess={()=>{}}
       />
+
+
+      </div>
     </motion.div>
   );
 };
