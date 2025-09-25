@@ -399,13 +399,13 @@ const ProfessionalLoginPage: React.FC = () => {
           body: JSON.stringify({username: credentials.username, password: credentials.password}),    
         });
         const data = await res.json();
-        console.log(JSON.stringify(data))
+        console.log(data.data.session)
 
         if(data.status === "error"){
           setErrors({ general: data.message });
         }
         else{
-          Cookies.set("session", data.session, { expires: 7 });
+          Cookies.set("session", data.data.session, { expires: 7 });
           nav("/chat-page");
         }
     } catch (error) {

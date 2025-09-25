@@ -1,14 +1,12 @@
-from flask import Flask
-from flask_cors import CORS
+from quart import Quart
+from quart_cors import cors 
 
 def create_app():
-    app = Flask(__name__)
-    
-    CORS(app, resources={
-        r"/*": {"origins": "*"}
-    })
+    app = Quart(__name__)
+    app = cors(app, allow_origin="*")
 
+    # import and register blueprints
     from .routes import main
-    app.register_blueprint(main)
+    app.register_blueprint(main)    
 
     return app

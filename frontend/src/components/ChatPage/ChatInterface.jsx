@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { Variants } from 'framer-motion'
 import { 
   Send, 
   User, 
@@ -12,33 +11,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-interface Message {
-  id: string;
-  content: string;
-  sender: 'user' | 'assistant';
-  timestamp: Date;
-}
-
-interface Tool {
-  id: number;
-  name: string;
-}
-
-interface ChatInterfaceProps {
-  theme?: 'light' | 'dark';
-  contextTools?: Tool[];
-  initialMessages?: Message[];
-  onSendMessage?: (message: string) => void;
-  onRemoveToolFromContext?: (toolId: number) => void;
-}
-
 // Typewriter Effect Component
-const TypewriterText = ({ text, className, delay = 50, onComplete }: {
-  text: string;
-  className?: string;
-  delay?: number;
-  onComplete?: () => void;
-}) => {
+const TypewriterText = ({ text, className, delay = 50, onComplete }) => {
   const [displayText, setDisplayText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -58,32 +32,26 @@ const TypewriterText = ({ text, className, delay = 50, onComplete }: {
   return <span className={className}>{displayText}</span>;
 };
 
-export const ChatInterface: React.FC<ChatInterfaceProps> = ({
+export const ChatInterface = ({
   theme = 'light',
   contextTools = [],
-  initialMessages = [],
+  messages = [],
+  isLoading = false,
   onSendMessage,
   onRemoveToolFromContext
 }) => {
   const [inputValue, setInputValue] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
-  const [isTyping, setIsTyping] = useState(false);
-  const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [showInitialLoading, setShowInitialLoading] = useState(true);
+  const messagesEndRef = useRef(null);
+  const textareaRef = useRef(null);
 
   const isDark = theme === 'dark';
 
-  // Update messages when initialMessages prop changes
-  useEffect(() => {
-    setMessages(initialMessages);
-  }, [initialMessages]);
+  // Initial loading animation
   useEffect(() => {
     const timer = setTimeout(() => {
-      setIsLoading(false);
+      setShowInitialLoading(false);
     }, 2000);
-
     return () => clearTimeout(timer);
   }, []);
 
@@ -96,18 +64,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!inputValue.trim() || isTyping) return;
+    if (!inputValue.trim() || isLoading) return;
 
-    // Add user message
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: inputValue,
-      sender: 'user',
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    onSendMessage?.(inputValue);
     const messageContent = inputValue;
     setInputValue('');
 
@@ -115,33 +73,18 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       textareaRef.current.style.height = 'auto';
     }
 
-    // Start typing animation
-    setIsTyping(true);
-
-    // After a delay, add bot response with typewriter effect
-    setTimeout(() => {
-      setIsTyping(false);
-      const botMessageId = (Date.now() + 1).toString();
-      const botMessage: Message = {
-        id: botMessageId,
-        content: 'I am in development',
-        sender: 'assistant',
-        timestamp: new Date()
-      };
-
-      setMessages(prev => [...prev, botMessage]);
-      setTypingMessageId(botMessageId);
-    }, 2000);
+    // Call the parent's send message function
+    onSendMessage(messageContent);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
 
-  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleInput = (e) => {
     setInputValue(e.target.value);
 
     const textarea = e.target;
@@ -171,37 +114,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     ? 'bg-[#374151] border-[#4b5563] text-[#e2e8f0] placeholder-[#9ca3af]'
     : 'bg-white border-[#d0d0d0] text-[#2a2a2a] placeholder-[#6b7280]';
 
-  // Animations
-  const centerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.3 } }
-  };
-
-  const messageVariants : Variants = {
-    initial: { opacity: 0, y: 20 },
-    animate: { 
-      opacity: 1, 
-      y: 0,
-      transition: { type: "spring", stiffness: 100, damping: 15 }
-    }
-  };
-
-  const loadingVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: { 
-      opacity: 1, 
-      scale: 1,
-      transition: { duration: 0.5 }
-    },
-    exit: { 
-      opacity: 0, 
-      scale: 0.8,
-      transition: { duration: 0.3 }
-    }
-  };
-
   // Enhanced Bot Icon Component
-  const BotIcon = ({ className }: { className?: string }) => (
+  const BotIcon = ({ className }) => (
     <div className={`relative ${className || ''}`}>
       <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
         isDark ? 'bg-gradient-to-br from-[#10b981] to-[#059669]' : 'bg-gradient-to-br from-[#10b981] to-[#059669]'
@@ -219,10 +133,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   // Loading Animation Component
   const LoadingAnimation = () => (
     <motion.div
-      variants={loadingVariants}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.8 }}
       className="flex items-center justify-center h-full"
     >
       <div className="text-center space-y-6">
@@ -271,13 +184,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     </motion.div>
   );
 
-  if (isLoading) {
+  if (showInitialLoading) {
     return (
       <motion.div
         className={`flex-1 flex flex-col h-full ${baseClasses}`}
-        variants={centerVariants}
-        initial="hidden"
-        animate="visible"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
       >
         <LoadingAnimation />
       </motion.div>
@@ -287,11 +199,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   return (
     <motion.div
       className={`flex-1 flex flex-col h-full ${baseClasses}`}
-      variants={centerVariants}
-      initial="hidden"
-      animate="visible"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
     >
-      {/* Chat header with enhanced design */}
+      {/* Chat header */}
       <div className={`p-6 border-b border-inherit ${cardClasses} backdrop-blur-md`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -339,7 +250,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   <div className="w-2 h-2 rounded-full bg-[#10b981]" />
                   <span className="font-medium">{tool.name}</span>
                   <Button
-                    onClick={() => onRemoveToolFromContext?.(tool.id)}
+                    onClick={() => onRemoveToolFromContext(tool.id)}
                     variant="ghost"
                     size="icon"
                     className="h-4 w-4 p-0 hover:bg-red-500/20 transition-colors"
@@ -363,6 +274,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             transition={{ delay: 0.3, duration: 0.8 }}
           >
             <div className="text-center space-y-6 max-w-md">
+              <div className='flex space-x-4'>
+
               <motion.div
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
@@ -380,6 +293,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   How can I assist you today?
                 </motion.h2>
               </div>
+                            </div>
+
               <motion.p
                 className={`${isDark ? 'text-[#9ca3af]' : 'text-[#6b7280]'} text-base`}
                 initial={{ opacity: 0 }}
@@ -410,9 +325,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             {messages.map((message) => (
               <motion.div
                 key={message.id}
-                variants={messageVariants}
-                initial="initial"
-                animate="animate"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: "spring", stiffness: 100, damping: 15 }}
                 className={`flex mb-6 ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div className={`flex items-start space-x-3 max-w-[75%] ${
@@ -434,18 +349,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                       ? userMessageClasses
                       : assistantMessageClasses
                   }`}>
-                    {message.sender === 'assistant' && typingMessageId === message.id ? (
-                      <TypewriterText 
-                        text={message.content}
-                        className="text-sm leading-relaxed whitespace-pre-wrap"
-                        delay={50}
-                        onComplete={() => setTypingMessageId(null)}
-                      />
-                    ) : (
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                        {message.content}
-                      </p>
-                    )}
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                      {message.content}
+                    </p>
                     <div className={`flex items-center gap-1 mt-2 text-xs opacity-60`}>
                       <Clock className="w-3 h-3" />
                       <span>
@@ -456,11 +362,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 </div>
               </motion.div>
             ))}
-            {isTyping && (
+            {isLoading && (
               <motion.div
-                variants={messageVariants}
-                initial="initial"
-                animate="animate"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 className="flex justify-start mb-6"
               >
                 <div className="flex items-start space-x-3">
@@ -490,7 +395,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Enhanced input area */}
+      {/* Input area */}
       <div className={`p-6 border-t border-inherit ${cardClasses} backdrop-blur-md`}>
         <div className="flex space-x-3">
           <div className="flex-1 relative">
@@ -502,15 +407,15 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               onKeyDown={handleKeyDown}
               className={`w-full resize-none pr-12 py-3 px-4 text-sm rounded-xl border transition-all duration-200 focus:ring-2 focus:ring-[#10b981]/20 focus:border-[#10b981] ${inputClasses}`}
               style={{ minHeight: '44px', maxHeight: '120px' }}
-              disabled={isTyping}
+              disabled={isLoading}
               rows={1}
             />
             <Button
               onClick={handleSendMessage}
-              disabled={!inputValue.trim() || isTyping}
+              disabled={!inputValue.trim() || isLoading}
               size="icon"
               className={`absolute h-8 w-8 top-1/2 -translate-y-1/2 right-2 rounded-lg ${
-                !inputValue.trim() || isTyping 
+                !inputValue.trim() || isLoading 
                   ? 'opacity-50 bg-[#9ca3af]' 
                   : 'bg-[#10b981] hover:bg-[#059669] text-white shadow-lg hover:shadow-xl'
               } transition-all duration-200`}
@@ -523,47 +428,3 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     </motion.div>
   );
 };
-
-// Example usage
-// export default function App() {
-//   const contextTools = [
-//     { id: 1, name: 'Project Management' },
-//     { id: 2, name: 'Data Analysis' }
-//   ];
-
-//   // Example with previous messages
-//   const previousMessages: Message[] = [
-//     {
-//       id: '1',
-//       content: 'Hello! How can I help you today?',
-//       sender: 'assistant',
-//       timestamp: new Date(Date.now() - 300000) // 5 minutes ago
-//     },
-//     {
-//       id: '2',
-//       content: 'I need help with my project planning.',
-//       sender: 'user',
-//       timestamp: new Date(Date.now() - 240000) // 4 minutes ago
-//     },
-//     {
-//       id: '3',
-//       content: 'I am in development',
-//       sender: 'assistant',
-//       timestamp: new Date(Date.now() - 180000) // 3 minutes ago
-//     }
-//   ];
-
-//   return (
-//     <div className="h-screen w-full bg-[#fafafa] dark:bg-[#2d3748] flex">
-//       <ChatInterface
-//         theme="dark"
-//         contextTools={contextTools}
-//         initialMessages={previousMessages} // Pass previous messages or [] for empty
-//         onSendMessage={(message) => {
-//           console.log('Message sent:', message);
-//         }}
-//         onRemoveToolFromContext={(id) => console.log('Remove tool:', id)}
-//       />
-//     </div>
-//   );
-// }
