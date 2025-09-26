@@ -199,7 +199,7 @@ const AppProvider = ({ children }) => {
       const res = await fetch(`http://localhost:4005/invoke-graph`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ session: session, userMessage: content }),
+        body: JSON.stringify({ user_session: session, user_input: content , is_new_chat : true }),
       });
 
       if (!res.body) throw new Error("No response body");

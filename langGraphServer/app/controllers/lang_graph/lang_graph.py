@@ -55,10 +55,10 @@ from lang_graph.nodes.reasoning_agent.invoke_reasoning_agent import invoke_reaso
 # from lang_graph.nodes.reasoning_agent.is_invoke_success import is_invoke_success , is_invoke_success_wrapper
 from lang_graph.nodes.reasoning_agent.reasoning_agent_output_formatter import reasoning_agent_output_formatter
 # from lang_graph.nodes.requestValidation.is_new_workflow import is_new_workflow , is_new_workflow_wrapper
-from lang_graph.state import InputState , ReasoningAgentInputState 
+from lang_graph.state import InputState , ReasoningAgentInputState , ReasoningAgentResponseState
 from lang_graph.nodes.loading_relevant_workflows.load_relevant_workflows import load_relevant_workflows
 
-from lang_graph.nodes.error_checker.error_checker import error_checker , error_checker_wrapper
+from lang_graph.nodes.error_checker.error_checker import error_checker , error_checker_wrapper , error_checker_last_wrapper
 
 from lang_graph.nodes.prompt.is_prompt_template_set import is_prompt_template_set , is_prompt_template_set_wrapper
 from lang_graph.nodes.prompt.set_prompt_for_user_request import set_prompt_for_user_request
@@ -119,7 +119,7 @@ date_clash_checker_tool = StructuredTool.from_function(
 
 
 
-graph = StateGraph(InputState)
+graph = StateGraph(InputState , output_schema=ReasoningAgentResponseState)
     
 nodes = {
     "are_tools_set": are_tools_set_wrapper,
@@ -146,7 +146,7 @@ nodes = {
     "error_checker7": error_checker_wrapper,
     "error_checker8": error_checker_wrapper,
     "error_checker9": error_checker_wrapper,
-    "error_checker10": error_checker_wrapper
+    "error_checker10": error_checker_last_wrapper
 }
 
 
@@ -346,20 +346,58 @@ with open("graph.png", "wb") as f:
     f.write(compiled_graph.get_graph().draw_png())
 
     
-async def main():
+# async def main():
     
     
-    dummy_state = InputState(
-    user_input="Reschedule final exams from 20th Sept to 25th Sept remember to check for clash with placements",
-    user_session="sess1234",
-    is_new_chat=True,
-    user_input_id=-1
-)
-    async for event in compiled_graph.astream(dummy_state, config={"configurable": {"thread_id": "test_thread"}}):
-        print(event.keys())
-        print()
-        print(list(event.values())[0]["message"])
-        print()
-        print()
+#     dummy_state = InputState(
+#     user_input="Reschedule final exams from 20th Sept to 25th Sept remember to check for clash with placements",
+#     user_session="sess1234",
+#     is_new_chat=True,
+#     user_input_id=-1
+# )
+#     async for event in compiled_graph.astream(dummy_state, config={"configurable": {"thread_id": "test_thread"}}):
+#         print(event.keys())
+#         print()
+#         print(list(event.values())[0]["message"])
+#         print()
+#         print()
+        
+async def invoke_graph(data) : 
+    
+    try: 
+        
+    
+        user_input = data.get("user_input")
+        user_session = data.get("user_session")
+        chat_session = data.get("chat_session")
+        is_new_chat = data.get("is_new_chat")
+        
+        if(is_new_chat):
+            chat_session = None
+        
+        state = InputState (
+            user_input=user_input , 
+            user_session=user_session,
+            is_new_chat=is_new_chat,
+            chat_session=chat_session,
+            user_input_id=-1
+        )
+        
+        
+        async for event in compiled_graph.astream(state, config={"configurable": {"thread_id": "test_thread"}}):
+            
+            yield f"{event.keys()}\n"
+            yield f"{list(event.values())[0]}\n\n"
+            
+            
+
+           
+        
+        
+        
+    except Exception as e : 
+        
+        yield f"some internal error"
+    
         
 # asyncio.run(main())

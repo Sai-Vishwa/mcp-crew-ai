@@ -9,6 +9,14 @@ from langchain.prompts.chat import (
 import aiofiles
 import asyncio
 
+
+from pathlib import Path
+
+# get path to current file
+BASE_DIR = Path(__file__).parent  # points to app/controller/
+file_path = BASE_DIR / "reasoning_agent_developer_prompt.txt"
+
+
 chat_prompt_template : ChatPromptTemplate | None = None
 
 
@@ -20,7 +28,7 @@ async def set_prompt_template(state : FlagState) -> FlagState:
         
         system_message_str = ""
         
-        async with aiofiles.open("lang_graph/nodes/prompt/reasoning_agent_developer_prompt.txt" ,mode="r" , encoding="utf-8") as f :
+        async with aiofiles.open(file_path ,mode="r" , encoding="utf-8") as f :
             system_message_str =  await f.read()
 
         system_message = SystemMessagePromptTemplate.from_template(system_message_str)

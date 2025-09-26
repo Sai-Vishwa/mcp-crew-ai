@@ -1,4 +1,4 @@
-from ...state import FlagState
+from ...state import FlagState , ReasoningAgentResponseState
 
 def error_checker(state : FlagState) -> str :
     
@@ -17,4 +17,7 @@ def error_checker(state : FlagState) -> str :
         return "error"
     
 def error_checker_wrapper(state : FlagState) -> FlagState : 
+    return state
+
+def error_checker_last_wrapper(state : FlagState) -> ReasoningAgentResponseState :
     return state

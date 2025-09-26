@@ -5,6 +5,7 @@ import asyncio
 from .controllers.login.login import login_controller
 from .controllers.bot_page.chat_page import chatpage_controller
 from .controllers.bot_page.sub_controllers.load_chat_history import load_chat_history_controller
+from .controllers.lang_graph.lang_graph import invoke_graph
 
 main = Blueprint("main", __name__)
 
@@ -33,9 +34,5 @@ async def loadChats():
 # SSE route
 @main.route("/invoke-graph", methods=["POST"])
 async def stream():
-    async def event_stream():
-            yield f"na tha da leo"
-            await asyncio.sleep(5)
-            yield f"leo dass"
-
-    return Response(event_stream(), mimetype="text/event-stream")
+    data = await request.get_json()
+    return Response(invoke_graph(data), mimetype="text/event-stream")
