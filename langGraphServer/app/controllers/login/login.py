@@ -13,8 +13,8 @@ async def login_controller(data):
             json={"username": uname, "password": pwd}
         )
         resp = response.json()  # ok for httpx, no need to await
-        print("hey this is the resp i got --- ")
-        print(resp)
+        # print("hey this is the resp i got --- ")
+        # print(resp)
 
         if resp.get("status") == "error":
             return jsonify({"status": "error", "message": resp.get("message")})

@@ -24,12 +24,14 @@ from langchain_core.chat_history import BaseChatMessageHistory
 from pydantic import BaseModel, Field
 from langchain_core.messages import BaseMessage, AIMessage
 from langchain.prompts import SystemMessagePromptTemplate
-from typing import List , Dict
+from typing import AsyncIterator, List , Dict
 import httpx
 from flask import jsonify
 from cachetools import TTLCache
 from typing import TypedDict , NotRequired , Any , Optional
 from langgraph.graph import StateGraph , END , START
+
+
 
 
 # lang_graph.py (top of the file)
@@ -38,6 +40,9 @@ from pathlib import Path
 
 # Add the parent folder to sys.path
 sys.path.append(str(Path(__file__).parent.parent.resolve()))
+
+
+from langgraph.checkpoint.redis.aio import AsyncRedisSaver
 
 
 
@@ -87,264 +92,10 @@ class ExamInput(BaseModel):
     exams : List[str]
     date : str
 
-def date_clash_checker(placements : list , exams : list , date : str) -> str:
-    return f"Clash um ila oru mannum ila"
 
-date_clash_checker_tool = StructuredTool.from_function(
-    func=date_clash_checker,
-    name="DateClashChecker",
-    description="With a lsit of all placement entries or with a list of all exam entries provided the tool checks for clash in a specific date",
-    args_schema=ExamInput
-)
+compiled_graph = None
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-graph = StateGraph(InputState , output_schema=ReasoningAgentResponseState)
-    
-nodes = {
-    "are_tools_set": are_tools_set_wrapper,
-    "set_tools": set_tools,
-    "are_agents_set": are_agents_set_wrapper,
-    "set_agents": set_agents,
-    "is_new_chat": is_new_chat_wrapper,
-    "is_valid_user_session_for_old_chat": is_valid_user_session_for_old_chat,
-    "is_valid_user_session_for_new_chat": is_valid_user_session_for_new_chat,
-    "is_memory_loaded": is_memory_loaded_wrapper,
-    "load_memory": load_memory,
-    "load_relevant_workflows": load_relevant_workflows,
-    "invoke_reasoning_agent": invoke_reasoning_agent,
-    "reasoning_agent_output_formatter": reasoning_agent_output_formatter,
-    "is_prompt_template_set": is_prompt_template_set_wrapper,
-    "set_prompt_template" : set_prompt_template,
-    "set_prompt_for_user_request" : set_prompt_for_user_request,
-    "error_checker1": error_checker_wrapper,
-    "error_checker2": error_checker_wrapper,
-    "error_checker3": error_checker_wrapper,
-    "error_checker4": error_checker_wrapper,
-    "error_checker5": error_checker_wrapper,
-    "error_checker6": error_checker_wrapper,
-    "error_checker7": error_checker_wrapper,
-    "error_checker8": error_checker_wrapper,
-    "error_checker9": error_checker_wrapper,
-    "error_checker10": error_checker_last_wrapper
-}
-
-
-for key,value in nodes.items():
-    graph.add_node(key , value)
-
-
-
-
-
-# Add edges
-graph.add_edge(
-    START, "are_tools_set"
-)
-
-graph.add_conditional_edges(
-    "are_tools_set",
-    are_tools_set,
-    {
-        "error": END,
-        "no": "set_tools",
-        "yes": "are_agents_set"
-    }
-)
-
-graph.add_edge(
-    "set_tools" , "error_checker1"
-)
-
-graph.add_conditional_edges(
-    "error_checker1",
-    error_checker, {
-        "success" : "are_agents_set",
-        "error" : END
-    } 
-)
-
-graph.add_conditional_edges(
-    "are_agents_set",
-    are_agents_set,
-    {
-        "error": END,
-        "no": "set_agents", 
-        "yes": "is_new_chat"
-    }
-)
-
-
-graph.add_edge(
-    "set_agents" , "error_checker2"
-)
-
-graph.add_conditional_edges(
-    "error_checker2",
-    error_checker, {
-        "success" : "is_new_chat",
-        "error" : END
-    } 
-)
-
-graph.add_conditional_edges(
-    "is_new_chat",
-    is_new_chat,
-    {
-        "error": END, 
-        "yes": "is_valid_user_session_for_new_chat",
-        "no": "is_valid_user_session_for_old_chat"
-    }
-)
-
-graph.add_edge(
-    "is_valid_user_session_for_new_chat" , "error_checker3"
-)
-
-graph.add_conditional_edges(
-    "error_checker3",
-    error_checker, {
-        "success" : "is_memory_loaded",
-        "error" : END
-    } 
-)
-
-graph.add_edge(
-    "is_valid_user_session_for_old_chat" , "error_checker4"
-)
-
-graph.add_conditional_edges(
-    "error_checker4",
-    error_checker, {
-        "success" : "is_memory_loaded",
-        "error" : END
-    } 
-)
-
-graph.add_conditional_edges(
-    "is_memory_loaded",
-    is_memory_loaded,
-    {
-        "error": END, 
-        "yes": "load_relevant_workflows", 
-        "no": "load_memory"
-    }
-)
-
-graph.add_edge(
-    "load_memory" , "error_checker5"
-)
-
-graph.add_conditional_edges(
-    "error_checker5",
-    error_checker, {
-        "success" : "load_relevant_workflows",
-        "error" : END
-    } 
-)
-
-
-graph.add_edge(
-    "load_relevant_workflows", "error_checker6"
-)
-
-graph.add_conditional_edges(
-    "error_checker6",
-    error_checker,
-    {
-        "error": END, 
-        "success": "is_prompt_template_set", 
-    }
-)
-
-graph.add_conditional_edges(
-    "is_prompt_template_set",
-    is_prompt_template_set,
-    {
-        "error" : END,
-        "yes" : "set_prompt_for_user_request",
-        "no" : "set_prompt_template"
-    }
-)
-
-graph.add_edge(
-    "set_prompt_template" , "error_checker7"
-)
-
-graph.add_conditional_edges(
-    "error_checker7",
-    error_checker,
-    {
-        "success" : "set_prompt_for_user_request",
-        "error" : END
-    }
-)
-
-graph.add_edge(
-    "set_prompt_for_user_request" , "error_checker8"
-)
-
-graph.add_conditional_edges(
-    "error_checker8",
-    error_checker,
-    {
-        "success" : "invoke_reasoning_agent",
-        "error" : END
-    }
-)
-
-graph.add_edge(
-    "invoke_reasoning_agent" , "error_checker9"
-)
-
-graph.add_conditional_edges(
-    "error_checker9", 
-    error_checker,
-    {
-        "error" : END,
-        "success" : "reasoning_agent_output_formatter"
-    }
-)
-
-graph.add_edge(
-    "reasoning_agent_output_formatter" , "error_checker10"
-)
-
-graph.add_conditional_edges(
-    "error_checker10" , 
-    error_checker,
-    {
-        "success" : END,
-        "error" : "invoke_reasoning_agent"
-    }
-)
-
-compiled_graph = graph.compile()
-
-# export to PNG using graphviz
-with open("graph.png", "wb") as f:
-    f.write(compiled_graph.get_graph().draw_png())
-
+is_redis_setup_done = False
     
 # async def main():
     
@@ -361,11 +112,297 @@ with open("graph.png", "wb") as f:
 #         print(list(event.values())[0]["message"])
 #         print()
 #         print()
+
+class DebugAsyncRedisSaver(AsyncRedisSaver):
+    async def aput(self, config, checkpoint, metadata, new_versions):
+        print("-----------------------------------------------------\n\n\n")
+        # print(metadata)
+        # print(checkpoint)\
+        print("see config \n")
+        print(config)
+        print("\n versions new")
+        print(new_versions)
+        print("inga paaru \n\n\n\n")
+        # print(f"Saving checkpoint: {checkpoint}")
+        return await super().aput(config, checkpoint, metadata, new_versions)
+
+
+async def compile_graph():
+    
+    
+    try: 
+        
+        DB_URI = "redis://localhost:6380/0"
+        
+        async with (
+            DebugAsyncRedisSaver.from_conn_string(DB_URI) as checkpointer , 
+            # AsyncRedisStore.from_conn_string(DB_URI) as store,
+
+            ) :
+            
+            global compiled_graph
+        
+            global is_redis_setup_done
+            
+            graph = StateGraph(InputState , output_schema=ReasoningAgentResponseState)
+            
+            nodes = {
+                "are_tools_set": are_tools_set_wrapper,
+                "set_tools": set_tools,
+                "are_agents_set": are_agents_set_wrapper,
+                "set_agents": set_agents,
+                "is_new_chat": is_new_chat_wrapper,
+                "is_valid_user_session_for_old_chat": is_valid_user_session_for_old_chat,
+                "is_valid_user_session_for_new_chat": is_valid_user_session_for_new_chat,
+                "is_memory_loaded": is_memory_loaded_wrapper,
+                "load_memory": load_memory,
+                "load_relevant_workflows": load_relevant_workflows,
+                "invoke_reasoning_agent": invoke_reasoning_agent,
+                "reasoning_agent_output_formatter": reasoning_agent_output_formatter,
+                "is_prompt_template_set": is_prompt_template_set_wrapper,
+                "set_prompt_template" : set_prompt_template,
+                "set_prompt_for_user_request" : set_prompt_for_user_request,
+                "error_checker1": error_checker_wrapper,
+                "error_checker2": error_checker_wrapper,
+                "error_checker3": error_checker_wrapper,
+                "error_checker4": error_checker_wrapper,
+                "error_checker5": error_checker_wrapper,
+                "error_checker6": error_checker_wrapper,
+                "error_checker7": error_checker_wrapper,
+                "error_checker8": error_checker_wrapper,
+                "error_checker9": error_checker_wrapper,
+                "error_checker10": error_checker_last_wrapper
+            }
+
+
+            for key,value in nodes.items():
+                graph.add_node(key , value)
+
+            # Add edges
+            graph.add_edge(
+                START, "are_tools_set"
+            )
+
+            graph.add_conditional_edges(
+                "are_tools_set",
+                are_tools_set,
+                {
+                    "error": END,
+                    "no": "set_tools",
+                    "yes": "are_agents_set"
+                }
+            )
+
+            graph.add_edge(
+                "set_tools" , "error_checker1"
+            )
+
+            graph.add_conditional_edges(
+                "error_checker1",
+                error_checker, {
+                    "success" : "are_agents_set",
+                    "error" : END
+                } 
+            )
+
+            graph.add_conditional_edges(
+                "are_agents_set",
+                are_agents_set,
+                {
+                    "error": END,
+                    "no": "set_agents", 
+                    "yes": "is_new_chat"
+                }
+            )
+
+
+            graph.add_edge(
+                "set_agents" , "error_checker2"
+            )
+
+            graph.add_conditional_edges(
+                "error_checker2",
+                error_checker, {
+                    "success" : "is_new_chat",
+                    "error" : END
+                } 
+            )
+
+            graph.add_conditional_edges(
+                "is_new_chat",
+                is_new_chat,
+                {
+                    "error": END, 
+                    "yes": "is_valid_user_session_for_new_chat",
+                    "no": "is_valid_user_session_for_old_chat"
+                }
+            )
+
+            graph.add_edge(
+                "is_valid_user_session_for_new_chat" , "error_checker3"
+            )
+
+            graph.add_conditional_edges(
+                "error_checker3",
+                error_checker, {
+                    "success" : "is_memory_loaded",
+                    "error" : END
+                } 
+            )
+
+            graph.add_edge(
+                "is_valid_user_session_for_old_chat" , "error_checker4"
+            )
+
+            graph.add_conditional_edges(
+                "error_checker4",
+                error_checker, {
+                    "success" : "is_memory_loaded",
+                    "error" : END
+                } 
+            )
+
+            graph.add_conditional_edges(
+                "is_memory_loaded",
+                is_memory_loaded,
+                {
+                    "error": END, 
+                    "yes": "load_relevant_workflows", 
+                    "no": "load_memory"
+                }
+            )
+
+            graph.add_edge(
+                "load_memory" , "error_checker5"
+            )
+
+            graph.add_conditional_edges(
+                "error_checker5",
+                error_checker, {
+                    "success" : "load_relevant_workflows",
+                    "error" : END
+                } 
+            )
+
+
+            graph.add_edge(
+                "load_relevant_workflows", "error_checker6"
+            )
+
+            graph.add_conditional_edges(
+                "error_checker6",
+                error_checker,
+                {
+                    "error": END, 
+                    "success": "is_prompt_template_set", 
+                }
+            )
+
+            graph.add_conditional_edges(
+                "is_prompt_template_set",
+                is_prompt_template_set,
+                {
+                    "error" : END,
+                    "yes" : "set_prompt_for_user_request",
+                    "no" : "set_prompt_template"
+                }
+            )
+
+            graph.add_edge(
+                "set_prompt_template" , "error_checker7"
+            )
+
+            graph.add_conditional_edges(
+                "error_checker7",
+                error_checker,
+                {
+                    "success" : "set_prompt_for_user_request",
+                    "error" : END
+                }
+            )
+
+            graph.add_edge(
+                "set_prompt_for_user_request" , "error_checker8"
+            )
+
+            graph.add_conditional_edges(
+                "error_checker8",
+                error_checker,
+                {
+                    "success" : "invoke_reasoning_agent",
+                    "error" : END
+                }
+            )
+
+            graph.add_edge(
+                "invoke_reasoning_agent" , "error_checker9"
+            )
+
+            graph.add_conditional_edges(
+                "error_checker9", 
+                error_checker,
+                {
+                    "error" : END,
+                    "success" : "reasoning_agent_output_formatter"
+                }
+            )
+
+            graph.add_edge(
+                "reasoning_agent_output_formatter" , "error_checker10"
+            )
+
+            graph.add_conditional_edges(
+                "error_checker10" , 
+                error_checker,
+                {
+                    "success" : END,
+                    "error" : "invoke_reasoning_agent"
+                }
+            )
+            
+            
+            print("\n\n setting up checkpointer\n\n") 
+            
+            await checkpointer.asetup()
+            
+            compiled_graph = graph.compile(checkpointer=checkpointer)
+            
+            
+            
+            print("=======================================")
+            print("\n\n")
+
+            with open("graph.png", "wb") as f:
+                f.write(compiled_graph.get_graph().draw_png())
+                
+            return compiled_graph
+    
+    except Exception as e :
+        
+        print("ennala mudila da ebba")
+        
+        print(e)
+
+
+        
+        
+
+        
+    
         
 async def invoke_graph(data) : 
     
     try: 
         
+        global compiled_graph
+        
+        
+        if(compiled_graph == None) :
+            
+            print("\n\n======================\n\n")
+            print("calling compile graph")
+            
+            compiled_graph = await compile_graph()
     
         user_input = data.get("user_input")
         user_session = data.get("user_session")
@@ -383,11 +420,12 @@ async def invoke_graph(data) :
             user_input_id=-1
         )
         
+        print(" i am here ")
         
-        async for event in compiled_graph.astream(state, config={"configurable": {"thread_id": "test_thread"}}):
+        
+        async for event in compiled_graph.astream(state, config={"configurable": {"thread_id": "test_thread"}}, stream_mode="values"):
             
-            yield f"{event.keys()}\n"
-            yield f"{list(event.values())[0]}\n\n"
+            yield f"{event}\n"
             
             
 

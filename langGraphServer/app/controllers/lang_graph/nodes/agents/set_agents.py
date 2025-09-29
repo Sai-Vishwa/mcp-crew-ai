@@ -3,6 +3,7 @@ import os
 from langchain.agents import initialize_agent , AgentType
 from ..tools.set_tools import expose_tools
 from ...state import FlagState
+from langchain_openai import ChatOpenAI
 
 llm = None
 reasoning_agent = None
@@ -18,8 +19,18 @@ async def set_agents(state : FlagState) -> FlagState:
 
         Tools = expose_tools()
         
+        # llm = ChatOpenAI(
+        #      model="gpt-4o",
+        #     temperature=0,
+        #     max_tokens=None,
+        #     timeout=None,
+        #     max_retries=2,
+        #     api_key=os.getenv("OPEN_API"),
+            
+        # )
+        
         llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash",  
+            model="gemini-2.5-flash-lite",  
             google_api_key=os.getenv("GEMINI_API"),
             temperature=0.2,
             max_output_tokens=1000,

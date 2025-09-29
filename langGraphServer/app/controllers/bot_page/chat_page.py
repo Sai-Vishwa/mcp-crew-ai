@@ -13,8 +13,8 @@ async def chatpage_controller(data):
             json={"session": session}
         )
         resp = response.json()  # httpx allows this synchronously
-        print("hey this is the resp i got --- ")
-        print(resp)
+        # print("hey this is the resp i got --- ")
+        # print(resp)
 
         if resp.get("status") == "error":
             return jsonify({"status": "error", "message": resp.get("message")})

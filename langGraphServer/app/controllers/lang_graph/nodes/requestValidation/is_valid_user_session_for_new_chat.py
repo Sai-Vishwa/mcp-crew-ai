@@ -19,7 +19,7 @@ async def is_valid_user_session_for_new_chat(state : InputState) -> FlagState:
                 resp = response.json()
                 
                 if resp["status"] == "error":
-                    print(resp)
+                    # print(resp)
                     return {
                         "status" : "error" , 
                         "message" : "Cannot create a new chat session for the user" , 

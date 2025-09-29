@@ -7,7 +7,7 @@ async def reasoning_agent_output_formatter(state : ReasoningAgentResponseState) 
         
         if(type(state.raw_response) != str and type(state.raw_response) != dict):
             
-            print("actual type returned is ==> " , type(state.raw_response))
+            # print("actual type returned is ==> " , type(state.raw_response))
             return {
                 "status": "error" ,
                 "message": "Invalid output from reasoning agent ",
@@ -29,14 +29,14 @@ async def reasoning_agent_output_formatter(state : ReasoningAgentResponseState) 
         
         response = json.loads(cleaned)
         
-        print("response from reasoning agent ==> " , response)
+        # print("response from reasoning agent ==> " , response)
         
         Tools = expose_tools()
         
         
         response_object = ReasoningAgentResponseFormat(**response)
         
-        print("response object ==> " , response_object)
+        # print("response object ==> " , response_object)
         
         if(response_object.is_new_workflow == True):
             

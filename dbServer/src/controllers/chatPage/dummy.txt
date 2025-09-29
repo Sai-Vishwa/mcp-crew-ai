@@ -1,147 +1,52 @@
-SELECT 
-    t.id,
-    t.name,
-    t.description,
-    CASE 
-        WHEN a.tool_id IS NOT NULL OR sa.tool_id IS NOT NULL THEN TRUE
-        ELSE FALSE
-    END AS access_status
-FROM tools t
-LEFT JOIN auth u ON u.uname = 'TeTeacher2'
-LEFT JOIN access a 
-    ON a.tool_id = t.id AND a.user_type = u.role
-LEFT JOIN specialaccess sa 
-    ON sa.tool_id = t.id AND sa.uname = u.uname;
-
-
-
-
-SELECT 
-    CASE 
-        WHEN EXISTS (
-            SELECT 1
-            FROM session s
-            JOIN auth a ON s.uname = a.uname
-            JOIN tools t ON t.name = 'Create_Placement'
-            LEFT JOIN access ra ON ra.user_type = a.role AND ra.tool_id = t.id
-            LEFT JOIN specialaccess sa ON sa.uname = a.uname AND sa.tool_id = t.id
-            WHERE s.session = 'abcd'
-              AND (ra.tool_id IS NOT NULL OR sa.tool_id IS NOT NULL)
-        )
-        THEN 'YES'
-        ELSE 'NO'
-    END AS access_result;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    [StructuredTool(name='CreatePlacement', description='This tool is used to create a new placement entry or update an existing one in the database', args_schema={'type': 'object', 'properties': {'session': {'type': 'string', 'description': 'Session identifier'}, 'company_name': {'type': 'string', 'description': 'Name of the company'}, 'visiting_date': {'type': 'string', 'description': 'Date of the company visit'}, 'interview_start': {'type': 'string', 'description': 'Interview start time (HH:MM:SS)'}, 'interview_end': {'type': 'string', 'description': 'Interview end time (HH:MM:SS)'}}, 'required': ['session', 'company_name', 'visiting_date', 'interview_start', 'interview_end']}, response_format='content_and_artifact', coroutine=<function convert_mcp_tool_to_langchain_tool.<locals>.call_tool at 0x7b54ddf42480>), StructuredTool(name='DeletePlacement', description='This tool is used to delete a placement entry from the database with the name of the organisation been provided', args_schema={'type': 'object', 'properties': {'company_name': {'type': 'string', 'description': 'Name of the company whose placement entry to be deleted'}, 'session': {'type': 'string', 'description': 'Session identifier'}}, 'required': ['company_name', 'session']}, response_format='content_and_artifact', coroutine=<function convert_mcp_tool_to_langchain_tool.<locals>.call_tool at 0x7b54ddf93ec0>), StructuredTool(name='example_tool', description='An example tool that processes messages', args_schema={'type': 'object', 'properties': {'message': {'type': 'string', 'description': 'Message to process'}}, 'required': ['message']}, response_format='content_and_artifact', coroutine=<function convert_mcp_tool_to_langchain_tool.<locals>.call_tool at 0x7b54ddf93f60>), StructuredTool(name='ReadPlacement', description='This tool is used to read placement entries', args_schema={'type': 'object', 'properties': {'session': {'type': 'string', 'description': 'Session identifier'}}, 'required': ['session']}, response_format='content_and_artifact', coroutine=<function convert_mcp_tool_to_langchain_tool.<locals>.call_tool at 0x7b54dc63e700>), StructuredTool(name='CreateExam', description='This tool is used to create a new exam entry or update an existing one in the database', args_schema={'type': 'object', 'properties': {'session': {'type': 'string', 'description': 'Session identifier'}, 'exam_date': {'type': 'string', 'description': 'Date of the Exam'}, 'exam_start': {'type': 'string', 'description': 'Exam start time (HH:MM:SS)'}, 'exam_end': {'type': 'string', 'description': 'Exam end time (HH:MM:SS)'}}, 'required': ['session', 'exam_date', 'exam_start', 'exam_end']}, response_format='content_and_artifact', coroutine=<function convert_mcp_tool_to_langchain_tool.<locals>.call_tool at 0x7b54dc63ca40>), StructuredTool(name='DeleteExam', description='This tool is used to delete an exam entry from the database with the date of the exam being provided', args_schema={'type': 'object', 'properties': {'session': {'type': 'string', 'description': 'Session identifier'}, 'exam_date': {'type': 'string', 'description': 'Date of the exam to be deleted'}}, 'required': ['session', 'exam_date']}, response_format='content_and_artifact', coroutine=<function convert_mcp_tool_to_langchain_tool.<locals>.call_tool at 0x7b54dc63f600>), StructuredTool(name='example_tool', description='An example tool that processes messages', args_schema={'type': 'object', 'properties': {'message': {'type': 'string', 'description': 'Message to process'}}, 'required': ['message']}, response_format='content_and_artifact', coroutine=<function convert_mcp_tool_to_langchain_tool.<locals>.call_tool at 0x7b54dc63ede0>), StructuredTool(name='ReadExam', description='This tool is used to read all exam schedule entries', args_schema={'type': 'object', 'properties': {'session': {'type': 'string', 'description': 'Session identifier'}}, 'required': ['session']}, response_format='content_and_artifact', coroutine=<function convert_mcp_tool_to_langchain_tool.<locals>.call_tool at 0x7b54dc63d8a0>), StructuredTool(name='CreateTransport', description='This tool is used to create a new transport entry or update an existing one in the database', args_schema={'type': 'object', 'properties': {'session': {'type': 'string', 'description': 'Session identifier'}, 'bus_date': {'type': 'string', 'description': 'Date for which the bus details is to be entered'}, 'start_time': {'type': 'string', 'description': 'time when busses start (HH:MM:SS)'}, 'leave_time': {'type': 'string', 'description': 'time when busses leave (HH:MM:SS)'}}, 'required': ['session', 'bus_date', 'start_time', 'leave_time']}, response_format='content_and_artifact', coroutine=<function convert_mcp_tool_to_langchain_tool.<locals>.call_tool at 0x7b54dc63ccc0>), StructuredTool(name='DeleteTransport', description='This tool is used to delete a transport entry for a corresponding date provided', args_schema={'type': 'object', 'properties': {'session': {'type': 'string', 'description': 'Session Identifier'}, 'bus_date': {'type': 'string', 'description': 'Date for which the bus details is to be deleted'}}, 'required': ['session', 'bus_date']}, response_format='content_and_artifact', coroutine=<function convert_mcp_tool_to_langchain_tool.<locals>.call_tool at 0x7b54dc63d9e0>), StructuredTool(name='example_tool', description='An example tool that processes messages', args_schema={'type': 'object', 'properties': {'message': {'type': 'string', 'description': 'Message to process'}}, 'required': ['message']}, response_format='content_and_artifact', coroutine=<function convert_mcp_tool_to_langchain_tool.<locals>.call_tool at 0x7b54dc63ec00>), StructuredTool(name='ReadTransport', description='This tool is used to read all transport entries', args_schema={'type': 'object', 'properties': {'session': {'type': 'string', 'description': 'session indentifier'}}, 'required': ['session']}, response_format='content_and_artifact', coroutine=<function convert_mcp_tool_to_langchain_tool.<locals>.call_tool at 0x7b54dc63fc40>)]
-prompt=PromptTemplate(input_variables=['\n  "workflow"'], input_types={}, partial_variables={}, template='You are a reasoning agent that converts natural language user requests into a JSON workflow of tool invocations.  \nYou will ALWAYS respond with valid JSON only, no explanations, no natural language.  \n\n## Rules:\n1. Your output must be a JSON object with this structure:\n   {{\n     "workflow": [\n       {{\n         "step": <number>,\n         "tool": "<ToolName>",\n         "args": {{\n            "<arg1>": "<value>",\n            "<arg2>": "<value>"\n         }}\n       }},\n       ...\n     ]\n   }}\n\n2. Tools available will be injected at runtime.  \n   - Do not hallucinate new tools.  \n   - Only use tools that are provided at runtime.  \n\n3. Every workflow must include correct sequencing.  \n   - Example: To update something, first **read**, then **delete/update**, then **create**.  \n   - If data consistency is needed (e.g., updating exam + transport), chain related tools step by step.  \n\n4. `args` must strictly follow the tool’s schema.  \n   - If you don’t know a value from user input, leave it as an empty string `""`.  \n\n5. Do NOT include comments, natural language, or explanations in your response. Output JSON only.  \n\n## Example:\nUser: "update the exam schedule from 4th sept to 5th sept"  \nOutput:\n{\n  "workflow": [\n    {{\n      "step": 1,\n      "tool": "ReadExam",\n      "args": {{\n        "session": "",\n        "exam_date": "4th sept"\n      }}\n    }},\n    {{\n      "step": 2,\n      "tool": "DeleteExam",\n      "args": {{\n        "session": "",\n        "exam_date": "4th sept"\n      }}\n    }},\n    {{\n      "step": 3,\n      "tool": "CreateExam",\n      "args": {{\n        "session": "",\n        "exam_date": "5th sept",\n        "exam_start": "",\n        "exam_end": ""\n      }}\n    }},\n    {\n      "step": 4,\n      "tool": "CreateTransport",\n      "args": {\n        "session": "",\n        \n      }\n    },\n    {\n      "step": 5,\n      "tool": "UpdateTransport",\n      "args": {\n        "session": ""\n      }\n    }\n  ]\n}\n') additional_kwargs={}
-/home/sai-nts0033/Desktop/mcp-crew-ai/langGraphServer/app/controllers/langgraph/lang_graph.py:103: LangChainDeprecationWarning: LangChain agents will continue to be supported, but it is recommended for new use cases to be built with LangGraph. LangGraph offers a more flexible and full-featured framework for building agents, including support for tool-calling, persistence of state, and human-in-the-loop workflows. For details, refer to the `LangGraph documentation <https://langchain-ai.github.io/langgraph/>`_ as well as guides for `Migrating from AgentExecutor <https://python.langchain.com/docs/how_to/migrate_agent/>`_ and LangGraph's `Pre-built ReAct agent <https://langchain-ai.github.io/langgraph/how-tos/create-react-agent/>`_.
-  reasoning_agent = initialize_agent(
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    {
-  "is_new_workflow": true,
-  "workflow_id": null,
-  "workflow_name": "Reschedule Final Exams",
-  "workflow_description": "Reschedule final exams and update transport accordingly",
-  "workflow_steps": [
-    {
-      "step_number": 1,
-      "tool_name": "ReadExam",
-      "tool_description": "This tool is used to read all exam schedule entries",
-      "params_required": []
-    },
-    {
-      "step_number": 2,
-      "tool_name": "UpdateExam",
-      "tool_description": "This tool is used to update a exam entry on the database by the changing the exam date , start time and end time of the provided exam name",
-      "params_required": [
-        "exam_name",
-        "new_exam_date",
-        "new_exam_start",
-        "new_exam_end",
-        "old_exam_date",
-        "old_exam_start",
-        "old_exam_end",
-        "session"
-      ]
-    },
-    {
-      "step_number": 3,
-      "tool_name": "ReadTransport",
-      "tool_description": "This tool is used to read all transport entries",
-      "params_required": []
-    },
-    {
-      "step_number": 4,
-      "tool_name": "UpdateTransport",
-      "tool_description": "This tool is used to update a transport entry in the database by changing the start and leave time for the provided bus date",
-      "params_required": [
-        "bus_date",
-        "new_start_time",
-        "new_leave_time",
-        "old_start_time",
-        "old_leave_time",
-        "session"
-      ]
-    }
-  ],
-  "confidence_score": 1.0,
-  "reasoning": "Generated a new workflow to reschedule final exams. The workflow first reads existing exam schedules, then updates the exam dates using UpdateExam.  To maintain consistency, it reads existing transport schedules and updates them using UpdateTransport to reflect the new exam dates. This workflow strictly adheres to the hierarchy (Exam > Transport)."
-}
-
-
+=== State: write_keys_zset:test_thread::1f09d223-6538-6b95-8000-e8d50af2b6a0 ===
+{"node":"__empty__","task_path":"~__pregel_pull, are_tools_set","output":"\"Checking if tools are set\"","idx":0}
+=== State: write_keys_zset:test_thread::1f09d223-6979-61d6-8005-168f3680184c ===
+{"node":"__empty__","task_path":"~__pregel_pull, error_checker2","output":"\"Agents are set up successfully\"","idx":1}
+=== State: write_keys_zset:test_thread::1f09d223-7b05-6d39-8012-df1fc3656ad3 ===
+{"node":"__empty__","task_path":"~__pregel_pull, error_checker8","output":"\"prompt is generated successfully\"","idx":1}
+=== State: write_keys_zset:test_thread::1f09d223-7b1c-6f9e-8013-a7c6810f3f39 ===
+{"node":"__empty__","task_path":"~__pregel_pull, invoke_reasoning_agent","output":"\"Reasoning agent predicted the workflow\"","idx":1}
+=== State: write_keys_zset:test_thread::1f09d223-6b75-6e28-800b-e11b3e889cc4 ===
+{"node":"__empty__","task_path":"~__pregel_pull, error_checker5","output":"\"as this is a new chat , a new memory instance is set in redis\"","idx":1}
+=== State: write_keys_zset:test_thread::1f09d223-6550-6da6-8001-ef58795533d3 ===
+{"node":"__empty__","task_path":"~__pregel_pull, set_tools","output":"\"Tools are successfully loaded in the Tools variable\"","idx":1}
+=== State: write_keys_zset:test_thread::1f09d223-79fe-6583-8011-e3dea79e4a31 ===
+{"node":"__empty__","task_path":"~__pregel_pull, set_prompt_for_user_request","output":"\"prompt is generated successfully\"","idx":1}
+=== State: write_keys_zset:test_thread::1f09d223-94b9-61be-8016-c84c48ec13bd ===
+{"node":"__empty__","task_path":"~__pregel_pull, error_checker10","output":"\"workflow_id is required when is_new_workflow is false\"","idx":1}
+=== State: write_keys_zset:test_thread::1f09d223-94d3-688a-8017-2ee44bb1d3a1 ===
+{"node":"__empty__","task_path":"~__pregel_pull, invoke_reasoning_agent","output":"\"Reasoning agent predicted the workflow\"","idx":1}
+=== State: write_keys_zset:test_thread::1f09d223-9f45-646b-8018-8d99c0b5cf5a ===
+{"node":"__empty__","task_path":"~__pregel_pull, error_checker9","output":"\"Reasoning agent predicted the workflow\"","idx":1}
+=== State: write_keys_zset:test_thread::1f09d223-79e6-6b87-8010-75b0a6a356e3 ===
+{"node":"__empty__","task_path":"~__pregel_pull, error_checker7","output":"\"Chat prompt template is set successfully\"","idx":1}
+=== State: write_keys_zset:test_thread::1f09d223-7999-6d3f-800d-dda20150d73d ===
+{"node":"__empty__","task_path":"~__pregel_pull, error_checker6","output":"\"Relevant workflows fetched successfully\"","idx":1}
+=== State: write_keys_zset:test_thread::1f09d223-6b4b-6eda-800a-eff32a4f13f2 ===
+{"node":"__empty__","task_path":"~__pregel_pull, load_memory","output":"\"as this is a new chat , a new memory instance is set in redis\"","idx":1}
+=== State: write_keys_zset:test_thread::1f09d223-69a3-6d5a-8006-ec80be731264 ===
+{"node":"__empty__","task_path":"~__pregel_pull, is_new_chat","output":"\"Checking if this is a new chat request\"","idx":0}
+=== State: write_keys_zset:test_thread::1f09d223-6b1b-6d21-8008-639f5166d8ad ===
+{"node":"__empty__","task_path":"~__pregel_pull, error_checker3","output":"\"The user session is valid and a new chat memory is created for the user\"","idx":1}
+=== State: write_keys_zset:test_thread::1f09d223-69cd-6a7e-8007-67902706a05c ===
+{"node":"__empty__","task_path":"~__pregel_pull, is_valid_user_session_for_new_chat","output":"\"The user session is valid and a new chat memory is created for the user\"","idx":1}
+=== State: write_keys_zset:test_thread::1f09d223-79c7-64d1-800f-7d1def8a2a34 ===
+{"node":"__empty__","task_path":"~__pregel_pull, set_prompt_template","output":"\"Chat prompt template is set successfully\"","idx":1}
+=== State: write_keys_zset:test_thread::1f09d223-79af-6091-800e-cfe94eb41fb9 ===
+{"node":"__empty__","task_path":"~__pregel_pull, is_prompt_template_set","output":"\"Checking if prompt template is set\"","idx":0}
+=== State: write_keys_zset:test_thread::1f09d223-690f-6ec1-8003-40ae57e7d7b8 ===
+{"node":"__empty__","task_path":"~__pregel_pull, are_agents_set","output":"\"Checking if agents are set\"","idx":0}
+=== State: write_keys_zset:test_thread::1f09d223-9487-6d97-8014-4784b149b35a ===
+{"node":"__empty__","task_path":"~__pregel_pull, error_checker9","output":"\"Reasoning agent predicted the workflow\"","idx":1}
+=== State: write_keys_zset:test_thread::1f09d223-6520-6915-bfff-9963354ed195 ===
+=== State: write_keys_zset:test_thread::1f09d223-68e8-654a-8002-7348765c40f1 ===
+{"node":"__empty__","task_path":"~__pregel_pull, error_checker1","output":"\"Tools are successfully loaded in the Tools variable\"","idx":1}
+=== State: write_keys_zset:test_thread::1f09d223-6936-61aa-8004-2a2f32a6dec2 ===
+{"node":"__empty__","task_path":"~__pregel_pull, set_agents","output":"\"Agents are set up successfully\"","idx":1}
+=== State: write_keys_zset:test_thread::1f09d223-6b97-67d9-800c-60743eb5d10b ===
+{"node":"__empty__","task_path":"~__pregel_pull, load_relevant_workflows","output":"\"Relevant workflows fetched successfully\"","idx":1}
+=== State: write_keys_zset:test_thread::1f09d223-6b33-6407-8009-fb6017f03054 ===
+{"node":"__empty__","task_path":"~__pregel_pull, is_memory_loaded","output":"\"Checking if memory is loaded\"","idx":0}
+=== State: write_keys_zset:test_thread::1f09d223-94a0-6ab6-8015-6bc08ad15737 ===
+{"node":"__empty__","task_path":"~__pregel_pull, reasoning_agent_output_formatter","output":"\"workflow_id is required when is_new_workflow is false\"","idx":1}
+sai-nts0033@sai-nts0033:~$ 
