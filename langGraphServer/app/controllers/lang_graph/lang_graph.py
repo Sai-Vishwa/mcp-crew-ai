@@ -31,7 +31,9 @@ from cachetools import TTLCache
 from typing import TypedDict , NotRequired , Any , Optional
 from langgraph.graph import StateGraph , END , START
 
+from langgraph.store.redis.aio import AsyncRedisStore
 
+from pprint import pprint
 
 
 # lang_graph.py (top of the file)
@@ -96,6 +98,7 @@ class ExamInput(BaseModel):
 compiled_graph = None
 
 is_redis_setup_done = False
+
     
 # async def main():
     
@@ -115,14 +118,14 @@ is_redis_setup_done = False
 
 class DebugAsyncRedisSaver(AsyncRedisSaver):
     async def aput(self, config, checkpoint, metadata, new_versions):
-        print("-----------------------------------------------------\n\n\n")
-        # print(metadata)
-        # print(checkpoint)\
-        print("see config \n")
-        print(config)
-        print("\n versions new")
-        print(new_versions)
-        print("inga paaru \n\n\n\n")
+        # print("-----------------------------------------------------\n\n\n")
+        # # print(metadata)
+        # # print(checkpoint)\
+        # print("see config \n")
+        # print(config)
+        # print("\n versions new")
+        # print(new_versions)
+        # print("inga paaru \n\n\n\n")
         # print(f"Saving checkpoint: {checkpoint}")
         return await super().aput(config, checkpoint, metadata, new_versions)
 
@@ -134,11 +137,7 @@ async def compile_graph():
         
         DB_URI = "redis://localhost:6380/0"
         
-        async with (
-            DebugAsyncRedisSaver.from_conn_string(DB_URI) as checkpointer , 
-            # AsyncRedisStore.from_conn_string(DB_URI) as store,
-
-            ) :
+        async with (DebugAsyncRedisSaver.from_conn_string(DB_URI) as checkpointer) :
             
             global compiled_graph
         
@@ -363,10 +362,13 @@ async def compile_graph():
             
             print("\n\n setting up checkpointer\n\n") 
             
-            await checkpointer.asetup()
+            if(is_redis_setup_done==False):
+            
+                await checkpointer.asetup()
+                
+                is_redis_setup_done = True
             
             compiled_graph = graph.compile(checkpointer=checkpointer)
-            
             
             
             print("=======================================")
@@ -423,19 +425,56 @@ async def invoke_graph(data) :
         print(" i am here ")
         
         
-        async for event in compiled_graph.astream(state, config={"configurable": {"thread_id": "test_thread"}}, stream_mode="values"):
-            
-            yield f"{event}\n"
+        async for event in compiled_graph.astream(state, config={"configurable": {"thread_id": "test_thread"}}, stream_mode="updates"):
             
             
+            try :
+                
+                
+                Lists = list(event.values())[0]
+                
+                value = Lists["formatted_response"]
+                
+                
+                
+                print("tho paaru ======")
+                print(value)
+                
+                
+                resp = {
+                    "is_final" : "true" , 
+                    "resp" : value
+                }
+                
+                
+                yield f"{resp}"
+                
+                return
+                
+            except Exception as e : 
 
-           
-        
-        
+                Lists = list(event.values())[0]
+                
+                value = Lists["message"]
+                
+                print("tho paaru ======")
+                print(value)
+                
+                
+                resp = {
+                    "is_final" : "false",
+                    "resp" : value
+                }
+                
+                yield f"{resp}"
         
     except Exception as e : 
         
-        yield f"some internal error"
+        value = {
+            "is_final": "true" , 
+            "value" : "some internal error happened"
+        }
+        yield f"{value}"
     
         
 # asyncio.run(main())
