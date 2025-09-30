@@ -67,9 +67,9 @@ from lang_graph.nodes.loading_relevant_workflows.load_relevant_workflows import 
 
 from lang_graph.nodes.error_checker.error_checker import error_checker , error_checker_wrapper , error_checker_last_wrapper
 
-from lang_graph.nodes.prompt.is_prompt_template_set import is_prompt_template_set , is_prompt_template_set_wrapper
-from lang_graph.nodes.prompt.set_prompt_for_user_request import set_prompt_for_user_request
-from lang_graph.nodes.prompt.set_prompt_template import set_prompt_template
+from lang_graph.nodes.prompt_for_reasoning_agent.is_prompt_template_set_for_reasoning_agent import is_prompt_template_set_for_reasoning_agent , is_prompt_template_set_wrapper_for_reasoning_agent
+from lang_graph.nodes.prompt_for_reasoning_agent.set_prompt_for_user_request_for_reasoning_agent import set_prompt_for_user_request_for_reasoning_agent
+from lang_graph.nodes.prompt_for_reasoning_agent.set_prompt_template_for_reasoning_agent import set_prompt_template_for_reasoning_agent
 
 
 
@@ -158,9 +158,9 @@ async def compile_graph():
                 "load_relevant_workflows": load_relevant_workflows,
                 "invoke_reasoning_agent": invoke_reasoning_agent,
                 "reasoning_agent_output_formatter": reasoning_agent_output_formatter,
-                "is_prompt_template_set": is_prompt_template_set_wrapper,
-                "set_prompt_template" : set_prompt_template,
-                "set_prompt_for_user_request" : set_prompt_for_user_request,
+                "is_prompt_template_set_for_reasoning_agent": is_prompt_template_set_wrapper_for_reasoning_agent,
+                "set_prompt_template_for_reasoning_agent" : set_prompt_template_for_reasoning_agent,
+                "set_prompt_for_user_request_for_reasoning_agent" : set_prompt_for_user_request_for_reasoning_agent,
                 "error_checker1": error_checker_wrapper,
                 "error_checker2": error_checker_wrapper,
                 "error_checker3": error_checker_wrapper,
@@ -293,35 +293,35 @@ async def compile_graph():
                 error_checker,
                 {
                     "error": END, 
-                    "success": "is_prompt_template_set", 
+                    "success": "is_prompt_template_set_for_reasoning_agent", 
                 }
             )
 
             graph.add_conditional_edges(
-                "is_prompt_template_set",
-                is_prompt_template_set,
+                "is_prompt_template_set_for_reasoning_agent",
+                is_prompt_template_set_for_reasoning_agent,
                 {
                     "error" : END,
-                    "yes" : "set_prompt_for_user_request",
-                    "no" : "set_prompt_template"
+                    "yes" : "set_prompt_for_user_request_for_reasoning_agent",
+                    "no" : "set_prompt_template_for_reasoning_agent"
                 }
             )
 
             graph.add_edge(
-                "set_prompt_template" , "error_checker7"
+                "set_prompt_template_for_reasoning_agent" , "error_checker7"
             )
 
             graph.add_conditional_edges(
                 "error_checker7",
                 error_checker,
                 {
-                    "success" : "set_prompt_for_user_request",
+                    "success" : "set_prompt_for_user_request_for_reasoning_agent",
                     "error" : END
                 }
             )
 
             graph.add_edge(
-                "set_prompt_for_user_request" , "error_checker8"
+                "set_prompt_for_user_request_for_reasoning_agent" , "error_checker8"
             )
 
             graph.add_conditional_edges(
