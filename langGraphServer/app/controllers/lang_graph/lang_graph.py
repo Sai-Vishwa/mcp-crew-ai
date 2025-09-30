@@ -394,6 +394,9 @@ async def compile_graph():
         
 async def invoke_graph(data) : 
     
+    # yield f"data: {json.dumps({"is_final" : "error" , "resp" : "Aama da error tha enna ipo"})}\n\n"
+    # return
+    
     try: 
         
         global compiled_graph
@@ -427,7 +430,7 @@ async def invoke_graph(data) :
         flag = False
         
         
-        async for event in compiled_graph.astream(state, config={"configurable": {"thread_id": "test_thread"}}, stream_mode="updates"):
+        async for event in compiled_graph.astream(state, config={"configurable": {"thread_id": "test_thread"} , "recursion_limit" : 100}, stream_mode="updates"):
             
             
             try :
@@ -466,20 +469,34 @@ async def invoke_graph(data) :
                 
                 value = Lists["message"]
                 
-                print("tho paaru ======")
-                print(value)
+                status = Lists["status"]
                 
-                resp = {
-                    "is_final" : "false",
-                    "resp" : value
-                }
+                resp = {}
+                
+                if(status != "success") : 
+                    
+                    resp = {
+                        "is_final" : "error" , 
+                        "resp" : value
+                    }
+                    
+                else : 
+            
+                    resp = {
+                        "is_final" : "false",
+                        "resp" : value
+                    }
+                    
                 if(flag == False) : 
                     yield f"data: {json.dumps(resp)}\n\n"
         
     except Exception as e : 
         
+        print("ada poya ")
+        print(e)
+        
         value = {
-            "is_final": "true" , 
+            "is_final": "error" , 
             "value" : "some internal error happened"
         }
         yield f"data: {json.dumps(value)}\n\n"

@@ -26,5 +26,6 @@ def is_memory_loaded_wrapper(state: FlagState) -> InputState:
     if(state.status != "success") :
         return state
     return {
-        "message" : "Checking if memory is loaded"
+        "message" : "Checking if memory is loaded" , 
+        "status" : state.status 
     }

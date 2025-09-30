@@ -27,5 +27,6 @@ def are_agents_set_wrapper(state: FlagState) -> FlagState:
     if(state.status != "success") :
         return state
     return {
-        "message" : "Checking if agents are set"
+        "message" : "Checking if agents are set",
+        "status" : state.status
     }

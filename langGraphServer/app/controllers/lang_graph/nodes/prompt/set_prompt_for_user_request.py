@@ -8,6 +8,10 @@ async def set_prompt_for_user_request(state : ReasoningAgentInputState) -> FlagS
     
     try :
         
+        
+        print("NA IPO THA PROMPT EH SET PANREN")
+        print(state.additional_message)
+        
         chat_prompt_template : ChatPromptTemplate = expose_chat_prompt_template()
         
         history = []

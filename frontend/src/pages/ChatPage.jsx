@@ -75,7 +75,9 @@ const reducer = (state, action) => {
           };
         }
       }
+      console.log("inga paaru last msg ah add panten")
       return { ...state, currentMessages: messages };
+
     
     case 'ADD_THINKING_STEP':
       const msgs = [...state.currentMessages];
@@ -282,6 +284,9 @@ const MessageBubble = ({ message, theme, onProceed, onRegenerate }) => {
   
   return (
     <div className="flex justify-start mb-4">
+
+      {!(message?.content && message?.content?.length > 0)  && 
+
       <div className="max-w-3xl w-full space-y-3">
         {message.thinkingSteps && message.thinkingSteps.length > 0 && !message.workflow && (
           <ThinkingSteps steps={message.thinkingSteps} theme={theme} />
@@ -295,6 +300,24 @@ const MessageBubble = ({ message, theme, onProceed, onRegenerate }) => {
             onRegenerate={() => onRegenerate(message.workflow)}
           />
         )}
+      </div>
+      }
+
+      <div>
+        {
+          message?.content && message?.content?.length > 0  && (
+            <div className="max-w-3xl w-full space-y-3 flex justify-start mb-4">
+              
+            <div className={`${themeObj.stepBg} border ${themeObj.border} rounded-lg p-4`}>
+              <h4 className={`${themeObj.textPrimary} text-sm font-semibold mb-2`}>Internal error</h4>
+              <p className={`${themeObj.textSecondary} text-sm leading-relaxed`}>
+                {message.content}
+              </p>
+            </div>
+
+            </div>
+          )
+        }
       </div>
     </div>
   );
@@ -505,6 +528,8 @@ const AppProvider = ({ children }) => {
             // // console.log(obj)
 
             // const parsed = obj;
+
+            console.log(parsed.is_final)
             // console.log(JSON.stringify(parsed))
             if (parsed.is_final === 'false') {
               // Add thinking step
@@ -522,6 +547,14 @@ const AppProvider = ({ children }) => {
                   payload: { workflow, thinkingSteps: [] }
                 });
               }
+            }
+            else {
+              console.log("itho paaru thala last message error uh")
+              console.table(parsed)
+              dispatch({ 
+                  type: 'UPDATE_LAST_MESSAGE', 
+                  payload: { content: parsed.resp }
+                });
             }
           } catch (e) {
             console.error("Error parsing chunk:", e);

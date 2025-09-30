@@ -22,5 +22,6 @@ def is_new_chat_wrapper(state: FlagState) -> InputState:
     if(state.status != "success") :
         return state
     return {
-        "message" : "Checking if this is a new chat request"
+        "message" : "Checking if this is a new chat request" , 
+        "status" : state.status
     }

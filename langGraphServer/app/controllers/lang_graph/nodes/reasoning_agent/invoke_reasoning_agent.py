@@ -7,8 +7,16 @@ async def invoke_reasoning_agent(state : ReasoningAgentInputState) -> FlagState 
 
     try : 
         
+        print("ENNA EVAN DA KOOPTUNE IRUKAN")
+        
+        print("Additional message ah paaru da ---> ")
+        
+        print(state.additional_message)
+        
         reasoning_agent_with_memory = expose_reasoning_agent()
         Tools = expose_tools()
+        
+        
         
         
         final_prompt = state.prompt

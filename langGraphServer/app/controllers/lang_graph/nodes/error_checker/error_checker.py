@@ -1,9 +1,14 @@
 from ...state import FlagState , ReasoningAgentResponseState
+from pprint import pprint
 
 def error_checker(state : FlagState) -> str :
     
     try : 
         
+        pprint("\n\n====================================================\n\n")
+        pprint("state inside error checker")
+        pprint(state)
+        print("\n\n=====================================================\n\n")
         if(state.status != 'success') : 
             return "error"
         
