@@ -8,6 +8,8 @@ from langchain_openai import ChatOpenAI
 llm = None
 reasoning_agent = None
 execution_agent = None     
+decider_agent = None
+default_reply_agent = None
 
 async def set_agents(state : FlagState) -> FlagState:
 
@@ -16,6 +18,8 @@ async def set_agents(state : FlagState) -> FlagState:
         global llm
         global reasoning_agent
         global execution_agent
+        global decider_agent
+        global default_reply_agent
 
         Tools = expose_tools()
         
@@ -35,20 +39,37 @@ async def set_agents(state : FlagState) -> FlagState:
             temperature=0.2,
             max_output_tokens=1000,
         )
+        
+        decider_agent = initialize_agent(
+            llm = llm,
+            agent = AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
+            verbose = True,
+            tools= []
+        )
+        
+        default_reply_agent = initialize_agent(
+            llm = llm,
+            agent = AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
+            verbose = True,
+            tools=[]
+        )
+        
 
         reasoning_agent = initialize_agent(
             llm= llm,
             agent= AgentType.OPENAI_MULTI_FUNCTIONS,
             verbose= True,
             tools=Tools,
-                   )
+        )
+        
+        
 
         execution_agent = initialize_agent(
             llm= llm,
             agent= AgentType.OPENAI_MULTI_FUNCTIONS,
             verbose= True,
             tools=Tools,
-                 )
+        )
         
         return {
             "status" : "success",
@@ -68,12 +89,19 @@ async def set_agents(state : FlagState) -> FlagState:
 def expose_all():
     return {
         "reasoning_agent" : reasoning_agent,
-        
         "llm" : llm,
-        "execution_agent" : execution_agent
+        "execution_agent" : execution_agent,
+        "decider_agent" : decider_agent,
+        "default_reply_agent" : default_reply_agent
     }
 def expose_reasoning_agent():
     return reasoning_agent
 
 def expose_execution_agent():
     return execution_agent
+
+def expose_decider_agent():
+    return decider_agent
+
+def expose_default_reply_agent():
+    return default_reply_agent
