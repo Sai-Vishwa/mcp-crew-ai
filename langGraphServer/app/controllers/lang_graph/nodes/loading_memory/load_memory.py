@@ -38,7 +38,7 @@ async def load_memory(state : InputState) -> FlagState:
                 "history_messages" : [] , 
                 "summary" : "" , 
                 "relevant_workflows" : [] , 
-                "prompt" : ""
+                "prompt_for_reasoning_agent" : ""
             }
         
         else : 

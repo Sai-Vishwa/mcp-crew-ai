@@ -1,10 +1,10 @@
-from .set_prompt_template import expose_chat_prompt_template
+from .set_prompt_for_user_request_for_decider_agent import expose_chat_prompt_template_for_decider_agent
 from ...state import FlagState
 
-async def is_prompt_template_set(state : FlagState) -> str:
+async def is_prompt_template_set_for_decider_agent(state : FlagState) -> str:
     try: 
         
-        chat_prompt_template = expose_chat_prompt_template()
+        chat_prompt_template = expose_chat_prompt_template_for_decider_agent()
 
         
         if(state.status != "success") :
@@ -20,11 +20,11 @@ async def is_prompt_template_set(state : FlagState) -> str:
         print(e)
         return  "error"
     
-def is_prompt_template_set_wrapper(state: FlagState) -> FlagState:
+def is_prompt_template_set_wrapper_for_decider_agent(state: FlagState) -> FlagState:
     
     if(state.status != "success") :
         return state
     return {
-        "message" : "Checking if prompt template is set" , 
+        "message" : "Checking if prompt template is set for the decider agent" , 
         "status" : state.status
     }

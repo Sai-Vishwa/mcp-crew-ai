@@ -81,13 +81,29 @@ class ReasoningAgentInputState(BaseModel) :  # this state holds the user chat hi
     
     relevant_workflows : Optional[List[SingleRelevantWorkflowFormat]] = []# List of relevant workflows
     
-    prompt : Optional[str] = "" # the final prompt to send to the agent
+    prompt_for_reasoning_agent : Optional[str] = "" # the final prompt to send to the agent
     
-    additional_message : Optional[str] = ""
+    additional_messages_for_reasoning_agent : Optional[str] = ""
     
 class ReasoningAgentResponseState(BaseModel) : 
     
     raw_response : str | dict
     
     formatted_response : Optional[ReasoningAgentResponseFormat] = None
+    
+    
+class DeciderAgentInputState(BaseModel) : 
+    
+    user_input_id : int # this is the config id for unique identification 
+    
+    user_input : str
+    
+    chat_session : int # the chat session whose memory is stored
+    
+    history_messages : List[SingleMessageFormat] # List of Messages from history
+        
+    prompt_for_decider_agent : Optional[str] = "" # the final prompt to send to the agent
+    
+    additional_messages_for_decider_agent : Optional[str] = ""
+    
     

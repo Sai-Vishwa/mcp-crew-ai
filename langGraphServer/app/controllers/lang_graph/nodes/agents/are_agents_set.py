@@ -8,11 +8,13 @@ async def are_agents_set(state : FlagState) -> str:
         reasoning_agent = agents["reasoning_agent"]
         llm = agents["llm"]
         execution_agent = agents["execution_agent"]
+        decider_agent = agents["decider_agent"]
+        default_reply_agent = agents["default_reply_agent"]
         
         if(state.status != "success") :
             return "error"
         
-        if(reasoning_agent is None or execution_agent is None or llm is None ):
+        if(reasoning_agent is None or execution_agent is None or llm is None or decider_agent is None or default_reply_agent is None ):
             return "no"
             
         else:

@@ -45,7 +45,7 @@ async def reasoning_agent_output_formatter(state : ReasoningAgentResponseState) 
                     return {
                         "status": "error" ,
                         "message": "invalid tool usage",
-                        "additional_message": f"the tool {tool.tool_name} is not in the list of approved tools. Approved tools are {[t.name for t in Tools]}"
+                        "additional_message_for_reasoning_agent": f"the tool {tool.tool_name} is not in the list of approved tools. Approved tools are {[t.name for t in Tools]}"
                     }
                     
         else :
@@ -54,7 +54,7 @@ async def reasoning_agent_output_formatter(state : ReasoningAgentResponseState) 
                 return {
                     "status": "error" ,
                     "message": "workflow_id is required when is_new_workflow is false",
-                    "additional_message": "Please provide a valid workflow_id from the approved workflows"
+                    "additional_message_for_reasoning_agent": "Please provide a valid workflow_id from the approved workflows"
                 }
                 
             
@@ -63,7 +63,7 @@ async def reasoning_agent_output_formatter(state : ReasoningAgentResponseState) 
             "status" : "success" , 
             "message" : "Successfully formatted the reasoning agent output",
             "formatted_response" : response_object,
-            "additional_message" : ""
+            "additional_message_for_reasoning_agent" : ""
         }
         
         
@@ -74,5 +74,5 @@ async def reasoning_agent_output_formatter(state : ReasoningAgentResponseState) 
         return {
             "status": "error" ,
             "message": "Invalid output from reasoning agent ",
-            "additional_message": "Please provide the output in the correct format"
+            "additional_message_for_reasoning_agent": "Please provide the output in the correct format"
         }

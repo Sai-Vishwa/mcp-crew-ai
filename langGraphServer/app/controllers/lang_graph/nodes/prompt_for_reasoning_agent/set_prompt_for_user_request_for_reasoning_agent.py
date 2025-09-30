@@ -1,18 +1,18 @@
 from ...state import ReasoningAgentInputState , FlagState
 import tiktoken
-from .set_prompt_template import expose_chat_prompt_template
+from .set_prompt_template_for_reasoning_agent import expose_chat_prompt_template_for_reasoning_agent
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import SystemMessage , HumanMessage , AIMessage
 from ..tools.set_tools import expose_tools
-async def set_prompt_for_user_request(state : ReasoningAgentInputState) -> FlagState : 
+async def set_prompt_for_user_request_for_reasoning_agent(state : ReasoningAgentInputState) -> FlagState : 
     
     try :
         
         
         print("NA IPO THA PROMPT EH SET PANREN")
-        print(state.additional_message)
+        print(state.additional_messages_for_reasoning_agent)
         
-        chat_prompt_template : ChatPromptTemplate = expose_chat_prompt_template()
+        chat_prompt_template : ChatPromptTemplate = expose_chat_prompt_template_for_reasoning_agent()
         
         history = []
         
@@ -37,7 +37,7 @@ async def set_prompt_for_user_request(state : ReasoningAgentInputState) -> FlagS
 
         tools = [SystemMessage (content="TOOLS AVAILABLE -> "+tools_str)]
         
-        additional_system_message = [SystemMessage(content=state.additional_message)]
+        additional_system_message = [SystemMessage(content=state.additional_messages_for_reasoning_agent)]
     
         
         final_prompt = chat_prompt_template.format(
@@ -58,7 +58,7 @@ async def set_prompt_for_user_request(state : ReasoningAgentInputState) -> FlagS
         return {
             "status" : "success" , 
             "message" : "prompt is generated successfully",
-            "prompt" : final_prompt
+            "prompt_for_reasoning_agent" : final_prompt
         }
         
     except Exception as e :

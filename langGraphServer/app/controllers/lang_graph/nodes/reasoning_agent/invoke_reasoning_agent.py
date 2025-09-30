@@ -11,7 +11,7 @@ async def invoke_reasoning_agent(state : ReasoningAgentInputState) -> FlagState 
         
         print("Additional message ah paaru da ---> ")
         
-        print(state.additional_message)
+        print(state.additional_messages_for_reasoning_agent)
         
         reasoning_agent_with_memory = expose_reasoning_agent()
         Tools = expose_tools()
@@ -19,7 +19,7 @@ async def invoke_reasoning_agent(state : ReasoningAgentInputState) -> FlagState 
         
         
         
-        final_prompt = state.prompt
+        final_prompt = state.prompt_for_reasoning_agent
         
         # print("aivoke is getting called")
         
