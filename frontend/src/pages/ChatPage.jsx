@@ -368,20 +368,8 @@ const AppProvider = ({ children }) => {
 
   const parseWorkflowResponse = (respString) => {
     try {
-      // Extract the actual response object after 'resp': 
-      const match = respString.match(/'resp':\s*(.+)$/);
-      if (!match) return null;
       
-      const jsonStr = match[1]
-        .replace(/ReasoningAgentResponseFormat\(/g, '{')
-        .replace(/SingleWorkflowStepFormat\(/g, '{')
-        .replace(/\)/g, '}')
-        .replace(/'/g, '"')
-        .replace(/True/g, 'true')
-        .replace(/False/g, 'false')
-        .replace(/None/g, 'null');
-      
-      return JSON.parse(jsonStr);
+      return JSON.parse(respString);
     } catch (e) {
       console.error("Error parsing workflow:", e);
       return null;
@@ -481,35 +469,53 @@ const AppProvider = ({ children }) => {
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
+        let parts = buffer.split("\n\n");
+        buffer = parts.pop() || "";
+
+        let parsed = {"is_final" : "true" , "resp" : ""}
+        for (const part of parts) {
+          if (part.startsWith("data:")) {
+            try {
+              const jsonString = part.replace(/^data:\s*/, "");
+              parsed = JSON.parse(jsonString);
+            } catch (err) {
+              console.error("Error parsing SSE chunk:", err);
+            }
+          }
         
-        // Split by }{ to handle multiple JSON objects
-        const chunks = buffer.split('}{');
-        buffer = chunks.pop() || ""; // Keep incomplete chunk in buffer
+
+          console.log("HEHEHEHEHEH")
+          console.log(JSON.stringify(parsed))
         
-        for (let i = 0; i < chunks.length; i++) {
-          let chunk = chunks[i];
-          if (i > 0) chunk = '{' + chunk;
-          if (i < chunks.length - 1) chunk = chunk + '}';
+        // // Split by }{ to handle multiple JSON objects
+        // const chunks = buffer.split('}{');
+        // buffer = chunks.pop() || ""; // Keep incomplete chunk in buffer
+        
+        // for (let i = 0; i < chunks.length; i++) {
+        //   let chunk = chunks[i];
+        //   if (i > 0) chunk = '{' + chunk;
+        //   if (i < chunks.length - 1) chunk = chunk + '}';
           
           try {
-            chunk = "{" + chunk + "}"
+            // chunk = "{" + chunk + "}"
 
-            let jsonStr = chunk.replace(/'/g, '"');
+            // let jsonStr = chunk.replace(/'/g, '"');
 
-            let obj = JSON.parse(jsonStr);
-            // console.log(obj)
+            // let obj = JSON.parse(jsonStr);
+            // // console.log(obj)
 
-            const parsed = obj;
-            console.log(JSON.stringify(parsed))
+            // const parsed = obj;
+            // console.log(JSON.stringify(parsed))
             if (parsed.is_final === 'false') {
               // Add thinking step
               dispatch({ type: 'ADD_THINKING_STEP', payload: parsed.resp });
             } else if (parsed.is_final === 'true') {
               // Parse and set final workflow
               const workflow = typeof parsed.resp === 'string' 
-                ? parseWorkflowResponse(chunk)
+                ? parseWorkflowResponse(parsed.resp)
                 : parsed.resp;
-              
+              console.log("inga paaru workflow va ---->>> ")
+              console.table(workflow)
               if (workflow) {
                 dispatch({ 
                   type: 'UPDATE_LAST_MESSAGE', 

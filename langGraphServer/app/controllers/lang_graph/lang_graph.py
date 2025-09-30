@@ -424,6 +424,8 @@ async def invoke_graph(data) :
         
         print(" i am here ")
         
+        flag = False
+        
         
         async for event in compiled_graph.astream(state, config={"configurable": {"thread_id": "test_thread"}}, stream_mode="updates"):
             
@@ -433,25 +435,32 @@ async def invoke_graph(data) :
                 
                 Lists = list(event.values())[0]
                 
-                value = Lists["formatted_response"]
+                value : ReasoningAgentResponseState  = Lists["formatted_response"]
                 
                 
-                
+                print("===============================================================")
                 print("tho paaru ======")
                 print(value)
                 
+                value = value.model_dump_json(exclude_none = True)
+
                 
                 resp = {
                     "is_final" : "true" , 
                     "resp" : value
                 }
                 
+                flag = True
+                print("itho yie;d uh")
+                yield f"data: {json.dumps(resp)}\n\n"
+                print("itho after yield uh")
                 
-                yield f"{resp}"
-                
-                return
                 
             except Exception as e : 
+                
+                
+                print("enna vro error")
+                print(e)
 
                 Lists = list(event.values())[0]
                 
@@ -460,13 +469,12 @@ async def invoke_graph(data) :
                 print("tho paaru ======")
                 print(value)
                 
-                
                 resp = {
                     "is_final" : "false",
                     "resp" : value
                 }
-                
-                yield f"{resp}"
+                if(flag == False) : 
+                    yield f"data: {json.dumps(resp)}\n\n"
         
     except Exception as e : 
         
@@ -474,7 +482,7 @@ async def invoke_graph(data) :
             "is_final": "true" , 
             "value" : "some internal error happened"
         }
-        yield f"{value}"
+        yield f"data: {json.dumps(value)}\n\n"
     
         
 # asyncio.run(main())
