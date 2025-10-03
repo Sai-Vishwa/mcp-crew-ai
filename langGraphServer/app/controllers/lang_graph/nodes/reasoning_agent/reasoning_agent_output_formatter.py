@@ -5,7 +5,7 @@ from ..tools.set_tools import expose_tools
 async def reasoning_agent_output_formatter(state : ReasoningAgentResponseState) -> FlagState:
     try : 
         
-        if(type(state.raw_response) != str and type(state.raw_response) != dict):
+        if(type(state.raw_response_from_reasoning_agent) != str and type(state.raw_response_from_reasoning_agent) != dict):
             
             # print("actual type returned is ==> " , type(state.raw_response))
             return {
@@ -16,11 +16,11 @@ async def reasoning_agent_output_formatter(state : ReasoningAgentResponseState) 
             
         response = {}
             
-        if(type(state.raw_response) == str ):
-            response : dict = json.loads(state.raw_response)
+        if(type(state.raw_response_from_reasoning_agent) == str ):
+            response : dict = json.loads(state.raw_response_from_reasoning_agent)
         
-        if(type(state.raw_response) == dict):
-            response : dict = state.raw_response
+        if(type(state.raw_response_from_reasoning_agent) == dict):
+            response : dict = state.raw_response_from_reasoning_agent
         
         response_str : str = response.get("output")
         
@@ -62,7 +62,7 @@ async def reasoning_agent_output_formatter(state : ReasoningAgentResponseState) 
         return {
             "status" : "success" , 
             "message" : "Successfully formatted the reasoning agent output",
-            "formatted_response" : response_object,
+            "formatted_response_from_reasoning_agent" : response_object,
             "additional_message_for_reasoning_agent" : ""
         }
         

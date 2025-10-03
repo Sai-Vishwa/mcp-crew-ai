@@ -71,6 +71,9 @@ from lang_graph.nodes.prompt_for_reasoning_agent.is_prompt_template_set_for_reas
 from lang_graph.nodes.prompt_for_reasoning_agent.set_prompt_for_user_request_for_reasoning_agent import set_prompt_for_user_request_for_reasoning_agent
 from lang_graph.nodes.prompt_for_reasoning_agent.set_prompt_template_for_reasoning_agent import set_prompt_template_for_reasoning_agent
 
+from lang_graph.nodes.prompt_for_decider_agent.is_prompt_template_set_for_decider_agent import is_prompt_template_set_for_decider_agent , is_prompt_template_set_wrapper_for_decider_agent
+from lang_graph.nodes.prompt_for_decider_agent.set_prompt_for_user_request_for_decider_agent import set_prompt_for_user_request_for_decider_agent
+from lang_graph.nodes.prompt_for_decider_agent.set_prompt_template_for_decider_agent import set_prompt_template_for_decider_agent
 
 
 load_dotenv()
@@ -161,6 +164,9 @@ async def compile_graph():
                 "is_prompt_template_set_for_reasoning_agent": is_prompt_template_set_wrapper_for_reasoning_agent,
                 "set_prompt_template_for_reasoning_agent" : set_prompt_template_for_reasoning_agent,
                 "set_prompt_for_user_request_for_reasoning_agent" : set_prompt_for_user_request_for_reasoning_agent,
+                "is_prompt_template_set_for_decider_agent": is_prompt_template_set_wrapper_for_decider_agent,
+                "set_prompt_template_for_decider_agent" : set_prompt_template_for_decider_agent,
+                "set_prompt_for_user_request_for_decider_agent" : set_prompt_for_user_request_for_decider_agent,                
                 "error_checker1": error_checker_wrapper,
                 "error_checker2": error_checker_wrapper,
                 "error_checker3": error_checker_wrapper,

@@ -1,7 +1,7 @@
 
 
 
-from typing import Any, Dict, List, Optional 
+from typing import Any, Dict, List, Optional , Literal
 from pydantic import BaseModel , Field
 from langchain_core.prompts import ChatPromptTemplate
   
@@ -87,9 +87,17 @@ class ReasoningAgentInputState(BaseModel) :  # this state holds the user chat hi
     
 class ReasoningAgentResponseState(BaseModel) : 
     
-    raw_response : str | dict
+    raw_response_from_reasoning_agent : str | dict
     
-    formatted_response : Optional[ReasoningAgentResponseFormat] = None
+    formatted_response_from_reasoning_agent : Optional[ReasoningAgentResponseFormat] = None
+    
+    
+class DeciderAgentResponseState(BaseModel) : 
+    
+    raw_response_from_decider_agent : str | dict
+    
+    formatted_response_from_decider_agent : Optional[Literal["REASONING","DIRECT"]] = None
+    
     
     
 class DeciderAgentInputState(BaseModel) : 
