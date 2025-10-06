@@ -130,4 +130,10 @@ class DefaultReplyAgentInputState(BaseModel) :
     
     summary : Optional[str] = ""
     
+class DefaultReplyAgentResponseState(BaseModel) : 
+    
+    raw_response_from_default_reply_agent : str | dict
+    
+    formatted_response_from_default_reply_agent : str
+    
     
