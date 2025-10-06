@@ -20,7 +20,7 @@ async def is_prompt_template_set_for_decider_agent(state : FlagState) -> str:
         print(e)
         return  "error"
     
-def is_prompt_template_set_wrapper_for_decider_agent(state: FlagState) -> FlagState:
+def is_prompt_template_set_for_decider_agent_wrapper(state: FlagState) -> FlagState:
     
     if(state.status != "success") :
         return state

@@ -29,6 +29,12 @@ async def decider_agent_output_formatter(state : DeciderAgentResponseState) -> F
         
         cleaned = response_str.split("{", 1)[1].rsplit("}", 1)[0]
         
+        cleaned = "{" + cleaned + "}"
+        
+        obj = json.loads(cleaned)
+        
+        cleaned = obj["decision"]
+        
         if(cleaned == "REASONING" or cleaned == "DIRECT") : 
             
             return {

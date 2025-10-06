@@ -42,14 +42,15 @@ async def set_agents(state : FlagState) -> FlagState:
         
         decider_agent = initialize_agent(
             llm = llm,
-            agent = AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
+            agent = AgentType.OPENAI_MULTI_FUNCTIONS,
             verbose = True,
-            tools= []
+            tools= [],
+            handle_parsing_errors = True
         )
         
         default_reply_agent = initialize_agent(
             llm = llm,
-            agent = AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
+            agent = AgentType.OPENAI_MULTI_FUNCTIONS,
             verbose = True,
             tools=[]
         )

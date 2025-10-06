@@ -62,7 +62,7 @@ from lang_graph.nodes.reasoning_agent.invoke_reasoning_agent import invoke_reaso
 # from lang_graph.nodes.reasoning_agent.is_invoke_success import is_invoke_success , is_invoke_success_wrapper
 from lang_graph.nodes.reasoning_agent.reasoning_agent_output_formatter import reasoning_agent_output_formatter
 # from lang_graph.nodes.requestValidation.is_new_workflow import is_new_workflow , is_new_workflow_wrapper
-from lang_graph.state import InputState , ReasoningAgentInputState , ReasoningAgentResponseState
+from lang_graph.state import InputState , ReasoningAgentInputState , ReasoningAgentResponseState , FlagState
 from lang_graph.nodes.loading_relevant_workflows.load_relevant_workflows import load_relevant_workflows
 
 from lang_graph.nodes.error_checker.error_checker import error_checker , error_checker_wrapper , error_checker_last_wrapper
@@ -71,10 +71,14 @@ from lang_graph.nodes.prompt_for_reasoning_agent.is_prompt_template_set_for_reas
 from lang_graph.nodes.prompt_for_reasoning_agent.set_prompt_for_user_request_for_reasoning_agent import set_prompt_for_user_request_for_reasoning_agent
 from lang_graph.nodes.prompt_for_reasoning_agent.set_prompt_template_for_reasoning_agent import set_prompt_template_for_reasoning_agent
 
-from lang_graph.nodes.prompt_for_decider_agent.is_prompt_template_set_for_decider_agent import is_prompt_template_set_for_decider_agent , is_prompt_template_set_wrapper_for_decider_agent
+from lang_graph.nodes.prompt_for_decider_agent.is_prompt_template_set_for_decider_agent import is_prompt_template_set_for_decider_agent , is_prompt_template_set_for_decider_agent_wrapper
 from lang_graph.nodes.prompt_for_decider_agent.set_prompt_for_user_request_for_decider_agent import set_prompt_for_user_request_for_decider_agent
 from lang_graph.nodes.prompt_for_decider_agent.set_prompt_template_for_decider_agent import set_prompt_template_for_decider_agent
 
+
+from lang_graph.nodes.decider_agent.invoke_decider_agent import invoke_decider_agent
+from lang_graph.nodes.decider_agent.decider_agent_output_formatter import decider_agent_output_formatter
+from lang_graph.nodes.decider_agent.decision_to_call_correct_agent import decision_to_call_correct_agent ,decision_to_call_correct_agent_wrapper
 
 load_dotenv()
 
@@ -101,6 +105,8 @@ class ExamInput(BaseModel):
 compiled_graph = None
 
 is_redis_setup_done = False
+
+
 
     
 # async def main():
@@ -133,6 +139,14 @@ class DebugAsyncRedisSaver(AsyncRedisSaver):
         return await super().aput(config, checkpoint, metadata, new_versions)
 
 
+
+async def dummy_node(state : FlagState) -> FlagState:
+    
+    return {
+        "message" : "Hey vro thanks for using this app vro" , 
+        "status" : "success"
+    }
+
 async def compile_graph():
     
     
@@ -164,7 +178,7 @@ async def compile_graph():
                 "is_prompt_template_set_for_reasoning_agent": is_prompt_template_set_wrapper_for_reasoning_agent,
                 "set_prompt_template_for_reasoning_agent" : set_prompt_template_for_reasoning_agent,
                 "set_prompt_for_user_request_for_reasoning_agent" : set_prompt_for_user_request_for_reasoning_agent,
-                "is_prompt_template_set_for_decider_agent": is_prompt_template_set_wrapper_for_decider_agent,
+                "is_prompt_template_set_for_decider_agent": is_prompt_template_set_for_decider_agent_wrapper,
                 "set_prompt_template_for_decider_agent" : set_prompt_template_for_decider_agent,
                 "set_prompt_for_user_request_for_decider_agent" : set_prompt_for_user_request_for_decider_agent,                
                 "error_checker1": error_checker_wrapper,
@@ -176,7 +190,15 @@ async def compile_graph():
                 "error_checker7": error_checker_wrapper,
                 "error_checker8": error_checker_wrapper,
                 "error_checker9": error_checker_wrapper,
-                "error_checker10": error_checker_last_wrapper
+                "error_checker11": error_checker_wrapper,
+                "error_checker12": error_checker_wrapper,
+                "error_checker13": error_checker_wrapper,
+                "error_checker14": error_checker_wrapper,
+                "error_checker10": error_checker_last_wrapper,
+                "invoke_decider_agent" : invoke_decider_agent,
+                "decider_agent_output_formatter" : decider_agent_output_formatter,
+                "decision_to_call_correct_agent" : decision_to_call_correct_agent_wrapper,
+                "dummy_node" : dummy_node
             }
 
 
@@ -266,17 +288,17 @@ async def compile_graph():
                     "error" : END
                 } 
             )
-
+            
             graph.add_conditional_edges(
                 "is_memory_loaded",
                 is_memory_loaded,
                 {
                     "error": END, 
-                    "yes": "load_relevant_workflows", 
+                    "yes": "is_prompt_template_set_for_decider_agent", 
                     "no": "load_memory"
                 }
             )
-
+            
             graph.add_edge(
                 "load_memory" , "error_checker5"
             )
@@ -284,11 +306,84 @@ async def compile_graph():
             graph.add_conditional_edges(
                 "error_checker5",
                 error_checker, {
-                    "success" : "load_relevant_workflows",
+                    "success" : "is_prompt_template_set_for_decider_agent",
                     "error" : END
                 } 
             )
+            
+            graph.add_conditional_edges(
+                "is_prompt_template_set_for_decider_agent",
+                is_prompt_template_set_for_decider_agent,
+                {
+                    "error": END, 
+                    "yes": "set_prompt_for_user_request_for_decider_agent", 
+                    "no": "set_prompt_template_for_decider_agent"
+                }
+            )
+            
+            graph.add_edge(
+                "set_prompt_template_for_decider_agent" , "error_checker11"
+            )
+            
+            graph.add_conditional_edges(
+                "error_checker11",
+                error_checker,
+                {
+                    "error": END, 
+                    "success" : "set_prompt_for_user_request_for_decider_agent"
+                }
+            )
+            
+            graph.add_edge(
+                "set_prompt_for_user_request_for_decider_agent" , "error_checker12"
+            )
+            
+            graph.add_conditional_edges(
+                "error_checker12",
+                error_checker,
+                {
+                    "error": END, 
+                    "success" : "invoke_decider_agent"
+                }
+            )
+            
+            graph.add_edge(
+                "invoke_decider_agent" , "error_checker13"
+            )
 
+            graph.add_conditional_edges(
+                "error_checker13", 
+                error_checker,
+                {
+                    "error" : END,
+                    "success" : "decider_agent_output_formatter"
+                }
+            )
+
+            graph.add_edge(
+                "decider_agent_output_formatter" , "error_checker14"
+            )
+
+            graph.add_conditional_edges(
+                "error_checker14" , 
+                error_checker,
+                {
+                    "success" : "decision_to_call_correct_agent",
+                    "error" : "invoke_decider_agent"
+                }
+            )
+            
+            graph.add_conditional_edges(
+                "decision_to_call_correct_agent" , 
+                decision_to_call_correct_agent , 
+                {
+                    "ERROR" : END , 
+                    "REASONING" : "load_relevant_workflows",
+                    "DIRECT" : "dummy_node"
+                }
+            )
+            
+            graph.add_edge("dummy_node" , END)
 
             graph.add_edge(
                 "load_relevant_workflows", "error_checker6"
@@ -377,10 +472,9 @@ async def compile_graph():
             compiled_graph = graph.compile(checkpointer=checkpointer)
             
             
-            print("=======================================")
-            print("\n\n")
+            print("itho paaru graph uh --->> ")
 
-            with open("graph.png", "wb") as f:
+            with open("final_graph.png", "wb") as f:
                 f.write(compiled_graph.get_graph().draw_png())
                 
             return compiled_graph
@@ -444,7 +538,7 @@ async def invoke_graph(data) :
                 
                 Lists = list(event.values())[0]
                 
-                value : ReasoningAgentResponseState  = Lists["formatted_response"]
+                value : ReasoningAgentResponseState  = Lists["formatted_response_from_decider_agent"]
                 
                 
                 print("===============================================================")
@@ -468,8 +562,8 @@ async def invoke_graph(data) :
             except Exception as e : 
                 
                 
-                print("enna vro error")
-                print(e)
+                # print("enna vro error")
+                # print(e)
 
                 Lists = list(event.values())[0]
                 
@@ -490,6 +584,12 @@ async def invoke_graph(data) :
             
                     resp = {
                         "is_final" : "false",
+                        "resp" : value
+                    }
+                    
+                if(value == "Hey vro thanks for using this app vro"):
+                    resp = {
+                        "is_final" : "true",
                         "resp" : value
                     }
                     

@@ -31,7 +31,7 @@ async def invoke_reasoning_agent(state : ReasoningAgentInputState) -> FlagState 
         return {
             "status" : "success" , 
             "message" : "Reasoning agent predicted the workflow",
-            "raw_response" : outcome
+            "raw_response_from_reasoning_agent" : outcome
         }
         
     except Exception as e:
@@ -40,5 +40,5 @@ async def invoke_reasoning_agent(state : ReasoningAgentInputState) -> FlagState 
         return {
             "status" : "error" , 
             "message" : "Some error occured while calling the reasoning agent",
-            "reasoning_agent_response" : "Thothukitte irukiye da"
+            "raw_response_from_reasoning_agent" : "Thothukitte irukiye da"
         }

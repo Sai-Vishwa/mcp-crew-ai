@@ -40,10 +40,10 @@ async def set_prompt_for_user_request_for_decider_agent(state : DeciderAgentInpu
             additional_system_message = additional_system_message
         )
 
-        # print("tho paara prompt uh ---> ")
+        print("tho paara prompt uh ---> ")
         # print()
         # print()
-        # print(final_prompt)
+        print(final_prompt)
         # print()
         # print()
         return {

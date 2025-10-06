@@ -16,7 +16,14 @@ Decision rules:
    not need tools → output "DIRECT".
 
 Output format:
-- Respond with **exactly one word**:
-  - "REASONING" → when the Reasoning Agent should be invoked.
-  - "DIRECT" → when the Default Reply Agent should respond.
-- Do NOT add explanations, reasoning steps, or extra words.
+   {{
+   "decision": "REASONING"
+   }}
+   {{
+   "decision": "DIRECT"
+   }}
+   Rules for the model:
+   Must only respond with this JSON structure.
+   No extra text, explanation, or formatting.
+   "decision" value must be either "REASONING" or "DIRECT".
+   - Do NOT add explanations, reasoning steps, or extra words.

@@ -96,7 +96,7 @@ class DeciderAgentResponseState(BaseModel) :
     
     raw_response_from_decider_agent : str | dict
     
-    formatted_response_from_decider_agent : Optional[Literal["REASONING","DIRECT"]] = None
+    formatted_response_from_decider_agent : Optional[Literal["REASONING","DIRECT"]] = "DIRECT"
     
     
     
