@@ -114,4 +114,18 @@ class DeciderAgentInputState(BaseModel) :
     
     additional_messages_for_decider_agent : Optional[str] = ""
     
+class DefaultReplyAgentInputState(BaseModel) : 
+    
+    user_input_id : int # this is the config id for unique identification 
+    
+    user_input : str
+    
+    chat_session : int # the chat session whose memory is stored
+    
+    history_messages : List[SingleMessageFormat] # List of Messages from history
+        
+    prompt_for_default_reply_agent : Optional[str] = "" # the final prompt to send to the agent
+    
+    additional_messages_for_default_reply_agent : Optional[str] = ""
+    
     

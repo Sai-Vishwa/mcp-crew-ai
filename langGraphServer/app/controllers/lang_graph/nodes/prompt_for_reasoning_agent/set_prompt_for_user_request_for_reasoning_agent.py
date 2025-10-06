@@ -57,7 +57,7 @@ async def set_prompt_for_user_request_for_reasoning_agent(state : ReasoningAgent
         # print()
         return {
             "status" : "success" , 
-            "message" : "prompt is generated successfully",
+            "message" : "prompt is generated successfully for the reasoning agent",
             "prompt_for_reasoning_agent" : final_prompt
         }
         
@@ -67,5 +67,5 @@ async def set_prompt_for_user_request_for_reasoning_agent(state : ReasoningAgent
         print(e)
         return {
             "status" : "error",
-            "message" : "cannot generate a proper prompt for the user request"
+            "message" : "cannot generate a proper prompt for the user request for the reasoning agent"
         }

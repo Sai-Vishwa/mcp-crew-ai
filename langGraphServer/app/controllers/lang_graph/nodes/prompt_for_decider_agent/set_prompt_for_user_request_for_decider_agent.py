@@ -48,7 +48,7 @@ async def set_prompt_for_user_request_for_decider_agent(state : DeciderAgentInpu
         # print()
         return {
             "status" : "success" , 
-            "message" : "prompt is generated successfully",
+            "message" : "prompt is generated successfully for the decider agent",
             "prompt_for_decider_agent" : final_prompt
         }
         
@@ -58,5 +58,5 @@ async def set_prompt_for_user_request_for_decider_agent(state : DeciderAgentInpu
         print(e)
         return {
             "status" : "error",
-            "message" : "cannot generate a proper prompt for the user request"
+            "message" : "cannot generate a proper prompt for the user request for the decider agent"
         }
