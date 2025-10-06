@@ -77,7 +77,7 @@ class ReasoningAgentInputState(BaseModel) :  # this state holds the user chat hi
     
     history_messages : List[SingleMessageFormat] # List of Messages from history
     
-    summary : str # summary of the previous messages to reduce context window
+    summary : Optional[str] = "" # summary of the previous messages to reduce context window
     
     relevant_workflows : Optional[List[SingleRelevantWorkflowFormat]] = []# List of relevant workflows
     
@@ -127,5 +127,7 @@ class DefaultReplyAgentInputState(BaseModel) :
     prompt_for_default_reply_agent : Optional[str] = "" # the final prompt to send to the agent
     
     additional_messages_for_default_reply_agent : Optional[str] = ""
+    
+    summary : Optional[str] = ""
     
     

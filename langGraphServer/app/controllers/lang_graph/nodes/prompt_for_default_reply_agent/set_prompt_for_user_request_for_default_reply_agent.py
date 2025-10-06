@@ -24,11 +24,13 @@ async def set_prompt_for_user_request_for_default_reply_agent(state : DefaultRep
  
         additional_system_message = [SystemMessage(content=state.additional_messages_for_default_reply_agent)]
     
-        
+        summary = [SystemMessage(content=state.summary)]
+
         final_prompt = chat_prompt_template_for_default_reply_agent.format(
             user_input = state.user_input , 
             history_messages = history, 
-            additional_system_message = additional_system_message
+            additional_system_message = additional_system_message,
+            summary = summary
         )
 
         print("tho paara prompt uh ---> ")

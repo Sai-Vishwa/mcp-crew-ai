@@ -39,8 +39,11 @@ async def set_prompt_template_for_default_reply_agent(state : FlagState) -> Flag
                         
         additional_system_message = MessagesPlaceholder(variable_name="additional_system_message")
         
+        summary = MessagesPlaceholder(variable_name="summary")
+
+        
         chat_prompt_template_for_default_reply_agent = ChatPromptTemplate.from_messages([
-            system_message , current_user_message , history_messages , additional_system_message
+            system_message , current_user_message , history_messages , additional_system_message , summary
         ])
         
         return {
