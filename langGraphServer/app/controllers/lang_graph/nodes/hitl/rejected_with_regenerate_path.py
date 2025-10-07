@@ -1,6 +1,6 @@
 from ...state import ReasoningAgentResponseState , FlagState
 
-async def rejected_path(state : ReasoningAgentResponseState) -> FlagState : 
+async def rejected_with_regenerate_path(state : ReasoningAgentResponseState) -> FlagState : 
     
     try : 
         
