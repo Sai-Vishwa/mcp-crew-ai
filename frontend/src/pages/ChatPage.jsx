@@ -309,7 +309,7 @@ const MessageBubble = ({ message, theme, onProceed, onRegenerate }) => {
             <div className="max-w-3xl w-full space-y-3 flex justify-start mb-4">
               
             <div className={`${themeObj.stepBg} border ${themeObj.border} rounded-lg p-4`}>
-              <h4 className={`${themeObj.textPrimary} text-sm font-semibold mb-2`}>Internal error</h4>
+              <h4 className={`${themeObj.textPrimary} text-sm font-semibold mb-2`}>{message.content}</h4>
               <p className={`${themeObj.textSecondary} text-sm leading-relaxed`}>
                 {message.content}
               </p>

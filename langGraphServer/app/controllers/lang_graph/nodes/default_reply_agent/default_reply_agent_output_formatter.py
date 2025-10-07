@@ -1,23 +1,26 @@
 from ...state import ReasoningAgentResponseState , FlagState , ReasoningAgentResponseFormat , DeciderAgentResponseState , DefaultReplyAgentResponseState
 import json
 from pprint import pprint
+import re
 
-async def decider_agent_output_formatter(state : DefaultReplyAgentResponseState) -> FlagState:
+async def default_reply_agent_output_formatter(state : DefaultReplyAgentResponseState) -> FlagState:
     try : 
         
         if(type(state.raw_response_from_default_reply_agent) != str and type(state.raw_response_from_default_reply_agent) != dict):
             
             # print("actual type returned is ==> " , type(state.raw_response))
             return {
-                "status": "error" ,
-                "message": "Invalid output from decider agent ",
-                "additional_message_for_default_reply_agent": "Provide a valid response ( in the expected response format )"
+                "status": "reinvoke" ,
+                "message": "Invalid output from default reply agent agent ",
+                "additional_message_for_default_reply_agent": "Provide a valid response ( in the expected response format )",
+                "filler_status_for_default_reply_agent" : "FAILURE"
+
             }
             
         response = {}
         
         
-        pprint(state.raw_response_from_default_reply_agent)
+        # pprint(state.raw_response_from_default_reply_agent)
         
         if(type(state.raw_response_from_default_reply_agent) == dict) :
             
@@ -29,28 +32,30 @@ async def decider_agent_output_formatter(state : DefaultReplyAgentResponseState)
         
         response_str : str = response.get("output")
         
-        cleaned = response_str.split("{", 1)[1].rsplit("}", 1)[0]
-        
-        cleaned = "{" + cleaned + "}"
-        
-        obj = json.loads(cleaned)
-        
+        response_str = re.sub(r'(\b\w+\b):', r'"\1":', response_str)
+
+# Now it's valid JSON
+        obj = json.loads(response_str)
+
         cleaned = obj["final_response"]
         
             
         return {
-            "status" : "success" , 
+            "status" : "reinvoke" , 
             "message" : "Default reply agent provided a valid response and is formatted successfully" , 
-            "formatted_response_from_default_reply_agent" : cleaned
+            "formatted_response_from_default_reply_agent" : cleaned,
+            "filler_status_for_default_reply_agent" : "SUCCESS"
+
         }
             
         
     except Exception as e:
         
-        print("error in formatting reasoning agent output")
-        print(e)
+        # print("error in formatting default reply agent output")
+        # print(e)
         return {
-            "status": "error" ,
+            "status": "reinvoke" ,
             "message": "Invalid output from the default reply agent ",
-            "additional_message_for_default_reply_agent": "Provide a valid response ( in the expected response format )"
+            "additional_message_for_default_reply_agent": "Provide a valid response ( in the expected response format )",
+            "filler_status_for_default_reply_agent" : "FAILURE"
         }

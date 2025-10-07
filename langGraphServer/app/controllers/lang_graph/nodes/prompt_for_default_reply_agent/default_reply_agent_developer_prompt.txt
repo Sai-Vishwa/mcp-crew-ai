@@ -24,3 +24,9 @@ Output must strictly follow this format:
 {{
 final_response: "your short reply here"
 }}
+
+EXAMPLE -> 
+
+user_input : what is 2 + 2
+
+output : {{ final_response : "2 + 2 equals 4" }}

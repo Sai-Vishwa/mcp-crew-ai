@@ -17,7 +17,7 @@ async def hello():
 # POST route
 @main.route("/login", methods=["POST"])
 async def login():
-    print("hey i am here")
+    # print("hey i am here")
     data = await request.get_json()
     return await login_controller(data)
 

@@ -65,7 +65,7 @@ from lang_graph.nodes.reasoning_agent.reasoning_agent_output_formatter import re
 from lang_graph.state import InputState , ReasoningAgentInputState , ReasoningAgentResponseState , FlagState
 from lang_graph.nodes.loading_relevant_workflows.load_relevant_workflows import load_relevant_workflows
 
-from lang_graph.nodes.error_checker.error_checker import error_checker , error_checker_wrapper , error_checker_last_wrapper
+from lang_graph.nodes.error_checker.error_checker import error_checker , error_checker_wrapper , error_checker_last_wrapper_for_default_reply_agent , error_checker_last_wrapper_for_reasoning_agent
 
 from lang_graph.nodes.prompt_for_reasoning_agent.is_prompt_template_set_for_reasoning_agent import is_prompt_template_set_for_reasoning_agent , is_prompt_template_set_wrapper_for_reasoning_agent
 from lang_graph.nodes.prompt_for_reasoning_agent.set_prompt_for_user_request_for_reasoning_agent import set_prompt_for_user_request_for_reasoning_agent
@@ -79,6 +79,13 @@ from lang_graph.nodes.prompt_for_decider_agent.set_prompt_template_for_decider_a
 from lang_graph.nodes.decider_agent.invoke_decider_agent import invoke_decider_agent
 from lang_graph.nodes.decider_agent.decider_agent_output_formatter import decider_agent_output_formatter
 from lang_graph.nodes.decider_agent.decision_to_call_correct_agent import decision_to_call_correct_agent ,decision_to_call_correct_agent_wrapper
+
+from lang_graph.nodes.prompt_for_default_reply_agent.is_prompt_template_set_for_default_reply_agent import is_prompt_template_set_for_default_reply_agent , is_prompt_template_set_for_default_reply_agent_wrapper
+from lang_graph.nodes.prompt_for_default_reply_agent.set_prompt_for_user_request_for_default_reply_agent import set_prompt_for_user_request_for_default_reply_agent
+from lang_graph.nodes.prompt_for_default_reply_agent.set_prompt_template_for_default_reply_agent import set_prompt_template_for_default_reply_agent
+
+from lang_graph.nodes.default_reply_agent.invoke_default_reply_agent import invoke_default_reply_agent
+from lang_graph.nodes.default_reply_agent.default_reply_agent_output_formatter import default_reply_agent_output_formatter
 
 load_dotenv()
 
@@ -194,11 +201,26 @@ async def compile_graph():
                 "error_checker12": error_checker_wrapper,
                 "error_checker13": error_checker_wrapper,
                 "error_checker14": error_checker_wrapper,
-                "error_checker10": error_checker_last_wrapper,
+                "error_checker_last_for_reasoning_agent": error_checker_last_wrapper_for_reasoning_agent,
+                "error_checker_last_for_default_reply_agent" : error_checker_last_wrapper_for_default_reply_agent,
+                "error_checker15": error_checker_wrapper,
+                "error_checker16": error_checker_wrapper,
+                "error_checker17": error_checker_wrapper,
+                "error_checker18": error_checker_wrapper,
+                
+                
                 "invoke_decider_agent" : invoke_decider_agent,
                 "decider_agent_output_formatter" : decider_agent_output_formatter,
                 "decision_to_call_correct_agent" : decision_to_call_correct_agent_wrapper,
-                "dummy_node" : dummy_node
+                "dummy_node" : dummy_node,
+                
+                "is_prompt_template_set_for_default_reply_agent" : is_prompt_template_set_for_default_reply_agent_wrapper,
+                "set_prompt_template_for_default_reply_agent" : set_prompt_template_for_default_reply_agent,
+                "set_prompt_for_user_request_for_default_reply_agent" : set_prompt_for_user_request_for_default_reply_agent,
+                
+                "invoke_default_reply_agent" : invoke_default_reply_agent,
+                "default_reply_agent_output_formatter" : default_reply_agent_output_formatter,
+                
             }
 
 
@@ -369,7 +391,8 @@ async def compile_graph():
                 error_checker,
                 {
                     "success" : "decision_to_call_correct_agent",
-                    "error" : "invoke_decider_agent"
+                    "reinvoke" : "invoke_decider_agent",
+                    "error" : END
                 }
             )
             
@@ -379,11 +402,72 @@ async def compile_graph():
                 {
                     "ERROR" : END , 
                     "REASONING" : "load_relevant_workflows",
-                    "DIRECT" : "dummy_node"
+                    "DIRECT" : "is_prompt_template_set_for_default_reply_agent"
                 }
             )
             
-            graph.add_edge("dummy_node" , END)
+            graph.add_conditional_edges(
+                "is_prompt_template_set_for_default_reply_agent" , 
+                is_prompt_template_set_for_default_reply_agent,
+                {
+                    "error" : END,
+                    "yes" : "set_prompt_for_user_request_for_default_reply_agent",
+                    "no" : "set_prompt_template_for_default_reply_agent"
+                }
+            )
+            
+            graph.add_edge(
+                "set_prompt_template_for_default_reply_agent" , "error_checker15"
+            )
+            
+            graph.add_conditional_edges(
+                "error_checker15",
+                error_checker,
+                {
+                    "error" : END,
+                    "success" : "set_prompt_for_user_request_for_default_reply_agent"
+                }
+            )
+            
+            graph.add_edge(
+                "set_prompt_for_user_request_for_default_reply_agent" , "error_checker16"
+            )
+            
+            graph.add_conditional_edges(
+                "error_checker16",
+                error_checker,
+                {
+                    "error" : END,
+                    "success" : "invoke_default_reply_agent"
+                }
+            )
+            
+            graph.add_edge(
+                "invoke_default_reply_agent" , "error_checker17"
+            )
+
+            graph.add_conditional_edges(
+                "error_checker17",
+                error_checker,
+                {
+                    "error" : END,
+                    "success" : "default_reply_agent_output_formatter"
+                }
+            )
+            
+            graph.add_edge(
+                "default_reply_agent_output_formatter" , "error_checker_last_for_default_reply_agent"
+            )
+            
+            graph.add_conditional_edges(
+                "error_checker_last_for_default_reply_agent" , 
+                error_checker,
+                {
+                    "reinvoke" : "invoke_default_reply_agent" , 
+                    "success" : END , 
+                    "error" : END
+                }
+            )
 
             graph.add_edge(
                 "load_relevant_workflows", "error_checker6"
@@ -448,20 +532,21 @@ async def compile_graph():
             )
 
             graph.add_edge(
-                "reasoning_agent_output_formatter" , "error_checker10"
+                "reasoning_agent_output_formatter" , "error_checker_last_for_reasoning_agent"
             )
 
             graph.add_conditional_edges(
-                "error_checker10" , 
+                "error_checker_last_for_reasoning_agent" , 
                 error_checker,
                 {
                     "success" : END,
-                    "error" : "invoke_reasoning_agent"
+                    "reinvoke" : "invoke_reasoning_agent",
+                    "error" : END
                 }
             )
             
             
-            print("\n\n setting up checkpointer\n\n") 
+            # print("\n\n setting up checkpointer\n\n") 
             
             if(is_redis_setup_done==False):
             
@@ -472,7 +557,7 @@ async def compile_graph():
             compiled_graph = graph.compile(checkpointer=checkpointer)
             
             
-            print("itho paaru graph uh --->> ")
+            # print("itho paaru graph uh --->> ")
 
             with open("final_graph.png", "wb") as f:
                 f.write(compiled_graph.get_graph().draw_png())
@@ -481,7 +566,7 @@ async def compile_graph():
     
     except Exception as e :
         
-        print("ennala mudila da ebba")
+        # print("ennala mudila da ebba")
         
         print(e)
 
@@ -504,8 +589,8 @@ async def invoke_graph(data) :
         
         if(compiled_graph == None) :
             
-            print("\n\n======================\n\n")
-            print("calling compile graph")
+            # print("\n\n======================\n\n")
+            # print("calling compile graph")
             
             compiled_graph = await compile_graph()
     
@@ -525,7 +610,7 @@ async def invoke_graph(data) :
             user_input_id=-1
         )
         
-        print(" i am here ")
+        # print(" i am here ")
         
         flag = False
         
@@ -536,70 +621,115 @@ async def invoke_graph(data) :
             try :
                 
                 
-                Lists = list(event.values())[0]
+                Lists : dict = list(event.values())[0]
                 
-                value : ReasoningAgentResponseState  = Lists["formatted_response_from_decider_agent"]
+                reasoning_agent_response = Lists.get("formatted_response_from_reasoning_agent")
                 
+                default_reply_agent_response = Lists.get("formatted_response_from_default_reply_agent")
                 
-                print("===============================================================")
-                print("tho paaru ======")
-                print(value)
+                status = Lists.get("status")
                 
-                value = value.model_dump_json(exclude_none = True)
+                message = Lists.get("message")
+                
+                filler_status_for_reasoning_agent = Lists.get("filler_status_for_reasoning_agent")
+                
+                filler_status_for_default_reply_agent = Lists.get("filler_status_for_default_reply_agent")
+                
+                # print("THO PAARU LIST UH -------------------->>>>>>>>>>>>>>>>")
+                
+                # print(Lists)
 
                 
+                
+                if(reasoning_agent_response) : 
+                    
+                    # if(filler_status_for_default_reply_agent == "SUCCESS") : 
+                    
+                        reasoning_agent_response = reasoning_agent_response.model_dump_json(exclude_none = True)
+                    
+                        resp = {
+                            "is_final" : "true" ,
+                            "resp" : reasoning_agent_response
+                        }
+                        
+                        yield f"data: {json.dumps(resp)}\n\n"
+                        
+                    # else :
+                         
+                    #     resp = {
+                    #         "is_final" : "true" ,
+                    #         "resp" : "Thothukite irukiye da"
+                    #     }
+                    #     yield f"data: {json.dumps(resp)}\n\n"
+             
+                        return
+                
+                if(default_reply_agent_response) : 
+                    
+                    # if(filler_status_for_default_reply_agent == "SUCCESS") : 
+                    
+                        # default_reply_agent_response = default_reply_agent_response.model_dump_json(exclude_none = True)
+                        
+                        resp = {
+                            "is_final" : "error" ,
+                            "resp" : default_reply_agent_response
+                        }
+                        
+                        yield f"data: {json.dumps(resp)}\n\n"
+                        
+                    # else : 
+                        
+                    #     resp = {
+                    #         "is_final" : "error" ,
+                    #         "resp" : "Thothukite irukiye da"
+                    #     }
+                    #     yield f"data: {json.dumps(resp)}\n\n"
+                        
+                        
+                
+                        return
+
+                
+                if(status and status == "error") : 
+                    
+                    resp = {
+                        "is_final" : "error" , 
+                        "resp" : message
+                    }
+                    
+                    yield f"data: {json.dumps(resp)}\n\n"
+
+                    return 
+                
+                
+                
                 resp = {
-                    "is_final" : "true" , 
-                    "resp" : value
+                    "is_final" : "false" , 
+                    "resp" : message
                 }
                 
-                flag = True
-                print("itho yie;d uh")
                 yield f"data: {json.dumps(resp)}\n\n"
-                print("itho after yield uh")
+          
+                
                 
                 
             except Exception as e : 
                 
+                print("enna error thala")
                 
-                # print("enna vro error")
-                # print(e)
-
-                Lists = list(event.values())[0]
+                print(e)
                 
-                value = Lists["message"]
+                resp = {
+                    "is_final" : "error" ,
+                    "resp" : "some internal error happened"
+                }
                 
-                status = Lists["status"]
-                
-                resp = {}
-                
-                if(status != "success") : 
-                    
-                    resp = {
-                        "is_final" : "error" , 
-                        "resp" : value
-                    }
-                    
-                else : 
-            
-                    resp = {
-                        "is_final" : "false",
-                        "resp" : value
-                    }
-                    
-                if(value == "Hey vro thanks for using this app vro"):
-                    resp = {
-                        "is_final" : "true",
-                        "resp" : value
-                    }
-                    
-                if(flag == False) : 
-                    yield f"data: {json.dumps(resp)}\n\n"
+                yield f"data: {json.dumps(resp)}\n\n"
         
     except Exception as e : 
         
-        print("ada poya ")
-        print(e)
+        # print("ada poya ")
+        # print(e)
         
         value = {
             "is_final": "error" , 

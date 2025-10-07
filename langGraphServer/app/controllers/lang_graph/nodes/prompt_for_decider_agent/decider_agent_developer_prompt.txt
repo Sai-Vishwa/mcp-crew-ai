@@ -15,6 +15,10 @@ Decision rules:
 2. If the current message is a normal chat, greeting, or general question that does 
    not need tools → output "DIRECT".
 
+IMPORTANT NOTE : 
+NEVER TRY TO INVOKE ANY TOOL , JUST DECIDE WHETHER THE USER MESSAGE REQUIRES A TOOL CALL FOR COMPLETION 
+NEVER TRY TO INVOKE A TOOL TO DECIDE
+
 Output format:
    {{
    "decision": "REASONING"
