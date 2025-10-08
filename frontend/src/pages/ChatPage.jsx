@@ -727,7 +727,7 @@ const ChatPage = () => {
         onProceedWorkflow={handleProceedWorkflow}
         onRegenerateWorkflow={handleRegenerateWorkflow}
       />
-
+actions
       <div className='w-1/6'>
         <ToolsPanel
           tools={state.tools}
