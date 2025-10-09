@@ -92,6 +92,10 @@ class ReasoningAgentResponseState(BaseModel) :
     formatted_response_from_reasoning_agent : Optional[ReasoningAgentResponseFormat] = None
     
     filler_status_for_reasoning_agent : Optional[Literal["SUCCESS" , "FAILURE"]] = "FAILURE"
+
+    user_message : str
+    
+    chat_id : int
     
     
 class DeciderAgentResponseState(BaseModel) : 
@@ -139,5 +143,9 @@ class DefaultReplyAgentResponseState(BaseModel) :
     formatted_response_from_default_reply_agent : Optional[str] = ""
     
     filler_status_for_default_reply : Optional[Literal["SUCCESS" , "FAILURE"]] = "FAILURE"
+    
+    user_input : str
+    
+    chat_id : int
     
     
